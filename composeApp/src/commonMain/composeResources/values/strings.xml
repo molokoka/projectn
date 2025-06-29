@@ -6,9 +6,12 @@
     <string name="n_queens">N-QUEENS</string>
     <string name="choose_size">CHOOSE SIZE</string>
     <string name="start_game">START GAME</string>
-    <string name="back">← Back</string>
+    <string name="exit_game">Exit Game</string>
     <string name="congratulations">🎉 Congratulations! 🎉</string>
     <string name="win_message">You solved the %1$dx%2$d N-Queens puzzle!</string>
     <string name="play_again">Play Again</string>
     <string name="choose_different_size">Choose Different Size</string>
+    <string name="timer">Time: %1$s</string>
+    <string name="queens_left">Queens: %1$d/%2$d</string>
+    <string name="restart">Restart</string>
 </resources>

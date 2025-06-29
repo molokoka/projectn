@@ -1,4 +1,4 @@
-package molokoka.project.n
+package molokoka.project.n.chess
 
 import kotlin.math.abs
 

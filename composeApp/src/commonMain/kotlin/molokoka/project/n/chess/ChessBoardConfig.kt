@@ -1,4 +1,4 @@
-package molokoka.project.n
+package molokoka.project.n.chess
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
