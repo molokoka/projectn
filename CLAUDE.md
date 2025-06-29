@@ -66,3 +66,4 @@ All code uses the base package `molokoka.project.n` with platform-specific subpa
 - Compose Hot Reload is enabled for faster development iteration
 - JVM target is Java 11 across all modules
 - iOS targets support x64, arm64, and simulator arm64 architectures
+- **Do not use Material components** - prefer basic Compose components and custom styling
