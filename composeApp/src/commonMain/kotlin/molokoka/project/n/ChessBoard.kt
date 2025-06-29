@@ -51,13 +51,13 @@ fun ChessBoard(
     modifier: Modifier = Modifier,
     config: ChessBoardConfig = ChessBoardConfig(),
     boardState: ChessBoardState = ChessBoardState(),
-    onBoardChange: (ChessBoardState) -> Unit
+    onSquareClicked: (row: Int, col: Int) -> Unit
 ) {
 
     ChessField(
         modifier = modifier,
         boardState = boardState,
-        onBoardChange = onBoardChange,
+        onSquareClicked = onSquareClicked,
         config = config
     )
 }
@@ -67,7 +67,7 @@ fun ChessBoard(
 private fun ChessField(
     modifier: Modifier = Modifier,
     boardState: ChessBoardState,
-    onBoardChange: (ChessBoardState) -> Unit,
+    onSquareClicked: (row: Int, col: Int) -> Unit,
     config: ChessBoardConfig = ChessBoardConfig()
 ) {
 
@@ -86,7 +86,7 @@ private fun ChessField(
                             .size(config.squareSize)
                             .background(squareColor)
                             .clickable {
-                                onBoardChange(boardState.toggleQueen(row, col))
+                                onSquareClicked(row, col)
                             }
                     ) {
                         Queen(

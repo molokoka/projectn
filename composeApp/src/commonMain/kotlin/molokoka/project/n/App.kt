@@ -62,7 +62,9 @@ fun App() {
         ChessBoard(
             config = ChessBoardConfig(),
             boardState = boardState,
-            onBoardChange = { boardState = it },
+            onSquareClicked = { row, col ->
+                boardState = boardState.toggleQueen(row, col)
+            },
             modifier = Modifier
                 .weight(1f)
                 .padding(20.dp)
