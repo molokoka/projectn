@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,73 +42,85 @@ data class AppConfig(
 @Preview
 fun App() {
     val appConfig = AppConfig()
-    var boardSize by remember { mutableStateOf(appConfig.defaultBoardSize) }
-    
+
     Column(
         modifier = Modifier
             .safeContentPadding()
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Size controls
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicText(
-                text = stringResource(Res.string.prev),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (boardSize > appConfig.minBoardSize) Color.Blue else Color.Gray
-                ),
-                modifier = Modifier
-                    .clickable(enabled = boardSize > appConfig.minBoardSize) {
-                        boardSize = (boardSize - 1).coerceAtLeast(appConfig.minBoardSize)
-                    }
-                    .padding(8.dp)
-            )
-            
-            Spacer(modifier = Modifier.padding(horizontal = 16.dp))
-            
-            BasicText(
-                text = stringResource(Res.string.size_format, boardSize, boardSize),
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            )
-            
-            Spacer(modifier = Modifier.padding(horizontal = 16.dp))
-            
-            BasicText(
-                text = stringResource(Res.string.next),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (boardSize < appConfig.maxBoardSize) Color.Blue else Color.Gray
-                ),
-                modifier = Modifier
-                    .clickable(enabled = boardSize < appConfig.maxBoardSize) {
-                        boardSize = (boardSize + 1).coerceAtMost(appConfig.maxBoardSize)
-                    }
-                    .padding(8.dp)
-            )
-        }
-        
+        var boardSize by remember { mutableIntStateOf(appConfig.defaultBoardSize) }
+        SizeControls(
+            boardSize = boardSize,
+            onBoardSizeChange = { boardSize = it },
+            appConfig = appConfig
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         var boardState by remember(boardSize) { mutableStateOf(ChessBoardState(boardSize = boardSize)) }
         ChessBoard(
             config = ChessBoardConfig(),
             boardState = boardState,
-            onBoardChange = { boardState = it},
+            onBoardChange = { boardState = it },
             modifier = Modifier
                 .weight(1f)
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
                 .horizontalScroll(rememberScrollState())
+        )
+    }
+}
+
+@Composable
+private fun SizeControls(
+    boardSize: Int,
+    onBoardSizeChange: (Int) -> Unit,
+    appConfig: AppConfig
+) {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicText(
+            text = stringResource(Res.string.prev),
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (boardSize > appConfig.minBoardSize) Color.Blue else Color.Gray
+            ),
+            modifier = Modifier
+                .clickable(enabled = boardSize > appConfig.minBoardSize) {
+                    onBoardSizeChange((boardSize - 1).coerceAtLeast(appConfig.minBoardSize))
+                }
+                .padding(8.dp)
+        )
+
+        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+
+        BasicText(
+            text = stringResource(Res.string.size_format, boardSize, boardSize),
+            style = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        )
+
+        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+
+        BasicText(
+            text = stringResource(Res.string.next),
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (boardSize < appConfig.maxBoardSize) Color.Blue else Color.Gray
+            ),
+            modifier = Modifier
+                .clickable(enabled = boardSize < appConfig.maxBoardSize) {
+                    onBoardSizeChange((boardSize + 1).coerceAtMost(appConfig.maxBoardSize))
+                }
+                .padding(8.dp)
         )
     }
 }

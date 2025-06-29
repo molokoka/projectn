@@ -64,7 +64,7 @@ fun ChessBoard(
 
 
 @Composable
-fun ChessField(
+private fun ChessField(
     modifier: Modifier = Modifier,
     boardState: ChessBoardState,
     onBoardChange: (ChessBoardState) -> Unit,
