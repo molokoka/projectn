@@ -1,6 +1,7 @@
 package molokoka.project.n
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -13,15 +14,51 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@Composable
-fun ChessBoard (
-    modifier: Modifier = Modifier,
-    boardSize: Int = 8
+data class ChessBoardConfig(
+    val squareSize: Dp = 40.dp,
+    val lightSquareColor: Color = Color(0xFFF0D9B5),
+    val darkSquareColor: Color = Color(0xFFB58863),
+    val coordinateTextStyle: TextStyle = TextStyle(
+        fontSize = 8.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Black.copy(alpha = 0.6f)
+    ),
+    val queenTextStyle: TextStyle = TextStyle(
+        fontSize = (squareSize.value * 0.6f).sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Black
+    )
+)
+
+data class ChessBoardState(
+    val boardSize: Int = 8,
+    val queensPositions: Set<Pair<Int, Int>> = emptySet()
 ) {
+    fun toggleQueen(row: Int, col: Int): ChessBoardState {
+        val position = Pair(row, col)
+        return if (queensPositions.contains(position)) {
+            copy(queensPositions = queensPositions - position)
+        } else {
+            copy(queensPositions = queensPositions + position)
+        }
+    }
+
+    fun hasQueen(row: Int, col: Int): Boolean = queensPositions.contains(Pair(row, col))
+}
+
+@Composable
+fun ChessBoard(
+    modifier: Modifier = Modifier,
+    config: ChessBoardConfig = ChessBoardConfig(),
+    boardState: ChessBoardState = ChessBoardState(),
+    onBoardChange: (ChessBoardState) -> Unit
+) {
+
     ChessField(
         modifier = modifier,
-        boardSize = boardSize,
-        squareSize = 40.dp
+        boardState = boardState,
+        onBoardChange = onBoardChange,
+        config = config
     )
 }
 
@@ -29,35 +66,40 @@ fun ChessBoard (
 @Composable
 fun ChessField(
     modifier: Modifier = Modifier,
-    boardSize: Int = 8,
-    squareSize: Dp = 40.dp
+    boardState: ChessBoardState,
+    onBoardChange: (ChessBoardState) -> Unit,
+    config: ChessBoardConfig = ChessBoardConfig()
 ) {
-    val lightSquareColor = Color(0xFFF0D9B5)
-    val darkSquareColor = Color(0xFFB58863)
-    val coordinateTextStyle = TextStyle(
-        fontSize = 8.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.Black.copy(alpha = 0.6f)
-    )
 
     Column(modifier = modifier) {
-        repeat(boardSize) { row ->
+        repeat(boardState.boardSize) { row ->
             Row {
-                repeat(boardSize) { col ->
+                repeat(boardState.boardSize) { col ->
                     val isLightSquare = (row + col) % 2 == 0
-                    val squareColor = if (isLightSquare) lightSquareColor else darkSquareColor
+                    val squareColor = if (isLightSquare) config.lightSquareColor else config.darkSquareColor
                     val isLeftEdge = col == 0
-                    val isBottomEdge = row == boardSize - 1
+                    val isBottomEdge = row == boardState.boardSize - 1
+                    val hasQueen = boardState.hasQueen(row, col)
 
                     Box(
                         modifier = Modifier
-                            .size(squareSize)
+                            .size(config.squareSize)
                             .background(squareColor)
+                            .clickable {
+                                onBoardChange(boardState.toggleQueen(row, col))
+                            }
                     ) {
+                        Queen(
+                            modifier = Modifier.align(Alignment.Center),
+                            show = hasQueen,
+                            queenTextStyle = config.queenTextStyle
+                        )
+
+
                         if (isLeftEdge) {
                             BasicText(
-                                text = (boardSize - row).toString(),
-                                style = coordinateTextStyle,
+                                text = (boardState.boardSize - row).toString(),
+                                style = config.coordinateTextStyle,
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
                                     .padding(1.dp)
@@ -66,7 +108,7 @@ fun ChessField(
                         if (isBottomEdge) {
                             BasicText(
                                 text = ('a' + col).toString(),
-                                style = coordinateTextStyle,
+                                style = config.coordinateTextStyle,
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .padding(1.dp)
@@ -76,5 +118,20 @@ fun ChessField(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun Queen(
+    modifier: Modifier = Modifier,
+    show: Boolean,
+    queenTextStyle: TextStyle,
+) {
+    if (show) {
+        BasicText(
+            text = "♛",
+            style = queenTextStyle,
+            modifier = modifier,
+        )
     }
 }

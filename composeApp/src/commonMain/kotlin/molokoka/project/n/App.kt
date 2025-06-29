@@ -24,14 +24,24 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import projectn.composeapp.generated.resources.Res
+import projectn.composeapp.generated.resources.next
+import projectn.composeapp.generated.resources.prev
+import projectn.composeapp.generated.resources.size_format
+
+data class AppConfig(
+    val minBoardSize: Int = 4,
+    val maxBoardSize: Int = 28,
+    val defaultBoardSize: Int = 8
+)
 
 @Composable
 @Preview
 fun App() {
-    var currentBoardSize by remember { mutableStateOf(8) }
-    val testSizes = (4..28).toList()
-    val currentIndex = testSizes.indexOf(currentBoardSize)
+    val appConfig = AppConfig()
+    var boardSize by remember { mutableStateOf(appConfig.defaultBoardSize) }
     
     Column(
         modifier = Modifier
@@ -45,17 +55,15 @@ fun App() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             BasicText(
-                text = "Prev",
+                text = stringResource(Res.string.prev),
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (currentIndex > 0) Color.Blue else Color.Gray
+                    color = if (boardSize > appConfig.minBoardSize) Color.Blue else Color.Gray
                 ),
                 modifier = Modifier
-                    .clickable(enabled = currentIndex > 0) {
-                        if (currentIndex > 0) {
-                            currentBoardSize = testSizes[currentIndex - 1]
-                        }
+                    .clickable(enabled = boardSize > appConfig.minBoardSize) {
+                        boardSize = (boardSize - 1).coerceAtLeast(appConfig.minBoardSize)
                     }
                     .padding(8.dp)
             )
@@ -63,7 +71,7 @@ fun App() {
             Spacer(modifier = Modifier.padding(horizontal = 16.dp))
             
             BasicText(
-                text = "Size: ${currentBoardSize}x${currentBoardSize}",
+                text = stringResource(Res.string.size_format, boardSize, boardSize),
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -74,17 +82,15 @@ fun App() {
             Spacer(modifier = Modifier.padding(horizontal = 16.dp))
             
             BasicText(
-                text = "Next",
+                text = stringResource(Res.string.next),
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (currentIndex < testSizes.size - 1) Color.Blue else Color.Gray
+                    color = if (boardSize < appConfig.maxBoardSize) Color.Blue else Color.Gray
                 ),
                 modifier = Modifier
-                    .clickable(enabled = currentIndex < testSizes.size - 1) {
-                        if (currentIndex < testSizes.size - 1) {
-                            currentBoardSize = testSizes[currentIndex + 1]
-                        }
+                    .clickable(enabled = boardSize < appConfig.maxBoardSize) {
+                        boardSize = (boardSize + 1).coerceAtMost(appConfig.maxBoardSize)
                     }
                     .padding(8.dp)
             )
@@ -92,9 +98,11 @@ fun App() {
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Chess board
+        var boardState by remember(boardSize) { mutableStateOf(ChessBoardState(boardSize = boardSize)) }
         ChessBoard(
-            boardSize = currentBoardSize,
+            config = ChessBoardConfig(),
+            boardState = boardState,
+            onBoardChange = { boardState = it},
             modifier = Modifier
                 .weight(1f)
                 .padding(20.dp)
