@@ -15,6 +15,7 @@ import molokoka.project.n.views.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.choose_size
+import projectn.composeapp.generated.resources.leaderboard
 import projectn.composeapp.generated.resources.n_queens
 import projectn.composeapp.generated.resources.next
 import projectn.composeapp.generated.resources.prev
@@ -26,7 +27,8 @@ fun InitScreen(
     boardSize: Int,
     onBoardSizeChange: (Int) -> Unit,
     boardConfig: BoardConfig,
-    onStartGame: () -> Unit
+    onStartGame: () -> Unit,
+    onShowLeaderboard: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -55,6 +57,17 @@ fun InitScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         PixelatedText(
+            text = stringResource(Res.string.leaderboard),
+            pixelSize = 3.dp,
+            color = Color.Blue,
+            modifier = Modifier
+                .clickable { onShowLeaderboard() }
+                .padding(16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PixelatedText(
             text = stringResource(Res.string.start_game),
             pixelSize = 3.dp,
             color = Color.Blue,
@@ -72,7 +85,6 @@ private fun SizeControls(
     boardConfig: BoardConfig
 ) {
     Row(
-        modifier = Modifier.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         PixelatedText(
@@ -86,7 +98,7 @@ private fun SizeControls(
                 .padding(8.dp)
         )
 
-        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
         PixelatedText(
             text = stringResource(Res.string.size_format, boardSize, boardSize),
@@ -94,7 +106,7 @@ private fun SizeControls(
             color = Color.Black
         )
 
-        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
         PixelatedText(
             text = stringResource(Res.string.next),

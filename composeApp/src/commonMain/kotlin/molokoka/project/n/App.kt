@@ -1,5 +1,6 @@
 package molokoka.project.n
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
@@ -11,13 +12,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import molokoka.project.n.chess.ChessBoardState
+import molokoka.project.n.di.appModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplication
+import kotlin.time.Clock.System.now
+import kotlin.time.ExperimentalTime
 
 sealed class GameState {
     object Init : GameState()
     data class Game(val boardSize: Int) : GameState()
-    data class Win(val boardSize: Int) : GameState()
+    data class Win(val boardSize: Int, val timeInSeconds: Long) : GameState()
+    data class Leaderboard(val boardSize: Int) : GameState()
 }
 
 data class BoardConfig(
@@ -26,9 +33,18 @@ data class BoardConfig(
     val defaultBoardSize: Int = 8
 )
 
+@OptIn(ExperimentalTime::class)
 @Composable
 @Preview
 fun App() {
+    KoinApplication(application = { modules(appModule) }) {
+        AppContent()
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
+fun AppContent() {
     val boardConfig = BoardConfig()
     var gameState by remember { mutableStateOf<GameState>(GameState.Init) }
     var boardSize by remember { mutableIntStateOf(boardConfig.defaultBoardSize) }
@@ -36,6 +52,7 @@ fun App() {
 
     Column(
         modifier = Modifier
+            .background(Color.White)
             .safeContentPadding()
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,19 +66,23 @@ fun App() {
                     onStartGame = {
                         boardState = ChessBoardState(boardSize = boardSize)
                         gameState = GameState.Game(boardSize)
+                    },
+                    onShowLeaderboard = {
+                        gameState = GameState.Leaderboard(boardSize)
                     }
                 )
             }
             is GameState.Game -> {
                 GameScreen(
                     boardState = boardState,
-                    onSquareClicked = { coordinate ->
+                    onSquareClicked = { coordinate, startTime ->
                         val newBoardState = boardState.toggleQueen(coordinate)
                         boardState = newBoardState
                         
                         // Check for win condition
                         if (GameLogic.isWinCondition(newBoardState.queensPositions, currentState.boardSize)) {
-                            gameState = GameState.Win(currentState.boardSize)
+                            val elapsedTime = (now().toEpochMilliseconds() - startTime) / 1000
+                            gameState = GameState.Win(currentState.boardSize, elapsedTime)
                         }
                     },
                     onBackToInit = {
@@ -75,10 +96,19 @@ fun App() {
             is GameState.Win -> {
                 WinScreen(
                     boardSize = currentState.boardSize,
+                    timeInSeconds = currentState.timeInSeconds,
                     onPlayAgain = {
                         boardState = ChessBoardState(boardSize = currentState.boardSize)
                         gameState = GameState.Game(currentState.boardSize)
                     },
+                    onBackToInit = {
+                        gameState = GameState.Init
+                    }
+                )
+            }
+            is GameState.Leaderboard -> {
+                LeaderboardScreen(
+                    boardSize = currentState.boardSize,
                     onBackToInit = {
                         gameState = GameState.Init
                     }

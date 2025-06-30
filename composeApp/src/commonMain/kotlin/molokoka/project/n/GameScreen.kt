@@ -2,22 +2,10 @@ package molokoka.project.n
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,11 +17,7 @@ import molokoka.project.n.chess.ChessBoardState
 import molokoka.project.n.chess.ChessCoordinate
 import molokoka.project.n.views.PixelatedText
 import org.jetbrains.compose.resources.stringResource
-import projectn.composeapp.generated.resources.Res
-import projectn.composeapp.generated.resources.exit_game
-import projectn.composeapp.generated.resources.queens_left
-import projectn.composeapp.generated.resources.restart
-import projectn.composeapp.generated.resources.timer
+import projectn.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -50,13 +34,9 @@ data class GameScreenState(
         return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
     }
     
-    fun getElapsedSeconds(): Long {
-        return (getCurrentTimeMillis() - startTime) / 1000
-    }
-    
     fun getQueensPlaced(boardState: ChessBoardState): Int = boardState.queensPositions.size
     
-    fun restart(): GameScreenState = copy(startTime = getCurrentTimeMillis())
+    fun restart(): GameScreenState = GameScreenState(boardSize = this.boardSize)
 }
 
 @OptIn(ExperimentalTime::class)
@@ -67,18 +47,12 @@ private fun getCurrentTimeMillis(): Long {
 @Composable
 fun GameScreen(
     boardState: ChessBoardState,
-    onSquareClicked: (ChessCoordinate) -> Unit,
+    onSquareClicked: (ChessCoordinate, Long) -> Unit,
     onBackToInit: () -> Unit,
     onRestart: () -> Unit
 ) {
     var gameScreenState by remember(boardState.boardSize) { 
         mutableStateOf(GameScreenState(boardSize = boardState.boardSize)) 
-    }
-
-    LaunchedEffect(boardState.queensPositions.size) {
-        if (boardState.queensPositions.isEmpty() && gameScreenState.getElapsedSeconds() > 0) {
-            gameScreenState = gameScreenState.restart()
-        }
     }
     
     LaunchedEffect(Unit) {
@@ -89,12 +63,17 @@ fun GameScreen(
     }
     
     Column {
-        GameInfoHeader(gameScreenState, boardState)
+        GameInfoHeader(
+            gameScreenState = gameScreenState,
+            boardState = boardState
+        )
         Spacer(modifier = Modifier.height(8.dp))
         ChessBoard(
             config = ChessBoardConfig(),
             boardState = boardState,
-            onSquareClicked = onSquareClicked,
+            onSquareClicked = { coordinate ->
+                onSquareClicked(coordinate, gameScreenState.startTime)
+            },
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterHorizontally)
@@ -103,7 +82,13 @@ fun GameScreen(
                 .horizontalScroll(rememberScrollState())
         )
         
-        BottomBar(onRestart, onBackToInit)
+        BottomBar(
+            onRestart = {
+                onRestart()
+                gameScreenState = gameScreenState.restart()
+            },
+            onBackToInit = onBackToInit
+        )
     }
 }
 
@@ -153,7 +138,7 @@ private fun BottomBar(onRestart: () -> Unit, onBackToInit: () -> Unit) {
         PixelatedText(
             text = stringResource(Res.string.restart),
             pixelSize = 2.dp,
-            color = Color.Red,
+            color = Color.Blue,
             modifier = Modifier
                 .clickable { onRestart() }
                 .padding(8.dp)
