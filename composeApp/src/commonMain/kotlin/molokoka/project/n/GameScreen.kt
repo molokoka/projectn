@@ -15,6 +15,7 @@ import molokoka.project.n.chess.ChessBoard
 import molokoka.project.n.chess.ChessBoardConfig
 import molokoka.project.n.chess.ChessBoardState
 import molokoka.project.n.chess.ChessCoordinate
+import molokoka.project.n.utils.formatElapsedTime
 import molokoka.project.n.views.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.*
@@ -28,10 +29,7 @@ data class GameScreenState(
 ) {
     fun getElapsedTimeFormatted(): String {
         val elapsedMillis = getCurrentTimeMillis() - startTime
-        val elapsedSeconds = elapsedMillis / 1000
-        val minutes = elapsedSeconds / 60
-        val seconds = elapsedSeconds % 60
-        return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+        return formatElapsedTime(elapsedMillis)
     }
     
     fun getQueensPlaced(boardState: ChessBoardState): Int = boardState.queensPositions.size

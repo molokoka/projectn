@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import molokoka.project.n.data.LeaderboardEntry
+import molokoka.project.n.utils.formatTime
 import molokoka.project.n.views.PixelatedText
 
 @Composable
@@ -35,11 +36,7 @@ fun NicknameEntryScreen(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     
-    val formattedTime = remember(timeInSeconds) {
-        val minutes = timeInSeconds / 60
-        val seconds = timeInSeconds % 60
-        "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-    }
+    val formattedTime = remember(timeInSeconds) { formatTime(timeInSeconds) }
     
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()

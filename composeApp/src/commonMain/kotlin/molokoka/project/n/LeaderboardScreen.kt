@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import molokoka.project.n.data.LeaderboardEntry
 import molokoka.project.n.data.LeaderboardRepository
+import molokoka.project.n.utils.formatTime
 import molokoka.project.n.views.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -57,11 +58,7 @@ fun LeaderboardScreen(
             )
         } else {
             leaderboardEntries.forEachIndexed { index, entry ->
-                val timeFormatted = remember(entry.timeInSeconds) {
-                    val minutes = entry.timeInSeconds / 60
-                    val seconds = entry.timeInSeconds % 60
-                    "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-                }
+                val timeFormatted = remember(entry.timeInSeconds) { formatTime(entry.timeInSeconds) }
                 
                 PixelatedText(
                     text = "${index + 1}. ${entry.nickname.trim()} $timeFormatted",

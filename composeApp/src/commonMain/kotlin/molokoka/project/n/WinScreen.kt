@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import molokoka.project.n.data.LeaderboardEntry
 import molokoka.project.n.data.LeaderboardRepository
+import molokoka.project.n.utils.formatTime
 import molokoka.project.n.views.PixelatedText
 import org.koin.compose.koinInject
 import org.jetbrains.compose.resources.stringResource
@@ -55,11 +56,7 @@ fun WinScreen(
     val coroutineScope = rememberCoroutineScope()
     val logger = Logger.withTag("WinScreen")
     
-    val formattedTime = remember(timeInSeconds) {
-        val minutes = timeInSeconds / 60
-        val seconds = timeInSeconds % 60
-        "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-    }
+    val formattedTime = remember(timeInSeconds) { formatTime(timeInSeconds) }
     
     LaunchedEffect(Unit) {
         if (showNicknameEntry) {
@@ -109,11 +106,7 @@ fun WinScreen(
             )
         } else {
             leaderboardEntries.take(3).forEachIndexed { index, entry ->
-                val timeFormatted = remember(entry.timeInSeconds) {
-                    val minutes = entry.timeInSeconds / 60
-                    val seconds = entry.timeInSeconds % 60
-                    "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-                }
+                val timeFormatted = remember(entry.timeInSeconds) { formatTime(entry.timeInSeconds) }
                 
                 PixelatedText(
                     text = "${index + 1}. ${entry.nickname.trim()} $timeFormatted",

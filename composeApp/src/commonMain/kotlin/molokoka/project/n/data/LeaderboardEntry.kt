@@ -1,6 +1,7 @@
 package molokoka.project.n.data
 
 import kotlinx.serialization.Serializable
+import molokoka.project.n.utils.formatTime
 import kotlin.time.ExperimentalTime
 
 @Serializable
@@ -10,11 +11,7 @@ data class LeaderboardEntry(
     val timeInSeconds: Long,
     val timestamp: Long = getCurrentTimeMillis()
 ) {
-    fun getFormattedTime(): String {
-        val minutes = timeInSeconds / 60
-        val seconds = timeInSeconds % 60
-        return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-    }
+    fun getFormattedTime(): String = formatTime(timeInSeconds)
 }
 
 @Serializable
