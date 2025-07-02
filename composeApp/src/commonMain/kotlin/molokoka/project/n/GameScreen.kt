@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package molokoka.project.n
 
 import androidx.compose.foundation.clickable
@@ -15,31 +17,26 @@ import molokoka.project.n.chess.ChessBoard
 import molokoka.project.n.chess.ChessBoardConfig
 import molokoka.project.n.chess.ChessBoardState
 import molokoka.project.n.chess.ChessCoordinate
-import molokoka.project.n.utils.formatElapsedTime
-import molokoka.project.n.views.PixelatedText
+import molokoka.project.n.ui.PixelatedText
+import molokoka.project.n.utils.formatTimeInMillis
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.*
-import kotlin.time.Clock
+import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 
 data class GameScreenState(
     val boardSize: Int,
-    val startTime: Long = getCurrentTimeMillis(),
-    val currentTime: Long = getCurrentTimeMillis()
+    val startTime: Long = now().toEpochMilliseconds(),
+    val triggerForTimerRecomposition: Long = now().toEpochMilliseconds()
 ) {
     fun getElapsedTimeFormatted(): String {
-        val elapsedMillis = getCurrentTimeMillis() - startTime
-        return formatElapsedTime(elapsedMillis)
+        val elapsedMillis = now().toEpochMilliseconds() - startTime
+        return formatTimeInMillis(elapsedMillis)
     }
     
     fun getQueensPlaced(boardState: ChessBoardState): Int = boardState.queensPositions.size
     
     fun restart(): GameScreenState = GameScreenState(boardSize = this.boardSize)
-}
-
-@OptIn(ExperimentalTime::class)
-private fun getCurrentTimeMillis(): Long {
-    return Clock.System.now().toEpochMilliseconds()
 }
 
 @Composable
@@ -56,7 +53,7 @@ fun GameScreen(
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000)
-            gameScreenState = gameScreenState.copy(currentTime = getCurrentTimeMillis())
+            gameScreenState = gameScreenState.copy(triggerForTimerRecomposition = now().toEpochMilliseconds())
         }
     }
     

@@ -1,18 +1,17 @@
 package molokoka.project.n.data
 
 import kotlinx.serialization.Serializable
-import molokoka.project.n.utils.formatTime
+import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class LeaderboardEntry(
     val nickname: String,
     val boardSize: Int,
-    val timeInSeconds: Long,
-    val timestamp: Long = getCurrentTimeMillis()
-) {
-    fun getFormattedTime(): String = formatTime(timeInSeconds)
-}
+    val timeInMillis: Long,
+    val timestamp: Long = now().toEpochMilliseconds()
+)
 
 @Serializable
 data class LeaderboardData(
@@ -21,22 +20,11 @@ data class LeaderboardData(
     fun getTopEntriesForSize(boardSize: Int, limit: Int = 10): List<LeaderboardEntry> {
         return entries
             .filter { it.boardSize == boardSize }
-            .sortedWith(compareBy<LeaderboardEntry> { it.timeInSeconds }.thenBy { it.timestamp })
+            .sortedWith(compareBy<LeaderboardEntry> { it.timeInMillis }.thenBy { it.timestamp })
             .take(limit)
     }
     
     fun addEntry(entry: LeaderboardEntry): LeaderboardData {
         return copy(entries = entries + entry)
     }
-    
-    fun getBestTimeForSize(boardSize: Int): LeaderboardEntry? {
-        return entries
-            .filter { it.boardSize == boardSize }
-            .minByOrNull { it.timeInSeconds }
-    }
-}
-
-@OptIn(ExperimentalTime::class)
-private fun getCurrentTimeMillis(): Long {
-    return kotlin.time.Clock.System.now().toEpochMilliseconds()
 }

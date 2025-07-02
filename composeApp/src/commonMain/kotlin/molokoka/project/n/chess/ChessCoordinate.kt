@@ -1,13 +1,16 @@
 package molokoka.project.n.chess
 
+import molokoka.project.n.FILE_CHARS
+
 data class ChessCoordinate(
     val file: Char,
     val rank: Int,
     val boardSize: Int
 ) {
+
     init {
-        // TODO: check file limitations too
-        require(file in 'a'..'z') { "File must be a letter (a-z)" }
+        require(file in FILE_CHARS) { "File must be a letter (a-z)" }
+        require(file <= ('a' + boardSize - 1)) { "File must not exceed board size" }
         require(rank >= 1) { "Rank must be positive (1-based)" }
         require(rank <= boardSize) { "Rank must not exceed board size" }
     }

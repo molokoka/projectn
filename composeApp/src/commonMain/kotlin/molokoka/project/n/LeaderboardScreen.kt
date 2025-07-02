@@ -9,15 +9,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import molokoka.project.n.data.LeaderboardEntry
 import molokoka.project.n.data.LeaderboardRepository
-import molokoka.project.n.utils.formatTime
-import molokoka.project.n.views.PixelatedText
+import molokoka.project.n.ui.Leaderboard
+import molokoka.project.n.ui.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.back
 import projectn.composeapp.generated.resources.leaderboard
 import projectn.composeapp.generated.resources.leaderboard_size
-import projectn.composeapp.generated.resources.no_records_yet
 
 @Composable
 fun LeaderboardScreen(
@@ -49,27 +48,10 @@ fun LeaderboardScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
         
-        if (leaderboardEntries.isEmpty()) {
-            PixelatedText(
-                text = stringResource(Res.string.no_records_yet),
-                pixelSize = 2.dp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-        } else {
-            leaderboardEntries.forEachIndexed { index, entry ->
-                val timeFormatted = remember(entry.timeInSeconds) { formatTime(entry.timeInSeconds) }
-                
-                PixelatedText(
-                    text = "${index + 1}. ${entry.nickname.trim()} $timeFormatted",
-                    pixelSize = 2.dp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+        Leaderboard(
+            entries = leaderboardEntries,
+            maxEntries = 10
+        )
         
         PixelatedText(
             text = stringResource(Res.string.back),

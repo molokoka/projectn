@@ -21,9 +21,8 @@ data class ChessBoardState(
         val newQueensPositions = if (queensPositions.contains(newQueen)) {
             queensPositions - newQueen
         } else {
-            // Don't allow adding more than boardSize number of queens
             if (queensPositions.size >= boardSize) {
-                return this // Return unchanged state
+                return this
             }
             queensPositions + newQueen
         }

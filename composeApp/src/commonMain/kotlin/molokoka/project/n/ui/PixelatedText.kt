@@ -1,4 +1,4 @@
-package molokoka.project.n.views
+package molokoka.project.n.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
@@ -459,6 +459,26 @@ private fun getCharacterPatterns(): Map<Char, Array<String>> {
             " █    ",
             "█     ",
             "      ",
+            "      "
+        ),
+        '█' to arrayOf(
+            "██████",
+            "██████",
+            "██████",
+            "██████",
+            "██████",
+            "██████",
+            "██████",
+            "██████"
+        ),
+        '_' to arrayOf(
+            "      ",
+            "      ",
+            "      ",
+            "      ",
+            "      ",
+            "      ",
+            "██████",
             "      "
         )
     )

@@ -23,15 +23,9 @@ import kotlin.time.ExperimentalTime
 sealed class GameState {
     object Init : GameState()
     data class Game(val boardSize: Int) : GameState()
-    data class Win(val boardSize: Int, val timeInSeconds: Long) : GameState()
+    data class Win(val boardSize: Int, val timeInMillis: Long) : GameState()
     data class Leaderboard(val boardSize: Int) : GameState()
 }
-
-data class BoardConfig(
-    val minBoardSize: Int = 4,
-    val maxBoardSize: Int = 28,
-    val defaultBoardSize: Int = 8
-)
 
 @OptIn(ExperimentalTime::class)
 @Composable
@@ -75,14 +69,13 @@ fun AppContent() {
             is GameState.Game -> {
                 GameScreen(
                     boardState = boardState,
-                    onSquareClicked = { coordinate, startTime ->
+                    onSquareClicked = { coordinate, startTimeInMillis ->
                         val newBoardState = boardState.toggleQueen(coordinate)
                         boardState = newBoardState
-                        
-                        // Check for win condition
+
                         if (GameLogic.isWinCondition(newBoardState.queensPositions, currentState.boardSize)) {
-                            val elapsedTime = (now().toEpochMilliseconds() - startTime) / 1000
-                            gameState = GameState.Win(currentState.boardSize, elapsedTime)
+                            val elapsedTimeInMillis = (now().toEpochMilliseconds() - startTimeInMillis)
+                            gameState = GameState.Win(currentState.boardSize, elapsedTimeInMillis)
                         }
                     },
                     onBackToInit = {
@@ -96,7 +89,7 @@ fun AppContent() {
             is GameState.Win -> {
                 WinScreen(
                     boardSize = currentState.boardSize,
-                    timeInSeconds = currentState.timeInSeconds,
+                    timeInMillis = currentState.timeInMillis,
                     onPlayAgain = {
                         boardState = ChessBoardState(boardSize = currentState.boardSize)
                         gameState = GameState.Game(currentState.boardSize)
