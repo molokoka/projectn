@@ -3,10 +3,10 @@ package molokoka.project.n
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ComposeAppCommonTest {
+class CanaryTest {
 
     @Test
-    fun example() {
-        assertEquals(3, 1 + 2)
+    fun test() {
+        assertEquals(2, 2)
     }
 }
