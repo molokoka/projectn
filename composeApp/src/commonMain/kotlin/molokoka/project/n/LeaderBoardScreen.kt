@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import molokoka.project.n.data.LeaderboardEntry
-import molokoka.project.n.data.LeaderboardRepository
-import molokoka.project.n.ui.Leaderboard
+import molokoka.project.n.data.LeaderBoardRepository
+import molokoka.project.n.ui.LeaderBoard
 import molokoka.project.n.ui.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -19,15 +19,15 @@ import projectn.composeapp.generated.resources.leaderboard
 import projectn.composeapp.generated.resources.leaderboard_size
 
 @Composable
-fun LeaderboardScreen(
-    boardSize: Int,
+fun LeaderBoardScreen(
+    chessBoardSize: Int,
     onBackToInit: () -> Unit
 ) {
-    val leaderboardRepository: LeaderboardRepository = koinInject()
-    var leaderboardEntries by remember { mutableStateOf<List<LeaderboardEntry>>(emptyList()) }
+    val leaderBoardRepository: LeaderBoardRepository = koinInject()
+    var leaderBoardEntries by remember { mutableStateOf<List<LeaderboardEntry>>(emptyList()) }
     
-    LaunchedEffect(boardSize) {
-        leaderboardEntries = leaderboardRepository.getTopEntriesForSize(boardSize, 10)
+    LaunchedEffect(chessBoardSize) {
+        leaderBoardEntries = leaderBoardRepository.getTopEntriesForSize(chessBoardSize, 10)
     }
     
     Column(
@@ -42,14 +42,14 @@ fun LeaderboardScreen(
         )
         
         PixelatedText(
-            text = stringResource(Res.string.leaderboard_size, boardSize, boardSize),
+            text = stringResource(Res.string.leaderboard_size, chessBoardSize, chessBoardSize),
             pixelSize = 3.dp,
             color = Color.Gray,
             modifier = Modifier.padding(bottom = 32.dp)
         )
         
-        Leaderboard(
-            entries = leaderboardEntries,
+        LeaderBoard(
+            entries = leaderBoardEntries,
             maxEntries = 10
         )
         

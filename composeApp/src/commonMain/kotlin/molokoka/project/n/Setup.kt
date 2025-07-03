@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import molokoka.project.n.ui.PixelatedText
-import molokoka.project.n.ui.BoardSizeControls
+import molokoka.project.n.ui.ChessBoardSizeControls
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.choose_size
@@ -20,10 +20,9 @@ import projectn.composeapp.generated.resources.n_queens
 import projectn.composeapp.generated.resources.start_game
 
 @Composable
-fun InitScreen(
-    boardSize: Int,
+fun Setup(
+    chessBoardSize: Int,
     onBoardSizeChange: (Int) -> Unit,
-    boardConfig: BoardConfig,
     onStartGame: () -> Unit,
     onShowLeaderboard: () -> Unit
 ) {
@@ -45,10 +44,9 @@ fun InitScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        BoardSizeControls(
-            boardSize = boardSize,
-            onBoardSizeChange = onBoardSizeChange,
-            boardConfig = boardConfig
+        ChessBoardSizeControls(
+            chessBoardSize = chessBoardSize,
+            onBoardSizeChange = onBoardSizeChange
         )
 
         Spacer(modifier = Modifier.height(32.dp))

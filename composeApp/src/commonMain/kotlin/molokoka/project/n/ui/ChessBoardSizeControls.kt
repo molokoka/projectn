@@ -9,7 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import molokoka.project.n.BoardConfig
+import molokoka.project.n.domain.chess.MIN_BOARD_SIZE
+import molokoka.project.n.domain.chess.MAX_BOARD_SIZE
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.next
@@ -17,10 +18,9 @@ import projectn.composeapp.generated.resources.prev
 import projectn.composeapp.generated.resources.size_format
 
 @Composable
-fun BoardSizeControls(
-    boardSize: Int,
-    onBoardSizeChange: (Int) -> Unit,
-    boardConfig: BoardConfig
+fun ChessBoardSizeControls(
+    chessBoardSize: Int,
+    onBoardSizeChange: (Int) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -28,10 +28,10 @@ fun BoardSizeControls(
         PixelatedText(
             text = stringResource(Res.string.prev),
             pixelSize = 2.dp,
-            color = if (boardSize > boardConfig.minBoardSize) Color.Blue else Color.Gray,
+            color = if (chessBoardSize > MIN_BOARD_SIZE) Color.Blue else Color.Gray,
             modifier = Modifier
-                .clickable(enabled = boardSize > boardConfig.minBoardSize) {
-                    onBoardSizeChange((boardSize - 1).coerceAtLeast(boardConfig.minBoardSize))
+                .clickable(enabled = chessBoardSize > MIN_BOARD_SIZE) {
+                    onBoardSizeChange((chessBoardSize - 1).coerceAtLeast(MIN_BOARD_SIZE))
                 }
                 .padding(8.dp)
         )
@@ -39,7 +39,7 @@ fun BoardSizeControls(
         Spacer(modifier = Modifier.padding(horizontal = 4.dp))
 
         PixelatedText(
-            text = stringResource(Res.string.size_format, boardSize, boardSize),
+            text = stringResource(Res.string.size_format, chessBoardSize, chessBoardSize),
             pixelSize = 3.dp,
             color = Color.Black
         )
@@ -49,10 +49,10 @@ fun BoardSizeControls(
         PixelatedText(
             text = stringResource(Res.string.next),
             pixelSize = 2.dp,
-            color = if (boardSize < boardConfig.maxBoardSize) Color.Blue else Color.Gray,
+            color = if (chessBoardSize < MAX_BOARD_SIZE) Color.Blue else Color.Gray,
             modifier = Modifier
-                .clickable(enabled = boardSize < boardConfig.maxBoardSize) {
-                    onBoardSizeChange((boardSize + 1).coerceAtMost(boardConfig.maxBoardSize))
+                .clickable(enabled = chessBoardSize < MAX_BOARD_SIZE) {
+                    onBoardSizeChange((chessBoardSize + 1).coerceAtMost(MAX_BOARD_SIZE))
                 }
                 .padding(8.dp)
         )

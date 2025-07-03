@@ -16,14 +16,14 @@ import projectn.composeapp.generated.resources.leaderboard_title
 import projectn.composeapp.generated.resources.no_records_yet
 
 @Composable
-fun Leaderboard(
+fun LeaderBoard(
     entries: List<LeaderboardEntry>,
-    boardSize: Int? = null,
+    chessBoardSize: Int? = null,
     maxEntries: Int = 10,
 ) {
-    if (boardSize != null) {
+    if (chessBoardSize != null) {
         PixelatedText(
-            text = stringResource(Res.string.leaderboard_title, boardSize, boardSize),
+            text = stringResource(Res.string.leaderboard_title, chessBoardSize, chessBoardSize),
             pixelSize = 2.dp,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)

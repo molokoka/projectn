@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import molokoka.project.n.data.LeaderboardEntry
-import molokoka.project.n.data.LeaderboardRepository
+import molokoka.project.n.data.LeaderBoardRepository
 import molokoka.project.n.utils.formatTimeInMillis
-import molokoka.project.n.ui.Leaderboard
+import molokoka.project.n.ui.LeaderBoard
 import molokoka.project.n.ui.NicknameEntry
 import molokoka.project.n.ui.PixelatedText
 import org.koin.compose.koinInject
@@ -36,12 +36,12 @@ data class WinScreenState(
 
 @Composable
 fun WinScreen(
-    boardSize: Int,
+    chessBoardSize: Int,
     timeInMillis: Long,
     onPlayAgain: () -> Unit,
     onBackToInit: () -> Unit
 ) {
-    val leaderboardRepository: LeaderboardRepository = koinInject()
+    val leaderboardRepository: LeaderBoardRepository = koinInject()
     val coroutineScope = rememberCoroutineScope()
 
     var state by remember {
@@ -54,7 +54,7 @@ fun WinScreen(
 
     LaunchedEffect(Unit) {
         state = state.copy(
-            leaderboardEntries = leaderboardRepository.getTopEntriesForSize(boardSize, 5)
+            leaderboardEntries = leaderboardRepository.getTopEntriesForSize(chessBoardSize, 5)
         )
     }
     Column(
@@ -64,12 +64,12 @@ fun WinScreen(
             .verticalScroll(rememberScrollState())
             .imePadding()
     ) {
-        Header(boardSize, state)
+        Header(chessBoardSize, state)
 
-        Leaderboard(
+        LeaderBoard(
             entries = state.leaderboardEntries,
             maxEntries = 3,
-            boardSize = boardSize,
+            chessBoardSize = chessBoardSize,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -83,13 +83,13 @@ fun WinScreen(
                 onSave = {
                     val entry = LeaderboardEntry(
                         nickname = state.nickname.padEnd(NICKNAME_MIN_LENGTH, ' '),
-                        boardSize = boardSize,
+                        chessBoardSize = chessBoardSize,
                         timeInMillis = timeInMillis
                     )
                     coroutineScope.launch {
                         leaderboardRepository.addEntry(entry)
                         state = state.copy(
-                            leaderboardEntries = leaderboardRepository.getTopEntriesForSize(boardSize, 5),
+                            leaderboardEntries = leaderboardRepository.getTopEntriesForSize(chessBoardSize, 5),
                             showNicknameEntry = false
                         )
                     }
@@ -125,7 +125,7 @@ fun WinScreen(
 }
 
 @Composable
-private fun Header(boardSize: Int, state: WinScreenState) {
+private fun Header(chessBoardSize: Int, state: WinScreenState) {
     PixelatedText(
         text = stringResource(Res.string.congrats),
         pixelSize = 4.dp,
@@ -134,7 +134,7 @@ private fun Header(boardSize: Int, state: WinScreenState) {
     )
 
     PixelatedText(
-        text = stringResource(Res.string.win_message, boardSize, boardSize),
+        text = stringResource(Res.string.win_message, chessBoardSize, chessBoardSize),
         pixelSize = 2.dp,
         color = Color.Black,
         modifier = Modifier.padding(bottom = 16.dp)

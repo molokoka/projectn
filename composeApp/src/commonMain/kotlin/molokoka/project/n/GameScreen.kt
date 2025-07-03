@@ -13,10 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import molokoka.project.n.chess.ChessBoard
-import molokoka.project.n.chess.ChessBoardConfig
-import molokoka.project.n.chess.ChessBoardState
-import molokoka.project.n.chess.ChessCoordinate
+import molokoka.project.n.ui.ChessBoard
+import molokoka.project.n.ui.ChessBoardState
+import molokoka.project.n.domain.chess.ChessCoordinates
 import molokoka.project.n.ui.PixelatedText
 import molokoka.project.n.utils.formatTimeInMillis
 import org.jetbrains.compose.resources.stringResource
@@ -25,7 +24,7 @@ import kotlin.time.Clock.System.now
 import kotlin.time.ExperimentalTime
 
 data class GameScreenState(
-    val boardSize: Int,
+    val chessBoardSize: Int,
     val startTime: Long = now().toEpochMilliseconds(),
     val triggerForTimerRecomposition: Long = now().toEpochMilliseconds()
 ) {
@@ -36,18 +35,18 @@ data class GameScreenState(
     
     fun getQueensPlaced(boardState: ChessBoardState): Int = boardState.queensPositions.size
     
-    fun restart(): GameScreenState = GameScreenState(boardSize = this.boardSize)
+    fun restart(): GameScreenState = GameScreenState(chessBoardSize = this.chessBoardSize)
 }
 
 @Composable
 fun GameScreen(
     boardState: ChessBoardState,
-    onSquareClicked: (ChessCoordinate, Long) -> Unit,
+    onSquareClicked: (ChessCoordinates, Long) -> Unit,
     onBackToInit: () -> Unit,
     onRestart: () -> Unit
 ) {
-    var gameScreenState by remember(boardState.boardSize) { 
-        mutableStateOf(GameScreenState(boardSize = boardState.boardSize)) 
+    var gameScreenState by remember(boardState.chessBoardSize) {
+        mutableStateOf(GameScreenState(chessBoardSize = boardState.chessBoardSize))
     }
     
     LaunchedEffect(Unit) {
@@ -64,7 +63,6 @@ fun GameScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         ChessBoard(
-            config = ChessBoardConfig(),
             boardState = boardState,
             onSquareClicked = { coordinate ->
                 onSquareClicked(coordinate, gameScreenState.startTime)
@@ -112,7 +110,7 @@ private fun GameInfoHeader(
             text = stringResource(
                 Res.string.queens_left,
                 gameScreenState.getQueensPlaced(boardState),
-                gameScreenState.boardSize
+                gameScreenState.chessBoardSize
             ),
             pixelSize = 2.dp,
             color = Color.Black,

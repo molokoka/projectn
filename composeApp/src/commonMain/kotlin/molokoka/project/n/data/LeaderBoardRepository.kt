@@ -12,7 +12,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import molokoka.project.n.utils.formatTimeInMillis
 
-class LeaderboardRepository(private val dataStore: DataStore<Preferences>) {
+class LeaderBoardRepository(private val dataStore: DataStore<Preferences>) {
     
     private val leaderboardKey = stringPreferencesKey("leaderboard_data")
     private val logger = Logger.withTag("LeaderboardRepository")
@@ -36,7 +36,7 @@ class LeaderboardRepository(private val dataStore: DataStore<Preferences>) {
     }
     
     suspend fun addEntry(entry: LeaderboardEntry) {
-        logger.i { "Adding entry: ${entry.nickname.trim()} - ${entry.boardSize}x${entry.boardSize} - ${formatTimeInMillis(entry.timeInMillis)}" }
+        logger.i { "Adding entry: ${entry.nickname.trim()} - ${entry.chessBoardSize}x${entry.chessBoardSize} - ${formatTimeInMillis(entry.timeInMillis)}" }
         dataStore.edit { preferences ->
             val currentLeaderboardJson = preferences[leaderboardKey] ?: ""
             val currentData = if (currentLeaderboardJson.isEmpty()) {
@@ -56,9 +56,9 @@ class LeaderboardRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
     
-    suspend fun getTopEntriesForSize(boardSize: Int, limit: Int = 10): List<LeaderboardEntry> {
-        val result = leaderboardData.map { it.getTopEntriesForSize(boardSize, limit) }.first()
-        logger.d { "Retrieved ${result.size} entries for ${boardSize}x${boardSize}" }
+    suspend fun getTopEntriesForSize(chessBoardSize: Int, limit: Int = 10): List<LeaderboardEntry> {
+        val result = leaderboardData.map { it.getTopEntriesForSize(chessBoardSize, limit) }.first()
+        logger.d { "Retrieved ${result.size} entries for ${chessBoardSize}x${chessBoardSize}" }
         return result
     }
 }

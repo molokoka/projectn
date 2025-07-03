@@ -1,15 +1,16 @@
-package molokoka.project.n.chess
+package molokoka.project.n.domain.nqueen
 
+import molokoka.project.n.domain.chess.ChessCoordinates
 import kotlin.math.abs
 
-data class ConflictVisualization(
-    val conflictingQueens: Set<ChessCoordinate> = mutableSetOf(),
-    val highlightedSquares: Set<ChessCoordinate> = mutableSetOf()
+data class NQueenConflictVisualization(
+    val conflictingQueens: Set<ChessCoordinates> = mutableSetOf(),
+    val attackLines: Set<ChessCoordinates> = mutableSetOf()
 )
 
-fun calculateConflicts(queens: Set<ChessCoordinate>, boardSize: Int): ConflictVisualization {
-    val conflictingQueens = mutableSetOf<ChessCoordinate>()
-    val highlightedSquares = mutableSetOf<ChessCoordinate>()
+fun calculateNQueenConflicts(queens: Set<ChessCoordinates>, chessBoardSize: Int): NQueenConflictVisualization {
+    val conflictingQueens = mutableSetOf<ChessCoordinates>()
+    val attackLines = mutableSetOf<ChessCoordinates>()
 
     // Find all pairs of conflicting queens
     val queensList = queens.toList()
@@ -21,22 +22,22 @@ fun calculateConflicts(queens: Set<ChessCoordinate>, boardSize: Int): ConflictVi
             if (areQueensInConflict(queen1, queen2)) {
                 conflictingQueens.add(queen1)
                 conflictingQueens.add(queen2)
-                highlightedSquares.addAll(getAttackLine(queen1, queen2, boardSize))
+                attackLines.addAll(getAttackLine(queen1, queen2, chessBoardSize))
             }
         }
     }
 
-    return ConflictVisualization(conflictingQueens, highlightedSquares)
+    return NQueenConflictVisualization(conflictingQueens, attackLines)
 }
 
-private fun areQueensInConflict(queen1: ChessCoordinate, queen2: ChessCoordinate): Boolean {
+private fun areQueensInConflict(queen1: ChessCoordinates, queen2: ChessCoordinates): Boolean {
     return queen1.rank == queen2.rank ||  // Same rank (horizontal)
             queen1.file == queen2.file ||  // Same file (vertical)
             abs(queen1.row - queen2.row) == abs(queen1.col - queen2.col)  // Same diagonal
 }
 
-private fun getAttackLine(queen1: ChessCoordinate, queen2: ChessCoordinate, boardSize: Int): Set<ChessCoordinate> {
-    val highlighted = mutableSetOf<ChessCoordinate>()
+private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates, chessBoardSize: Int): Set<ChessCoordinates> {
+    val attachLine = mutableSetOf<ChessCoordinates>()
 
     when {
         // Same rank (horizontal line)
@@ -44,7 +45,7 @@ private fun getAttackLine(queen1: ChessCoordinate, queen2: ChessCoordinate, boar
             val startFile = minOf(queen1.file, queen2.file)
             val endFile = maxOf(queen1.file, queen2.file)
             for (file in startFile..endFile) {
-                highlighted.add(ChessCoordinate(file, queen1.rank, boardSize))
+                attachLine.add(ChessCoordinates.Companion.create(file, queen1.rank, chessBoardSize))
             }
         }
         // Same file (vertical line)
@@ -52,7 +53,7 @@ private fun getAttackLine(queen1: ChessCoordinate, queen2: ChessCoordinate, boar
             val startRank = minOf(queen1.rank, queen2.rank)
             val endRank = maxOf(queen1.rank, queen2.rank)
             for (rank in startRank..endRank) {
-                highlighted.add(ChessCoordinate(queen1.file, rank, boardSize))
+                attachLine.add(ChessCoordinates.Companion.create(queen1.file, rank, chessBoardSize))
             }
         }
         // Diagonal line
@@ -63,17 +64,16 @@ private fun getAttackLine(queen1: ChessCoordinate, queen2: ChessCoordinate, boar
             var currentRow = queen1.row
             var currentCol = queen1.col
 
+            // Add all squares along the diagonal from queen1 to queen2
             while (currentRow != queen2.row || currentCol != queen2.col) {
-                val file = ('a' + currentCol)
-                val rank = boardSize - currentRow
-                highlighted.add(ChessCoordinate(file, rank, boardSize))
+                attachLine.add(ChessCoordinates.Companion.fromRowCol(currentRow, currentCol, chessBoardSize))
                 currentRow += rowStep
                 currentCol += colStep
             }
             // Add the final square
-            highlighted.add(queen2)
+            attachLine.add(queen2)
         }
     }
 
-    return highlighted
+    return attachLine
 }

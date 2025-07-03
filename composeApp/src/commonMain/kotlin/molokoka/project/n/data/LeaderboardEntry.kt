@@ -8,7 +8,7 @@ import kotlin.time.ExperimentalTime
 @Serializable
 data class LeaderboardEntry(
     val nickname: String,
-    val boardSize: Int,
+    val chessBoardSize: Int,
     val timeInMillis: Long,
     val timestamp: Long = now().toEpochMilliseconds()
 )
@@ -17,9 +17,9 @@ data class LeaderboardEntry(
 data class LeaderboardData(
     val entries: List<LeaderboardEntry> = emptyList()
 ) {
-    fun getTopEntriesForSize(boardSize: Int, limit: Int = 10): List<LeaderboardEntry> {
+    fun getTopEntriesForSize(chessBoardSize: Int, limit: Int = 10): List<LeaderboardEntry> {
         return entries
-            .filter { it.boardSize == boardSize }
+            .filter { it.chessBoardSize == chessBoardSize }
             .sortedWith(compareBy<LeaderboardEntry> { it.timeInMillis }.thenBy { it.timestamp })
             .take(limit)
     }
