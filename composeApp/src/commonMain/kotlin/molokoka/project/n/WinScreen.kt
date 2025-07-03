@@ -41,6 +41,7 @@ fun WinScreen(
     onPlayAgain: () -> Unit,
     onBackToInit: () -> Unit
 ) {
+    // TODO: extract logic into view model
     val leaderboardRepository: LeaderBoardRepository = koinInject()
     val coroutineScope = rememberCoroutineScope()
 

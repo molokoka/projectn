@@ -24,7 +24,8 @@ import kotlin.time.ExperimentalTime
 
 sealed class AppState {
     data class Setup(val chessBoardSize: Int) : AppState()
-    data class Game(val chessBoardSize: Int, val boardState: ChessBoardState) : AppState()
+    // TODO: investigate if
+    data class Game(val chessBoardSize: Int, val chessBoardState: ChessBoardState) : AppState()
     data class Win(val chessBoardSize: Int, val timeInMillis: Long) : AppState()
     data class Leaderboard(val chessBoardSize: Int) : AppState()
 }
@@ -70,10 +71,10 @@ fun AppContent() {
             }
             is AppState.Game -> {
                 GameScreen(
-                    boardState = currentState.boardState,
+                    boardState = currentState.chessBoardState,
                     onSquareClicked = { coordinate, startTimeInMillis ->
-                        val newBoardState = currentState.boardState.toggleQueen(coordinate)
-                        appState = currentState.copy(boardState = newBoardState)
+                        val newBoardState = currentState.chessBoardState.toggleQueen(coordinate)
+                        appState = currentState.copy(chessBoardState = newBoardState)
 
                         if (isWinCondition(newBoardState.queensPositions, currentState.chessBoardSize)) {
                             val elapsedTimeInMillis = (now().toEpochMilliseconds() - startTimeInMillis)
@@ -84,7 +85,7 @@ fun AppContent() {
                         appState = AppState.Setup(currentState.chessBoardSize)
                     },
                     onRestart = {
-                        appState = currentState.copy(boardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize))
+                        appState = currentState.copy(chessBoardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize))
                     }
                 )
             }

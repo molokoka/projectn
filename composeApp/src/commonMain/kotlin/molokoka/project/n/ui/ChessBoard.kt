@@ -44,13 +44,15 @@ data class ChessBoardState(
         nQueenConflictVisualization.attackLines.contains(coordinate) == true
 }
 
+// TODO: make abstract chess board
 @Composable
 fun ChessBoard(
     modifier: Modifier = Modifier,
     boardState: ChessBoardState,
     onSquareClicked: (ChessCoordinates) -> Unit
 ) {
-    val config = chessBoardUiConfig()
+    val uiConfig = chessBoardUiConfig()
+
     Column(modifier = modifier) {
         repeat(boardState.chessBoardSize) { row ->
             Row {
@@ -58,13 +60,13 @@ fun ChessBoard(
                     val coordinate = ChessCoordinates.Companion.fromRowCol(row, col, boardState.chessBoardSize)
 
                     val isLightSquare = (row + col) % 2 == 0
-                    val baseSquareColor = if (isLightSquare) config.lightSquareColor else config.darkSquareColor
+                    val baseSquareColor = if (isLightSquare) uiConfig.lightSquareColor else uiConfig.darkSquareColor
                     val isLeftEdge = col == 0
                     val isBottomEdge = row == boardState.chessBoardSize - 1
 
                     val isConflictHighlight = boardState.isConflictHighlightedSquare(coordinate)
                     val squareColor = if (isConflictHighlight) {
-                        config.withConflictHighlight(baseSquareColor)
+                        uiConfig.withConflictHighlight(baseSquareColor)
                     } else {
                         baseSquareColor
                     }
@@ -74,7 +76,7 @@ fun ChessBoard(
 
                     Box(
                         modifier = Modifier
-                            .size(config.squareSize)
+                            .size(uiConfig.squareSize)
                             .background(squareColor)
                             .clickable { onSquareClicked(coordinate) }
                     ) {
@@ -82,7 +84,7 @@ fun ChessBoard(
                         if (hasQueen) {
                             BasicText(
                                 text = "♛",
-                                style = if (isConflictingQueen) config.conflictingQueenTextStyle else config.queenTextStyle,
+                                style = if (isConflictingQueen) uiConfig.conflictingQueenTextStyle else uiConfig.queenTextStyle,
                                 modifier = Modifier.align(Alignment.Center),
                             )
                         }
@@ -90,7 +92,7 @@ fun ChessBoard(
                         if (isLeftEdge) {
                             BasicText(
                                 text = coordinate.rank.toString(),
-                                style = config.coordinateTextStyle,
+                                style = uiConfig.coordinateTextStyle,
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
                                     .padding(1.dp)
@@ -99,7 +101,7 @@ fun ChessBoard(
                         if (isBottomEdge) {
                             BasicText(
                                 text = coordinate.file.toString(),
-                                style = config.coordinateTextStyle,
+                                style = uiConfig.coordinateTextStyle,
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .padding(1.dp)

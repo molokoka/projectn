@@ -42,6 +42,8 @@ The project follows a modular Kotlin Multiplatform structure:
 ### Testing
 - **Run all tests**: `./gradlew test`
 - **Run specific module tests**: `./gradlew :composeApp:test`, `./gradlew :server:test`, `./gradlew :shared:test`
+- **Run unit tests**: `./gradlew :composeApp:testDebugUnitTest`
+- **Unit tests location**: `composeApp/src/commonTest/kotlin/` - contains Kotlin multiplatform unit tests using kotlin.test
 
 ### Platform-Specific Tasks
 - **Android tasks**: `./gradlew :composeApp:assembleDebug`, `./gradlew :composeApp:assembleRelease`
