@@ -39,7 +39,7 @@ fun LeaderBoard(
         )
     } else {
         entries.take(maxEntries).forEachIndexed { index, entry ->
-            val timeFormatted = remember(entry.timeInMillis) { formatTimeInMillis(entry.timeInMillis) }
+            val timeFormatted = remember(entry.completionTimeMillis) { formatTimeInMillis(entry.completionTimeMillis) }
 
             PixelatedText(
                 text = "${index + 1}. ${entry.nickname.trim()} $timeFormatted",

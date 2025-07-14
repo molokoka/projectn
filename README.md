@@ -1,19 +1,80 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop, Server.
+# N-Queen Game
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+A classic N-Queen puzzle game built with Compose Multiplatform, featuring conflict visualization and leaderboard functionality.
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Features
 
-* `/server` is for the Ktor server application.
+- **Interactive N-Queen Puzzle**: Place queens on a chessboard without conflicts
+- **Conflict Visualization**: Visual feedback showing attacking lines and conflicting queens
+- **Multiple Board Sizes**: Play with different board dimensions
+- **Leaderboard**: Track your best times and compete with yourself
+- **Cross-Platform**: apps for Android, iOS, and Desktop
 
-* `/shared` is for the code that will be shared between all targets in the project.
-  The most important subfolder is `commonMain`. If preferred, you can add code to the platform-specific folders here too.
+## Architecture
 
+At this stage didn't face the necessity of introducing view models. 
+I've definitely was thinking about adding them, but decided to keep it simple.
+I'm happy to focus on this part of project if needed.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Walkthrough
+
+[walkthrough.mov](walkthrough.mov)
+
+## Quick Start
+
+### Desktop
+```bash
+./gradlew :composeApp:run
+```
+
+### Android
+```bash
+./gradlew :composeApp:installDebug
+```
+
+### iOS
+iOS apps must be built and run through Xcode or the iOS Simulator directly.
+Build through Xcode or build specific iOS targets:
+```bash
+# For device
+./gradlew :composeApp:linkDebugFrameworkIosArm64
+
+# For simulator
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+```
+
+## Testing
+
+### Unit Tests
+Run unit tests for all platforms:
+```bash
+# All tests
+./gradlew test
+
+# Specific module tests
+./gradlew :composeApp:test
+./gradlew :shared:test
+
+# Debug unit tests only
+./gradlew :composeApp:testDebugUnitTest
+
+# iOS tests
+./gradlew :composeApp:iosSimulatorArm64Test
+./gradlew :composeApp:iosX64Test
+```
+
+### Test Locations
+- **Unit tests**: `composeApp/src/commonTest/kotlin/` - Kotlin multiplatform tests using kotlin.test
+- **UI tests**: `composeApp/src/commonTest/kotlin/` - Simple UI component tests with mocked data
+
+## Project Structure
+
+- **`composeApp/`** - Shared UI code for all platforms
+- **`iosApp/`** - iOS application entry point
+- **`shared/`** - Shared business logic
+
+## TODO List
+
+### Development Tasks
+- [ ] **ChessBoard.kt:47** - Make abstract chess board
+- [ ] **WinScreen.kt:44** - Extract logic into view model

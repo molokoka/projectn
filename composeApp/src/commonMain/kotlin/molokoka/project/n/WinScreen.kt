@@ -37,7 +37,7 @@ data class WinScreenState(
 @Composable
 fun WinScreen(
     chessBoardSize: Int,
-    timeInMillis: Long,
+    completionTimeMillis: Long,
     onPlayAgain: () -> Unit,
     onBackToInit: () -> Unit
 ) {
@@ -48,7 +48,7 @@ fun WinScreen(
     var state by remember {
         mutableStateOf(
             WinScreenState(
-                formattedTime = formatTimeInMillis(timeInMillis)
+                formattedTime = formatTimeInMillis(completionTimeMillis)
             )
         )
     }
@@ -85,7 +85,7 @@ fun WinScreen(
                     val entry = LeaderboardEntry(
                         nickname = state.nickname.padEnd(NICKNAME_MIN_LENGTH, ' '),
                         chessBoardSize = chessBoardSize,
-                        timeInMillis = timeInMillis
+                        completionTimeMillis = completionTimeMillis
                     )
                     coroutineScope.launch {
                         leaderboardRepository.addEntry(entry)

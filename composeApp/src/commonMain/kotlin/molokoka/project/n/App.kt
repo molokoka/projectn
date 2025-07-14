@@ -24,9 +24,8 @@ import kotlin.time.ExperimentalTime
 
 sealed class AppState {
     data class Setup(val chessBoardSize: Int) : AppState()
-    // TODO: investigate if
     data class Game(val chessBoardSize: Int, val chessBoardState: ChessBoardState) : AppState()
-    data class Win(val chessBoardSize: Int, val timeInMillis: Long) : AppState()
+    data class Win(val chessBoardSize: Int, val completionTimeMillis: Long) : AppState()
     data class Leaderboard(val chessBoardSize: Int) : AppState()
 }
 
@@ -92,7 +91,7 @@ fun AppContent() {
             is AppState.Win -> {
                 WinScreen(
                     chessBoardSize = currentState.chessBoardSize,
-                    timeInMillis = currentState.timeInMillis,
+                    completionTimeMillis = currentState.completionTimeMillis,
                     onPlayAgain = {
                         val newBoardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize)
                         appState = AppState.Game(currentState.chessBoardSize, newBoardState)

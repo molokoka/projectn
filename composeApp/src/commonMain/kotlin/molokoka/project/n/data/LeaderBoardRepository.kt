@@ -36,7 +36,7 @@ class LeaderBoardRepository(private val dataStore: DataStore<Preferences>) {
     }
     
     suspend fun addEntry(entry: LeaderboardEntry) {
-        logger.i { "Adding entry: ${entry.nickname.trim()} - ${entry.chessBoardSize}x${entry.chessBoardSize} - ${formatTimeInMillis(entry.timeInMillis)}" }
+        logger.i { "Adding entry: ${entry.nickname.trim()} - ${entry.chessBoardSize}x${entry.chessBoardSize} - ${formatTimeInMillis(entry.completionTimeMillis)}" }
         dataStore.edit { preferences ->
             val currentLeaderboardJson = preferences[leaderboardKey] ?: ""
             val currentData = if (currentLeaderboardJson.isEmpty()) {
