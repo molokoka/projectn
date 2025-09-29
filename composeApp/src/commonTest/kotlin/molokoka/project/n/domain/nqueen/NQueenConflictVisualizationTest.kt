@@ -10,8 +10,8 @@ class NQueenConflictVisualizationTest {
     @Test
     fun testNoConflicts() {
         // . . . .  4
-        // . . Q .  3
-        // . . . .  2
+        // . . . .  3
+        // . . Q .  2
         // Q . . .  1
         // a b c d
         val queens = setOf(
