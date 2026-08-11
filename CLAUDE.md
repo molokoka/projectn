@@ -7,8 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop using
 Compose Multiplatform for UI.
 
-Local toolchain: JDK 17 (Gradle runs on it; JDK 21+ is not required) and Xcode 26
-for iOS.
+Local toolchain: JDK 17 and Xcode 26 for iOS.
 
 ## Project Architecture
 
@@ -18,9 +17,8 @@ The project follows a modular Kotlin Multiplatform structure:
   - Applies `com.android.kotlin.multiplatform.library`, configured via `kotlin { android { } }`
   - `commonMain` - Shared UI code across all platforms
   - `androidMain` - Android-specific code (platform `actual`s only; no app entry point)
-  - `desktopMain` - Desktop-specific code
+  - `desktopMain` - Desktop-specific code (platform `actual`s only; no app entry point)
   - `iosMain` - iOS-specific code
-  - Main class: `molokoka.project.n.MainKt` (Desktop)
 
 - **`/androidApp`** - Android application module (`com.android.application`)
   - Holds `MainActivity`, `AndroidManifest.xml`, and launcher `res/`; depends on `/composeApp`
@@ -28,6 +26,10 @@ The project follows a modular Kotlin Multiplatform structure:
 
 - **`/iosApp`** - iOS application entry point (Xcode project)
   - Swift entry point that integrates with Kotlin Multiplatform framework
+
+- **`/desktopApp`** - Desktop application module (`org.jetbrains.kotlin.jvm`)
+  - Holds `main.kt` (`molokoka.project.n.MainKt`) and the `compose.desktop { application { } }` block; depends on `/composeApp`
+  - A plain JVM module, not a KMP one - `composeApp` keeps the `jvm("desktop")` target it consumes
 
 ## Development Commands
 
@@ -44,9 +46,14 @@ run `./gradlew tasks` rather than trusting a list here. The non-obvious ones:
 | `:composeApp:desktopTest` | JVM target is named `desktop`, so it is not `:composeApp:test` |
 | `:composeApp:iosSimulatorArm64Test` | iOS unit tests |
 | `:androidApp:*` | All Android tasks live here, not in `:composeApp` |
+| `:desktopApp:run` | Desktop app; `:composeApp:run` no longer exists |
+| `:desktopApp:hotRun --auto` | Desktop app with hot reload; `hotRunAsync` launches it detached |
+| `:desktopApp:packageDmg` | Native distribution; also `packageMsi`, `packageDeb` |
 
 `:composeApp:test` and `:composeApp:testDebugUnitTest` do not exist -
 `composeApp` is a KMP library with no Android build variants.
+
+**`hotRun` does not watch files unless you pass `--auto`** (alias `--autoReload`).
 
 **A passing `linkDebugFramework*` does not mean the iOS app builds.** The Gradle
 framework link and the Xcode project fail independently. After touching iOS
@@ -61,7 +68,7 @@ xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
 **Testing policy**: Claude may run any test command without asking.
 
 Tests live in `composeApp/src/commonTest/kotlin/` and cover n-queen conflict
-logic only - not rendering. To check UI changes, run `./gradlew :composeApp:run`
+logic only - not rendering. To check UI changes, run `./gradlew :desktopApp:run`
 and look at the app.
 
 ## Development Notes
@@ -69,11 +76,14 @@ and look at the app.
 - Base package is `molokoka.project.n`, with platform-specific subpackages
 - All dependency versions belong in `gradle/libs.versions.toml`, never inline in
   a build script
-- JVM target is Java 11 **for Android compilations only** (set in the
+- JVM target is Java 11 for Android compilations (set in the
   `kotlin { android { } }` block of `composeApp`, plus `compileOptions` in
-  `androidApp`). The desktop compilation pins nothing and currently produces
-  Java 17 bytecode, inherited from whatever JDK runs Gradle - so its output
-  changes with the local JDK.
+  `androidApp`) and Java 17 for the desktop ones (`composeApp`'s `desktop`
+  target and `desktopApp`). Both are pinned deliberately - do not remove them.
+  Unpinned, desktop bytecode follows whatever JDK runs Gradle, and Compose Hot
+  Reload runs the app on its own provisioned JetBrains Runtime, which is older
+  than the JDK an IDE may build with. That mismatch fails at launch with
+  `UnsupportedClassVersionError`, not at compile time.
 - iOS targets are arm64 (device) and simulator arm64 only. iosX64 (Intel
   simulator) was removed: Compose Multiplatform publishes no iosX64 artifacts,
   so it could never build the UI. `EXCLUDED_ARCHS[sdk=iphonesimulator*]` in the
