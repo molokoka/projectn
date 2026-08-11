@@ -6,22 +6,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Kotlin Multiplatform project targeting Android, iOS, Desktop, and Server platforms using Compose Multiplatform for UI and Ktor for the server component.
 
+Local toolchain: JDK 17 (Gradle runs on it; JDK 21+ is not required) and Xcode 26
+for iOS.
+
 ## Project Architecture
 
 The project follows a modular Kotlin Multiplatform structure:
 
-- **`/composeApp`** - Compose Multiplatform application targeting Android, iOS, and Desktop
+- **`/composeApp`** - Compose Multiplatform **library** targeting Android, iOS, and Desktop
+  - Applies `com.android.kotlin.multiplatform.library`, configured via `kotlin { android { } }`
   - `commonMain` - Shared UI code across all platforms
-  - `androidMain` - Android-specific code
-  - `desktopMain` - Desktop-specific code  
+  - `androidMain` - Android-specific code (platform `actual`s only; no app entry point)
+  - `desktopMain` - Desktop-specific code
   - `iosMain` - iOS-specific code
-  - Main class: `molokoka.project.n.MainKt` (Desktop), `molokoka.project.n.MainActivity` (Android)
+  - Main class: `molokoka.project.n.MainKt` (Desktop)
+
+- **`/androidApp`** - Android application module (`com.android.application`)
+  - Holds `MainActivity`, `AndroidManifest.xml`, and launcher `res/`; depends on `/composeApp`
+  - Exists because AGP 9 does not allow `com.android.application` in a Kotlin Multiplatform module
 
 - **`/server`** - Ktor server application (JVM)
   - Main class: `molokoka.project.n.ApplicationKt`
   - Uses Netty engine with Logback for logging
 
 - **`/shared`** - Shared business logic across all targets
+  - Also uses `com.android.kotlin.multiplatform.library`
   - Supports Android, iOS, JVM targets
   - Contains common utilities and platform abstractions
 
@@ -30,43 +39,61 @@ The project follows a modular Kotlin Multiplatform structure:
 
 ## Development Commands
 
-### Building
-- **Build all targets**: `./gradlew build`
-- **Build specific module**: `./gradlew :composeApp:build`, `./gradlew :server:build`, `./gradlew :shared:build`
+**Run Gradle tasks one per invocation.** Do not batch several tasks into a
+single `./gradlew` call - a batched run gives no feedback until it finishes,
+hides which target failed, and tends to exceed command timeouts. Run them in
+fast-to-slow order so failures surface early.
 
-### Running Applications
-- **Desktop app**: `./gradlew :composeApp:run`
-- **Server**: `./gradlew :server:run`
-- **Android**: Use Android Studio or `./gradlew :composeApp:installDebug`
+Standard Gradle task names work as expected (`build`, `run`, `assembleDebug`);
+run `./gradlew tasks` rather than trusting a list here. The non-obvious ones:
 
-### Testing
-- **Run all tests**: `./gradlew test`
-- **Run specific module tests**: `./gradlew :composeApp:test`, `./gradlew :server:test`, `./gradlew :shared:test`
-- **Run unit tests**: `./gradlew :composeApp:testDebugUnitTest`
-- **Unit tests location**: `composeApp/src/commonTest/kotlin/` - contains Kotlin multiplatform unit tests using kotlin.test
-- **Testing policy**: Claude is allowed to run any test commands without user confirmation to verify functionality
+| Task | Note |
+|---|---|
+| `:composeApp:desktopTest` | JVM target is named `desktop`, so it is not `:composeApp:test` |
+| `:composeApp:iosSimulatorArm64Test` | iOS unit tests |
+| `:androidApp:*` | All Android tasks live here, not in `:composeApp` |
 
-### Platform-Specific Tasks
-- **Android tasks**: `./gradlew :composeApp:assembleDebug`, `./gradlew :composeApp:assembleRelease`
-- **Desktop distribution**: `./gradlew :composeApp:packageDistributionForCurrentOS`
-- **iOS framework**: Build through Xcode or `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`
+`:composeApp:test`, `:shared:test`, and `:composeApp:testDebugUnitTest` do not
+exist - `composeApp` is a KMP library with no Android build variants.
 
-## Key Dependencies
+**A passing `linkDebugFramework*` does not mean the iOS app builds.** The Gradle
+framework link and the Xcode project fail independently. After touching iOS
+targets, Compose, or AGP, verify the real app:
 
-- **Kotlin**: 2.1.21
-- **Compose Multiplatform**: 1.8.1  
-- **Ktor**: 3.1.3
-- **Coroutines**: 1.10.2
-- **Android Compile/Target SDK**: 35, Min SDK: 24
+```bash
+xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
+  -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+  -configuration Debug build
+```
 
-## Package Structure
+**Testing policy**: Claude may run any test command without asking.
 
-All code uses the base package `molokoka.project.n` with platform-specific subpackages as needed.
+Tests live in `composeApp/src/commonTest/kotlin/` and cover n-queen conflict
+logic only - not rendering. To check UI changes, run `./gradlew :composeApp:run`
+and look at the app.
 
 ## Development Notes
 
-- Uses Gradle version catalogs (`gradle/libs.versions.toml`) for dependency management
-- Compose Hot Reload is enabled for faster development iteration
-- JVM target is Java 11 across all modules
-- iOS targets support x64, arm64, and simulator arm64 architectures
-- **Do not use Material components** - prefer basic Compose components and custom styling
+- Base package is `molokoka.project.n`, with platform-specific subpackages
+- All dependency versions belong in `gradle/libs.versions.toml`, never inline in
+  a build script
+- JVM target is Java 11 **for Android compilations only** (set in the
+  `kotlin { android { } }` blocks of `composeApp` and `shared`, plus
+  `compileOptions` in `androidApp`). The desktop, `shared` JVM, and `server`
+  compilations pin nothing and currently produce Java 17 bytecode, inherited
+  from whatever JDK runs Gradle - so their output changes with the local JDK.
+- iOS targets are arm64 (device) and simulator arm64 only. iosX64 (Intel
+  simulator) was removed: Compose Multiplatform publishes no iosX64 artifacts,
+  so it could never build the UI. `EXCLUDED_ARCHS[sdk=iphonesimulator*]` in the
+  Xcode project keeps Xcode from requesting it.
+- **Do not use Material components** - prefer basic Compose components and custom
+  styling. The `compose.material3` dependency has been removed from the build, so
+  a Material import will fail to compile rather than slip through.
+- Gradle configuration cache and build cache are enabled (`gradle.properties`).
+  A killed Gradle client can leave a daemon holding cache locks; if a build hangs
+  waiting on `journal-1.lock` or `fileContent.lock`, kill the stale daemon rather
+  than waiting it out.
+- AGP 10 will remove the legacy KMP/Android APIs entirely. The `androidApp` split
+  and `com.android.kotlin.multiplatform.library` usage are what keep this project
+  ready for it - do not reintroduce `com.android.application` or
+  `com.android.library` into a KMP module.

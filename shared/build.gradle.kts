@@ -3,18 +3,20 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKmpLibrary)
 }
 
 kotlin {
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    android {
+        namespace = "molokoka.project.n.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
-    iosX64()
+
     iosArm64()
     iosSimulatorArm64()
     
@@ -22,7 +24,7 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+            implementation(libs.kotlinx.coroutinesCore)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -30,14 +32,3 @@ kotlin {
     }
 }
 
-android {
-    namespace = "molokoka.project.n.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-}
