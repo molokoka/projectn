@@ -60,9 +60,6 @@ Run unit tests for all platforms:
 # Desktop unit tests
 ./gradlew :composeApp:desktopTest
 
-# Server tests
-./gradlew :server:test
-
 # iOS tests
 ./gradlew :composeApp:iosSimulatorArm64Test
 ```
@@ -76,8 +73,6 @@ Run unit tests for all platforms:
 - **`composeApp/`** - Shared UI code for all platforms (Kotlin Multiplatform library)
 - **`androidApp/`** - Android application entry point (`MainActivity`, manifest, launcher icons)
 - **`iosApp/`** - iOS application entry point (Xcode project)
-- **`shared/`** - Shared business logic
-- **`server/`** - Ktor server (JVM)
 
 Android's entry point lives in its own module because AGP 9 no longer allows
 the Android application plugin inside a Kotlin Multiplatform module.

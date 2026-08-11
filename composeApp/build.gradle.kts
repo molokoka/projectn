@@ -54,7 +54,6 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.kermit)
-            implementation(projects.shared)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

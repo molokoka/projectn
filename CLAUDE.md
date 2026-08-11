@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop, and Server platforms using Compose Multiplatform for UI and Ktor for the server component.
+This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop using
+Compose Multiplatform for UI.
 
 Local toolchain: JDK 17 (Gradle runs on it; JDK 21+ is not required) and Xcode 26
 for iOS.
@@ -25,15 +26,6 @@ The project follows a modular Kotlin Multiplatform structure:
   - Holds `MainActivity`, `AndroidManifest.xml`, and launcher `res/`; depends on `/composeApp`
   - Exists because AGP 9 does not allow `com.android.application` in a Kotlin Multiplatform module
 
-- **`/server`** - Ktor server application (JVM)
-  - Main class: `molokoka.project.n.ApplicationKt`
-  - Uses Netty engine with Logback for logging
-
-- **`/shared`** - Shared business logic across all targets
-  - Also uses `com.android.kotlin.multiplatform.library`
-  - Supports Android, iOS, JVM targets
-  - Contains common utilities and platform abstractions
-
 - **`/iosApp`** - iOS application entry point (Xcode project)
   - Swift entry point that integrates with Kotlin Multiplatform framework
 
@@ -53,8 +45,8 @@ run `./gradlew tasks` rather than trusting a list here. The non-obvious ones:
 | `:composeApp:iosSimulatorArm64Test` | iOS unit tests |
 | `:androidApp:*` | All Android tasks live here, not in `:composeApp` |
 
-`:composeApp:test`, `:shared:test`, and `:composeApp:testDebugUnitTest` do not
-exist - `composeApp` is a KMP library with no Android build variants.
+`:composeApp:test` and `:composeApp:testDebugUnitTest` do not exist -
+`composeApp` is a KMP library with no Android build variants.
 
 **A passing `linkDebugFramework*` does not mean the iOS app builds.** The Gradle
 framework link and the Xcode project fail independently. After touching iOS
@@ -78,10 +70,10 @@ and look at the app.
 - All dependency versions belong in `gradle/libs.versions.toml`, never inline in
   a build script
 - JVM target is Java 11 **for Android compilations only** (set in the
-  `kotlin { android { } }` blocks of `composeApp` and `shared`, plus
-  `compileOptions` in `androidApp`). The desktop, `shared` JVM, and `server`
-  compilations pin nothing and currently produce Java 17 bytecode, inherited
-  from whatever JDK runs Gradle - so their output changes with the local JDK.
+  `kotlin { android { } }` block of `composeApp`, plus `compileOptions` in
+  `androidApp`). The desktop compilation pins nothing and currently produces
+  Java 17 bytecode, inherited from whatever JDK runs Gradle - so its output
+  changes with the local JDK.
 - iOS targets are arm64 (device) and simulator arm64 only. iosX64 (Intel
   simulator) was removed: Compose Multiplatform publishes no iosX64 artifacts,
   so it could never build the UI. `EXCLUDED_ARCHS[sdk=iphonesimulator*]` in the
