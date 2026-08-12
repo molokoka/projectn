@@ -1,9 +1,7 @@
 package molokoka.project.n.domain.chess
 
 const val FIRST_FILE = 'a'
-const val LATIN_ALPHABET_SIZE = 28 // interconnected with file range
-val FILE_RANGE = FIRST_FILE..'z'
+const val BOARD_SIZE = 8
 
-const val MIN_BOARD_SIZE = 4
-const val MAX_BOARD_SIZE = LATIN_ALPHABET_SIZE
-const val DEFAULT_BOARD_SIZE = 8
+val FILE_RANGE = FIRST_FILE..(FIRST_FILE + BOARD_SIZE - 1)
+val RANK_RANGE = 1..BOARD_SIZE

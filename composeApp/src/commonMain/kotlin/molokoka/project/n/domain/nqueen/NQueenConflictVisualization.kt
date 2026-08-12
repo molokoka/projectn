@@ -8,7 +8,7 @@ data class NQueenConflictVisualization(
     val attackLines: Set<ChessCoordinates> = mutableSetOf()
 )
 
-fun calculateNQueenConflicts(queens: Set<ChessCoordinates>, chessBoardSize: Int): NQueenConflictVisualization {
+fun calculateNQueenConflicts(queens: Set<ChessCoordinates>): NQueenConflictVisualization {
     val conflictingQueens = mutableSetOf<ChessCoordinates>()
     val attackLines = mutableSetOf<ChessCoordinates>()
 
@@ -22,7 +22,7 @@ fun calculateNQueenConflicts(queens: Set<ChessCoordinates>, chessBoardSize: Int)
             if (areQueensInConflict(queen1, queen2)) {
                 conflictingQueens.add(queen1)
                 conflictingQueens.add(queen2)
-                attackLines.addAll(getAttackLine(queen1, queen2, chessBoardSize))
+                attackLines.addAll(getAttackLine(queen1, queen2))
             }
         }
     }
@@ -36,7 +36,7 @@ private fun areQueensInConflict(queen1: ChessCoordinates, queen2: ChessCoordinat
             abs(queen1.row - queen2.row) == abs(queen1.col - queen2.col)  // Same diagonal
 }
 
-private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates, chessBoardSize: Int): Set<ChessCoordinates> {
+private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates): Set<ChessCoordinates> {
     val attachLine = mutableSetOf<ChessCoordinates>()
 
     when {
@@ -45,7 +45,7 @@ private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates, ch
             val startFile = minOf(queen1.file, queen2.file)
             val endFile = maxOf(queen1.file, queen2.file)
             for (file in startFile..endFile) {
-                attachLine.add(ChessCoordinates.Companion.create(file, queen1.rank, chessBoardSize))
+                attachLine.add(ChessCoordinates.Companion.create(file, queen1.rank))
             }
         }
         // Same file (vertical line)
@@ -53,7 +53,7 @@ private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates, ch
             val startRank = minOf(queen1.rank, queen2.rank)
             val endRank = maxOf(queen1.rank, queen2.rank)
             for (rank in startRank..endRank) {
-                attachLine.add(ChessCoordinates.Companion.create(queen1.file, rank, chessBoardSize))
+                attachLine.add(ChessCoordinates.Companion.create(queen1.file, rank))
             }
         }
         // Diagonal line
@@ -66,7 +66,7 @@ private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates, ch
 
             // Add all squares along the diagonal from queen1 to queen2
             while (currentRow != queen2.row || currentCol != queen2.col) {
-                attachLine.add(ChessCoordinates.Companion.fromRowCol(currentRow, currentCol, chessBoardSize))
+                attachLine.add(ChessCoordinates.Companion.fromRowCol(currentRow, currentCol))
                 currentRow += rowStep
                 currentCol += colStep
             }

@@ -9,19 +9,14 @@ data class ChessCoordinates(
 
     companion object {
 
-        fun create(file: Char, rank: Int, chessBoardSize: Int): ChessCoordinates {
-            require(file in FILE_RANGE) { "File must be a letter (a-z)" }
-            require(file <= (FIRST_FILE + chessBoardSize - 1)) { "File must not exceed board size" }
-            require(rank >= 1) { "Rank must be positive (1-based)" }
-            require(rank <= chessBoardSize) { "Rank must not exceed board size" }
+        fun create(file: Char, rank: Int): ChessCoordinates {
+            require(file in FILE_RANGE) { "File must be in $FILE_RANGE, was '$file'" }
+            require(rank in RANK_RANGE) { "Rank must be in $RANK_RANGE, was $rank" }
 
             return ChessCoordinates(file, rank)
         }
-        
-        fun fromRowCol(row: Int, col: Int, chessBoardSize: Int): ChessCoordinates {
-            val file = (FIRST_FILE + col)
-            val rank = row + 1  // row 0 -> rank 1, row 7 -> rank 8
-            return create(file, rank, chessBoardSize)
-        }
+
+        fun fromRowCol(row: Int, col: Int): ChessCoordinates =
+            create(FIRST_FILE + col, row + 1)
     }
 }

@@ -16,20 +16,15 @@ import molokoka.project.n.domain.nqueen.isWinCondition
 import molokoka.project.n.ui.ChessBoardUiConfigProvider
 import molokoka.project.n.ui.ChessBoardState
 import molokoka.project.n.di.appModule
-import molokoka.project.n.domain.chess.DEFAULT_BOARD_SIZE
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
-import kotlin.time.Clock.System.now
-import kotlin.time.ExperimentalTime
 
 sealed class AppState {
-    data class Setup(val chessBoardSize: Int) : AppState()
-    data class Game(val chessBoardSize: Int, val chessBoardState: ChessBoardState) : AppState()
-    data class Win(val chessBoardSize: Int, val completionTimeMillis: Long) : AppState()
-    data class Leaderboard(val chessBoardSize: Int) : AppState()
+    data object Setup : AppState()
+    data class Game(val chessBoardState: ChessBoardState) : AppState()
+    data object Win : AppState()
 }
 
-@OptIn(ExperimentalTime::class)
 @Composable
 @Preview
 fun App() {
@@ -40,10 +35,9 @@ fun App() {
     }
 }
 
-@OptIn(ExperimentalTime::class)
 @Composable
 fun AppContent() {
-    var appState by remember { mutableStateOf<AppState>(AppState.Setup(DEFAULT_BOARD_SIZE)) }
+    var appState by remember { mutableStateOf<AppState>(AppState.Setup) }
 
     Column(
         modifier = Modifier
@@ -55,57 +49,37 @@ fun AppContent() {
         when (val currentState = appState) {
             is AppState.Setup -> {
                 Setup(
-                    chessBoardSize = currentState.chessBoardSize,
-                    onBoardSizeChange = { newSize ->
-                        appState = AppState.Setup(newSize)
-                    },
                     onStartGame = {
-                        val newBoardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize)
-                        appState = AppState.Game(currentState.chessBoardSize, newBoardState)
-                    },
-                    onShowLeaderboard = {
-                        appState = AppState.Leaderboard(currentState.chessBoardSize)
+                        appState = AppState.Game(ChessBoardState())
                     }
                 )
             }
             is AppState.Game -> {
                 GameScreen(
                     boardState = currentState.chessBoardState,
-                    onSquareClicked = { coordinate, startTimeInMillis ->
+                    onSquareClicked = { coordinate ->
                         val newBoardState = currentState.chessBoardState.toggleQueen(coordinate)
-                        appState = currentState.copy(chessBoardState = newBoardState)
+                        appState = AppState.Game(newBoardState)
 
-                        if (isWinCondition(newBoardState.queensPositions, currentState.chessBoardSize)) {
-                            val elapsedTimeInMillis = (now().toEpochMilliseconds() - startTimeInMillis)
-                            appState = AppState.Win(currentState.chessBoardSize, elapsedTimeInMillis)
+                        if (isWinCondition(newBoardState.queensPositions)) {
+                            appState = AppState.Win
                         }
                     },
                     onBackToInit = {
-                        appState = AppState.Setup(currentState.chessBoardSize)
+                        appState = AppState.Setup
                     },
                     onRestart = {
-                        appState = currentState.copy(chessBoardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize))
+                        appState = AppState.Game(ChessBoardState())
                     }
                 )
             }
             is AppState.Win -> {
                 WinScreen(
-                    chessBoardSize = currentState.chessBoardSize,
-                    completionTimeMillis = currentState.completionTimeMillis,
                     onPlayAgain = {
-                        val newBoardState = ChessBoardState(chessBoardSize = currentState.chessBoardSize)
-                        appState = AppState.Game(currentState.chessBoardSize, newBoardState)
+                        appState = AppState.Game(ChessBoardState())
                     },
                     onBackToInit = {
-                        appState = AppState.Setup(currentState.chessBoardSize)
-                    }
-                )
-            }
-            is AppState.Leaderboard -> {
-                LeaderBoardScreen(
-                    chessBoardSize = currentState.chessBoardSize,
-                    onBackToInit = {
-                        appState = AppState.Setup(currentState.chessBoardSize)
+                        appState = AppState.Setup
                     }
                 )
             }

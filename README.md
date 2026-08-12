@@ -1,13 +1,12 @@
 # N-Queen Game
 
-A classic N-Queen puzzle game built with Compose Multiplatform, featuring conflict visualization and leaderboard functionality.
+A classic N-Queen puzzle game built with Compose Multiplatform, featuring conflict visualization.
 
 ## Features
 
 - **Interactive N-Queen Puzzle**: Place queens on a chessboard without conflicts
 - **Conflict Visualization**: Visual feedback showing attacking lines and conflicting queens
-- **Multiple Board Sizes**: Play with different board dimensions
-- **Leaderboard**: Track your best times and compete with yourself
+- **Fixed 8x8 Board**: Standard chessboard dimensions
 - **Cross-Platform**: apps for Android, iOS, and Desktop
 
 ## Requirements
@@ -21,6 +20,14 @@ A classic N-Queen puzzle game built with Compose Multiplatform, featuring confli
 At this stage didn't face the necessity of introducing view models. 
 I've definitely was thinking about adding them, but decided to keep it simple.
 I'm happy to focus on this part of project if needed.
+
+### Fixed board size
+
+The board is fixed at 8x8.
+
+`BOARD_SIZE` is a single constant in `domain/chess/ChessBoardConfig.kt`,
+with `FILE_RANGE` and `RANK_RANGE` derived from it, so restoring dynamic
+sizing means widening one constant rather than unpicking a hardcoded 8.
 
 ## Walkthrough
 
@@ -93,4 +100,3 @@ Multiplatform module - and desktop follows the same shape for symmetry.
 
 ### Development Tasks
 - [ ] **ChessBoard.kt:47** - Make abstract chess board
-- [ ] **WinScreen.kt:44** - Extract logic into view model

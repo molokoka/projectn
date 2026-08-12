@@ -1,10 +1,12 @@
 package molokoka.project.n.di
 
-import molokoka.project.n.data.LeaderBoardRepository
-import molokoka.project.n.data.createDataStore
 import org.koin.dsl.module
 
+/**
+ * Dependency graph for the app.
+ *
+ * Empty for now - the leaderboard's DataStore-backed repository was the only
+ * binding. Kept wired so the analysis board's view model has somewhere to go.
+ */
 val appModule = module {
-    single { createDataStore() }
-    single { LeaderBoardRepository(get()) }
 }

@@ -1,26 +1,12 @@
 <resources>
     <string name="app_name">projectn</string>
-    <string name="prev">prev</string>
-    <string name="next">next</string>
-    <string name="size_format">size: %1$dx%2$d</string>
     <string name="n_queens">n-queens</string>
-    <string name="choose_size">choose size</string>
     <string name="start_game">start game</string>
+    <string name="main_menu">main menu</string>
     <string name="exit_game">exit game</string>
-    <string name="leaderboard">leaderboard</string>
     <string name="congrats">congrats</string>
     <string name="win_message">you solved the puzzle!</string>
     <string name="play_again">play again</string>
-    <string name="timer">time: %1$s</string>
     <string name="queens_left">queens: %1$d/%2$d</string>
     <string name="restart">restart</string>
-    <string name="no_records_yet">no records yet</string>
-    <string name="back">back</string>
-    <string name="leaderboard_size">%1$dx%2$d</string>
-    <string name="enter_name">enter name</string>
-    <string name="save">save</string>
-    <string name="min_chars">min %1$d chars</string>
-    <string name="skip">skip</string>
-    <string name="time_format">time: %1$s</string>
-    <string name="leaderboard_title">leaderboard %1$dx%2$d</string>
 </resources>
