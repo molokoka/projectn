@@ -20,3 +20,5 @@ data class ChessCoordinates(
             create(FIRST_FILE + col, row + 1)
     }
 }
+
+val ChessCoordinates.isLightSquare: Boolean get() = (row + col) % 2 != 0

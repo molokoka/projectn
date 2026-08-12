@@ -6,10 +6,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import molokoka.project.n.ui.BoardOrientation
 import molokoka.project.n.ui.ChessBoard
 import molokoka.project.n.ui.ChessBoardState
 import molokoka.project.n.domain.chess.BOARD_SIZE
@@ -25,6 +30,8 @@ fun GameScreen(
     onBackToInit: () -> Unit,
     onRestart: () -> Unit
 ) {
+    var orientation by remember { mutableStateOf(BoardOrientation.WHITE) }
+
     Column {
         GameInfoHeader(boardState = boardState)
 
@@ -32,6 +39,7 @@ fun GameScreen(
 
         ChessBoard(
             boardState = boardState,
+            orientation = orientation,
             onSquareClicked = onSquareClicked,
             modifier = Modifier
                 .weight(1f)
@@ -42,6 +50,12 @@ fun GameScreen(
         )
 
         BottomBar(
+            onFlipBoard = {
+                orientation = when (orientation) {
+                    BoardOrientation.WHITE -> BoardOrientation.BLACK
+                    BoardOrientation.BLACK -> BoardOrientation.WHITE
+                }
+            },
             onRestart = onRestart,
             onBackToInit = onBackToInit
         )
@@ -71,13 +85,24 @@ private fun GameInfoHeader(boardState: ChessBoardState) {
 }
 
 @Composable
-private fun BottomBar(onRestart: () -> Unit, onBackToInit: () -> Unit) {
+private fun BottomBar(onFlipBoard: () -> Unit, onRestart: () -> Unit, onBackToInit: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        PixelatedText(
+            text = stringResource(Res.string.flip_board),
+            pixelSize = 2.dp,
+            color = Color.Blue,
+            modifier = Modifier
+                .clickable { onFlipBoard() }
+                .padding(8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         PixelatedText(
             text = stringResource(Res.string.restart),
             pixelSize = 2.dp,

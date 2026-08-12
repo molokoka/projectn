@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import molokoka.project.n.domain.chess.BOARD_SIZE
 import molokoka.project.n.domain.chess.ChessCoordinates
+import molokoka.project.n.domain.chess.isLightSquare
 import molokoka.project.n.domain.nqueen.NQueenConflictVisualization
 import molokoka.project.n.domain.nqueen.calculateNQueenConflicts
 
@@ -49,20 +50,24 @@ data class ChessBoardState(
 fun ChessBoard(
     modifier: Modifier = Modifier,
     boardState: ChessBoardState,
+    orientation: BoardOrientation = BoardOrientation.WHITE,
     onSquareClicked: (ChessCoordinates) -> Unit
 ) {
     val uiConfig = chessBoardUiConfig()
 
-    Column(modifier = modifier) {
-        repeat(BOARD_SIZE) { row ->
-            Row {
-                repeat(BOARD_SIZE) { col ->
-                    val coordinate = ChessCoordinates.Companion.fromRowCol(row, col)
+    val rows = rowsInDrawOrder(BOARD_SIZE, orientation)
+    val cols = colsInDrawOrder(BOARD_SIZE, orientation)
 
-                    val isLightSquare = (row + col) % 2 == 0
-                    val baseSquareColor = if (isLightSquare) uiConfig.lightSquareColor else uiConfig.darkSquareColor
-                    val isLeftEdge = col == 0
-                    val isBottomEdge = row == BOARD_SIZE - 1
+    Column(modifier = modifier) {
+        for (row in rows) {
+            Row {
+                for (col in cols) {
+                    val coordinate = ChessCoordinates.fromRowCol(row, col)
+
+                    val baseSquareColor =
+                        if (coordinate.isLightSquare) uiConfig.lightSquareColor else uiConfig.darkSquareColor
+                    val isLeftEdge = col == cols.first
+                    val isBottomEdge = row == rows.last
 
                     val isConflictHighlight = boardState.isConflictHighlightedSquare(coordinate)
                     val squareColor = if (isConflictHighlight) {
