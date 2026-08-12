@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,11 +14,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import molokoka.project.n.domain.chess.ChessCoordinates
 import molokoka.project.n.ui.BoardOrientation
 import molokoka.project.n.ui.ChessBoard
-import molokoka.project.n.ui.PixelatedText
+import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.*
 
@@ -62,10 +65,15 @@ private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PixelatedText(
+        val labelStyle = TextStyle(
+            fontFamily = karmaticArcade(),
+            fontSize = 16.sp,
+            color = Color.Blue
+        )
+
+        BasicText(
             text = stringResource(Res.string.flip_board),
-            pixelSize = 2.dp,
-            color = Color.Blue,
+            style = labelStyle,
             modifier = Modifier
                 .clickable { onFlipBoard() }
                 .padding(8.dp)
@@ -73,10 +81,9 @@ private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PixelatedText(
+        BasicText(
             text = stringResource(Res.string.reset),
-            pixelSize = 2.dp,
-            color = Color.Blue,
+            style = labelStyle,
             modifier = Modifier
                 .clickable { onReset() }
                 .padding(8.dp)
@@ -84,10 +91,9 @@ private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PixelatedText(
+        BasicText(
             text = stringResource(Res.string.exit),
-            pixelSize = 2.dp,
-            color = Color.Blue,
+            style = labelStyle,
             modifier = Modifier
                 .clickable { onBackToInit() }
                 .padding(8.dp)
