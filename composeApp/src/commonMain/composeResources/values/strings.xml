@@ -1,13 +1,8 @@
 <resources>
     <string name="app_name">projectn</string>
-    <string name="n_queens">n-queens</string>
-    <string name="start_game">start game</string>
-    <string name="main_menu">main menu</string>
-    <string name="exit_game">exit game</string>
-    <string name="congrats">congrats</string>
-    <string name="win_message">you solved the puzzle!</string>
-    <string name="play_again">play again</string>
-    <string name="queens_left">queens: %1$d/%2$d</string>
-    <string name="restart">restart</string>
+    <string name="analysis_board">analysis board</string>
+    <string name="start">start</string>
+    <string name="exit">exit</string>
+    <string name="reset">reset</string>
     <string name="flip_board">flip board</string>
 </resources>

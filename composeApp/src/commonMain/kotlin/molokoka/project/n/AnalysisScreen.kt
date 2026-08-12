@@ -14,31 +14,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import molokoka.project.n.domain.chess.ChessCoordinates
 import molokoka.project.n.ui.BoardOrientation
 import molokoka.project.n.ui.ChessBoard
-import molokoka.project.n.ui.ChessBoardState
-import molokoka.project.n.domain.chess.BOARD_SIZE
-import molokoka.project.n.domain.chess.ChessCoordinates
 import molokoka.project.n.ui.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.*
 
 @Composable
-fun GameScreen(
-    boardState: ChessBoardState,
+fun AnalysisScreen(
     onSquareClicked: (ChessCoordinates) -> Unit,
     onBackToInit: () -> Unit,
-    onRestart: () -> Unit
+    onReset: () -> Unit
 ) {
     var orientation by remember { mutableStateOf(BoardOrientation.WHITE) }
 
     Column {
-        GameInfoHeader(boardState = boardState)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         ChessBoard(
-            boardState = boardState,
             orientation = orientation,
             onSquareClicked = onSquareClicked,
             modifier = Modifier
@@ -56,36 +48,14 @@ fun GameScreen(
                     BoardOrientation.BLACK -> BoardOrientation.WHITE
                 }
             },
-            onRestart = onRestart,
+            onReset = onReset,
             onBackToInit = onBackToInit
         )
     }
 }
 
 @Composable
-private fun GameInfoHeader(boardState: ChessBoardState) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        PixelatedText(
-            text = stringResource(
-                Res.string.queens_left,
-                boardState.queensPositions.size,
-                BOARD_SIZE
-            ),
-            pixelSize = 2.dp,
-            color = Color.Black,
-            modifier = Modifier
-                .padding(8.dp)
-        )
-    }
-}
-
-@Composable
-private fun BottomBar(onFlipBoard: () -> Unit, onRestart: () -> Unit, onBackToInit: () -> Unit) {
+private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,18 +74,18 @@ private fun BottomBar(onFlipBoard: () -> Unit, onRestart: () -> Unit, onBackToIn
         Spacer(modifier = Modifier.height(16.dp))
 
         PixelatedText(
-            text = stringResource(Res.string.restart),
+            text = stringResource(Res.string.reset),
             pixelSize = 2.dp,
             color = Color.Blue,
             modifier = Modifier
-                .clickable { onRestart() }
+                .clickable { onReset() }
                 .padding(8.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         PixelatedText(
-            text = stringResource(Res.string.exit_game),
+            text = stringResource(Res.string.exit),
             pixelSize = 2.dp,
             color = Color.Blue,
             modifier = Modifier

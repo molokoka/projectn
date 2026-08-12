@@ -11,28 +11,28 @@ import androidx.compose.ui.unit.dp
 import molokoka.project.n.ui.PixelatedText
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
-import projectn.composeapp.generated.resources.n_queens
-import projectn.composeapp.generated.resources.start_game
+import projectn.composeapp.generated.resources.analysis_board
+import projectn.composeapp.generated.resources.start
 
 @Composable
-fun Setup(onStartGame: () -> Unit) {
+fun Setup(onStart: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
         PixelatedText(
-            text = stringResource(Res.string.n_queens),
+            text = stringResource(Res.string.analysis_board),
             pixelSize = 4.dp,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
         PixelatedText(
-            text = stringResource(Res.string.start_game),
+            text = stringResource(Res.string.start),
             pixelSize = 3.dp,
             color = Color.Blue,
             modifier = Modifier
-                .clickable { onStartGame() }
+                .clickable { onStart() }
                 .padding(16.dp)
         )
     }

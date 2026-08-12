@@ -67,9 +67,9 @@ xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
 
 **Testing policy**: Claude may run any test command without asking.
 
-Tests live in `composeApp/src/commonTest/kotlin/` and cover n-queen conflict
-logic only - not rendering. To check UI changes, run `./gradlew :desktopApp:run`
-and look at the app.
+Tests live in `composeApp/src/commonTest/kotlin/` and cover the board primitives
+only - coordinate parsing, square colour, draw order - not rendering. To check UI
+changes, run `./gradlew :desktopApp:run` and look at the app.
 
 ## Development Notes
 

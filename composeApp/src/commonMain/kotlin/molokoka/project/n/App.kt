@@ -12,17 +12,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import molokoka.project.n.domain.nqueen.isWinCondition
-import molokoka.project.n.ui.ChessBoardUiConfigProvider
-import molokoka.project.n.ui.ChessBoardState
 import molokoka.project.n.di.appModule
+import molokoka.project.n.ui.ChessBoardUiConfigProvider
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 
 sealed class AppState {
     data object Setup : AppState()
-    data class Game(val chessBoardState: ChessBoardState) : AppState()
-    data object Win : AppState()
+    data object Analysis : AppState()
 }
 
 @Composable
@@ -46,38 +43,18 @@ fun AppContent() {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        when (val currentState = appState) {
+        when (appState) {
             is AppState.Setup -> {
                 Setup(
-                    onStartGame = {
-                        appState = AppState.Game(ChessBoardState())
+                    onStart = {
+                        appState = AppState.Analysis
                     }
                 )
             }
-            is AppState.Game -> {
-                GameScreen(
-                    boardState = currentState.chessBoardState,
-                    onSquareClicked = { coordinate ->
-                        val newBoardState = currentState.chessBoardState.toggleQueen(coordinate)
-                        appState = AppState.Game(newBoardState)
-
-                        if (isWinCondition(newBoardState.queensPositions)) {
-                            appState = AppState.Win
-                        }
-                    },
-                    onBackToInit = {
-                        appState = AppState.Setup
-                    },
-                    onRestart = {
-                        appState = AppState.Game(ChessBoardState())
-                    }
-                )
-            }
-            is AppState.Win -> {
-                WinScreen(
-                    onPlayAgain = {
-                        appState = AppState.Game(ChessBoardState())
-                    },
+            is AppState.Analysis -> {
+                AnalysisScreen(
+                    onSquareClicked = { },
+                    onReset = { },
                     onBackToInit = {
                         appState = AppState.Setup
                     }

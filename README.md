@@ -1,11 +1,21 @@
-# N-Queen Game
+# Analysis Board
 
-A classic N-Queen puzzle game built with Compose Multiplatform, featuring conflict visualization.
+A chess analysis board built with Compose Multiplatform, implementing the
+exercise in [task_2.md](task_2.md): a move tree with variations, a delayed
+computer move, and simulated asynchronous analysis.
+
+## Status
+
+- **Board rendering**: 8x8 board with file and rank labels, flippable
+- **Part 1 - move variations**: not implemented
+- **Part 2 - delayed computer move**: not implemented
+- **Part 3 - asynchronous analysis**: not implemented
+
+The board currently draws empty squares. Pieces, the starting position, and move
+handling arrive with Part 1, so tapping a square does nothing yet.
 
 ## Features
 
-- **Interactive N-Queen Puzzle**: Place queens on a chessboard without conflicts
-- **Conflict Visualization**: Visual feedback showing attacking lines and conflicting queens
 - **Fixed 8x8 Board**: Standard chessboard dimensions
 - **Cross-Platform**: apps for Android, iOS, and Desktop
 
@@ -28,10 +38,6 @@ The board is fixed at 8x8.
 `BOARD_SIZE` is a single constant in `domain/chess/ChessBoardConfig.kt`,
 with `FILE_RANGE` and `RANK_RANGE` derived from it, so restoring dynamic
 sizing means widening one constant rather than unpicking a hardcoded 8.
-
-## Walkthrough
-
-[walkthrough.mov](walkthrough.mov)
 
 ## Quick Start
 
@@ -82,7 +88,9 @@ Run unit tests for all platforms:
 
 ### Test Locations
 - **Unit tests**: `composeApp/src/commonTest/kotlin/` - Kotlin multiplatform tests using kotlin.test
-- **UI tests**: `composeApp/src/commonTest/kotlin/` - Simple UI component tests with mocked data
+
+Coverage is currently the board primitives: coordinate parsing and validation,
+square colour, and draw order under both orientations.
 
 ## Project Structure
 
@@ -99,4 +107,8 @@ Multiplatform module - and desktop follows the same shape for symmetry.
 ## TODO List
 
 ### Development Tasks
-- [ ] **ChessBoard.kt:47** - Make abstract chess board
+- [ ] Pieces and the starting position from [task_2.md](task_2.md)
+- [ ] Rook and queen move generation, LAN move application
+- [ ] Move tree with variations and node selection
+- [ ] Delayed computer move, cancelling any pending request
+- [ ] Asynchronous analysis with out-of-order result handling
