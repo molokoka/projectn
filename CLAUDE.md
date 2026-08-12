@@ -55,6 +55,22 @@ run `./gradlew tasks` rather than trusting a list here. The non-obvious ones:
 
 **`hotRun` does not watch files unless you pass `--auto`** (alias `--autoReload`).
 
+**Check for an already-running desktop app before launching another one.** A
+hot-reload session started with `--auto` already picks up code changes, so a
+second launch is redundant, and the two instances race over the same build
+directory:
+
+```bash
+pgrep -fl molokoka.project.n.MainKt
+```
+
+Two matches means a hot-reload session is live - the app JVM plus the
+`org.jetbrains.compose.devtools.Main` sidecar, which only exists under `hotRun`.
+One match is a plain `:desktopApp:run`. Nothing means the field is clear. If a
+hot-reload session is running, edit the source and let it reload rather than
+starting a second app. `pgrep -f hotRun` does not work - the Gradle process
+carries the task name `:desktopApp:hotReloadMain`, not `hotRun`.
+
 **A passing `linkDebugFramework*` does not mean the iOS app builds.** The Gradle
 framework link and the Xcode project fail independently. After touching iOS
 targets, Compose, or AGP, verify the real app:
