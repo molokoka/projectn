@@ -33,7 +33,7 @@ fun calculateNQueenConflicts(queens: Set<ChessCoordinates>): NQueenConflictVisua
 private fun areQueensInConflict(queen1: ChessCoordinates, queen2: ChessCoordinates): Boolean {
     return queen1.rank == queen2.rank ||  // Same rank (horizontal)
             queen1.file == queen2.file ||  // Same file (vertical)
-            abs(queen1.row - queen2.row) == abs(queen1.col - queen2.col)  // Same diagonal
+            abs(queen1.rank - queen2.rank) == abs(queen1.file - queen2.file)  // Same diagonal
 }
 
 private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates): Set<ChessCoordinates> {
@@ -45,7 +45,7 @@ private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates): S
             val startFile = minOf(queen1.file, queen2.file)
             val endFile = maxOf(queen1.file, queen2.file)
             for (file in startFile..endFile) {
-                attachLine.add(ChessCoordinates.Companion.create(file, queen1.rank))
+                attachLine.add(ChessCoordinates(file, queen1.rank))
             }
         }
         // Same file (vertical line)
@@ -53,22 +53,22 @@ private fun getAttackLine(queen1: ChessCoordinates, queen2: ChessCoordinates): S
             val startRank = minOf(queen1.rank, queen2.rank)
             val endRank = maxOf(queen1.rank, queen2.rank)
             for (rank in startRank..endRank) {
-                attachLine.add(ChessCoordinates.Companion.create(queen1.file, rank))
+                attachLine.add(ChessCoordinates(queen1.file, rank))
             }
         }
         // Diagonal line
-        abs(queen1.row - queen2.row) == abs(queen1.col - queen2.col) -> {
-            val rowStep = if (queen2.row > queen1.row) 1 else -1
-            val colStep = if (queen2.col > queen1.col) 1 else -1
+        abs(queen1.rank - queen2.rank) == abs(queen1.file - queen2.file) -> {
+            val rankStep = if (queen2.rank > queen1.rank) 1 else -1
+            val fileStep = if (queen2.file > queen1.file) 1 else -1
 
-            var currentRow = queen1.row
-            var currentCol = queen1.col
+            var currentRank = queen1.rank
+            var currentFile = queen1.file
 
             // Add all squares along the diagonal from queen1 to queen2
-            while (currentRow != queen2.row || currentCol != queen2.col) {
-                attachLine.add(ChessCoordinates.Companion.fromRowCol(currentRow, currentCol))
-                currentRow += rowStep
-                currentCol += colStep
+            while (currentRank != queen2.rank || currentFile != queen2.file) {
+                attachLine.add(ChessCoordinates(currentFile, currentRank))
+                currentRank += rankStep
+                currentFile += fileStep
             }
             // Add the final square
             attachLine.add(queen2)

@@ -9,12 +9,12 @@ class SquareColorTest {
 
     @Test
     fun `a1 is dark`() {
-        assertFalse(ChessCoordinates.create('a', 1).isLightSquare)
+        assertFalse(ChessCoordinates.create("a1").isLightSquare)
     }
 
     @Test
     fun `h1 is light`() {
-        assertTrue(ChessCoordinates.create('h', 1).isLightSquare)
+        assertTrue(ChessCoordinates.create("h1").isLightSquare)
     }
 
     @Test
@@ -22,8 +22,8 @@ class SquareColorTest {
         for (rank in 1..8) {
             for (file in 'a'..'g') {
                 assertNotEquals(
-                    ChessCoordinates.create(file, rank).isLightSquare,
-                    ChessCoordinates.create(file + 1, rank).isLightSquare
+                    ChessCoordinates(file, rank).isLightSquare,
+                    ChessCoordinates(file + 1, rank).isLightSquare
                 )
             }
         }
@@ -34,8 +34,8 @@ class SquareColorTest {
         for (rank in 1..7) {
             for (file in 'a'..'h') {
                 assertNotEquals(
-                    ChessCoordinates.create(file, rank).isLightSquare,
-                    ChessCoordinates.create(file, rank + 1).isLightSquare
+                    ChessCoordinates(file, rank).isLightSquare,
+                    ChessCoordinates(file, rank + 1).isLightSquare
                 )
             }
         }

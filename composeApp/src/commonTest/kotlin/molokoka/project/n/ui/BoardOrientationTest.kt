@@ -8,22 +8,22 @@ import kotlin.test.assertEquals
 class BoardOrientationTest {
 
     @Test
-    fun `from white orientation rows are drawn from the top rank down`() {
-        assertEquals(listOf(7, 6, 5, 4, 3, 2, 1, 0), rowsInDrawOrder(8, WHITE).toList())
+    fun `from white orientation ranks are drawn from the top rank down`() {
+        assertEquals(listOf(8, 7, 6, 5, 4, 3, 2, 1), ranksInDrawOrder(WHITE).toList())
     }
 
     @Test
-    fun `from white orientation columns are drawn from the 'a' file rightwards`() {
-        assertEquals(listOf(0, 1, 2, 3, 4, 5, 6, 7), colsInDrawOrder(8, WHITE).toList())
+    fun `from white orientation files are drawn from the 'a' file rightwards`() {
+        assertEquals("abcdefgh".toList(), filesInDrawOrder(WHITE).toList())
     }
 
     @Test
-    fun `from black orientation rows are drawn from the bottom rank up`() {
-        assertEquals(listOf(0, 1, 2, 3, 4, 5, 6, 7), rowsInDrawOrder(8, BLACK).toList())
+    fun `from black orientation ranks are drawn from the bottom rank up`() {
+        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8), ranksInDrawOrder(BLACK).toList())
     }
 
     @Test
-    fun `from black orientation columns are drawn from the 'h' file leftwards`() {
-        assertEquals(listOf(7, 6, 5, 4, 3, 2, 1, 0), colsInDrawOrder(8, BLACK).toList())
+    fun `from black orientation files are drawn from the 'h' file leftwards`() {
+        assertEquals("hgfedcba".toList(), filesInDrawOrder(BLACK).toList())
     }
 }

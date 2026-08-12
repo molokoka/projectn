@@ -1,18 +1,21 @@
 package molokoka.project.n.ui
 
+import molokoka.project.n.domain.chess.FILE_RANGE
+import molokoka.project.n.domain.chess.RANK_RANGE
+
 enum class BoardOrientation {
     WHITE,
     BLACK
 }
 
-fun rowsInDrawOrder(boardSize: Int, orientation: BoardOrientation): IntProgression =
+fun ranksInDrawOrder(orientation: BoardOrientation): IntProgression =
     when (orientation) {
-        BoardOrientation.WHITE -> boardSize - 1 downTo 0
-        BoardOrientation.BLACK -> 0 until boardSize
+        BoardOrientation.WHITE -> RANK_RANGE.reversed()
+        BoardOrientation.BLACK -> RANK_RANGE
     }
 
-fun colsInDrawOrder(boardSize: Int, orientation: BoardOrientation): IntProgression =
+fun filesInDrawOrder(orientation: BoardOrientation): CharProgression =
     when (orientation) {
-        BoardOrientation.WHITE -> 0 until boardSize
-        BoardOrientation.BLACK -> boardSize - 1 downTo 0
+        BoardOrientation.WHITE -> FILE_RANGE
+        BoardOrientation.BLACK -> FILE_RANGE.reversed()
     }

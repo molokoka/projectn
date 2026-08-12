@@ -4,21 +4,21 @@ data class ChessCoordinates(
     val file: Char,
     val rank: Int
 ) {
-    val col: Int = file - FIRST_FILE
-    val row: Int = rank - 1
+    init {
+        require(file in FILE_RANGE) { "File must be in $FILE_RANGE, was '$file'" }
+        require(rank in RANK_RANGE) { "Rank must be in $RANK_RANGE, was $rank" }
+    }
+
+    override fun toString(): String = "$file$rank"
 
     companion object {
 
-        fun create(file: Char, rank: Int): ChessCoordinates {
-            require(file in FILE_RANGE) { "File must be in $FILE_RANGE, was '$file'" }
-            require(rank in RANK_RANGE) { "Rank must be in $RANK_RANGE, was $rank" }
+        fun create(square: String): ChessCoordinates {
+            require(square.length == 2) { "Square must be a file and a rank, like 'a1', was '$square'" }
 
-            return ChessCoordinates(file, rank)
+            return ChessCoordinates(square[0], square[1] - '0')
         }
-
-        fun fromRowCol(row: Int, col: Int): ChessCoordinates =
-            create(FIRST_FILE + col, row + 1)
     }
 }
 
-val ChessCoordinates.isLightSquare: Boolean get() = (row + col) % 2 != 0
+val ChessCoordinates.isLightSquare: Boolean get() = (file.code + rank) % 2 != 0

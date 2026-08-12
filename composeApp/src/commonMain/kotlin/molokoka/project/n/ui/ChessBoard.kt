@@ -55,19 +55,19 @@ fun ChessBoard(
 ) {
     val uiConfig = chessBoardUiConfig()
 
-    val rows = rowsInDrawOrder(BOARD_SIZE, orientation)
-    val cols = colsInDrawOrder(BOARD_SIZE, orientation)
+    val ranks = ranksInDrawOrder(orientation)
+    val files = filesInDrawOrder(orientation)
 
     Column(modifier = modifier) {
-        for (row in rows) {
+        for (rank in ranks) {
             Row {
-                for (col in cols) {
-                    val coordinate = ChessCoordinates.fromRowCol(row, col)
+                for (file in files) {
+                    val coordinate = ChessCoordinates(file, rank)
 
                     val baseSquareColor =
                         if (coordinate.isLightSquare) uiConfig.lightSquareColor else uiConfig.darkSquareColor
-                    val isLeftEdge = col == cols.first
-                    val isBottomEdge = row == rows.last
+                    val isLeftEdge = file == files.first
+                    val isBottomEdge = rank == ranks.last
 
                     val isConflictHighlight = boardState.isConflictHighlightedSquare(coordinate)
                     val squareColor = if (isConflictHighlight) {

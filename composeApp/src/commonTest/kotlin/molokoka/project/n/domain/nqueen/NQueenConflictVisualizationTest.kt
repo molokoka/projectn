@@ -19,8 +19,8 @@ class NQueenConflictVisualizationTest {
         // Q . . . . . . .  1
         // a b c d e f g h
         val queens = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('c', 2)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("c2")
         )
 
         val result = calculateNQueenConflicts(queens)
@@ -41,20 +41,20 @@ class NQueenConflictVisualizationTest {
         // Q X Q . . . . .  1  <- horizontal attack line
         // a b c d e f g h
         val queens = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('c', 1)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("c1")
         )
 
         val result = calculateNQueenConflicts(queens)
 
         assertEquals(2, result.conflictingQueens.size)
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 1)))
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('c', 1)))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a1")))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("c1")))
 
         val expectedAttackLine = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('b', 1),
-            ChessCoordinates.create('c', 1)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("b1"),
+            ChessCoordinates.create("c1")
         )
         assertEquals(expectedAttackLine, result.attackLines)
     }
@@ -71,20 +71,20 @@ class NQueenConflictVisualizationTest {
         // Q . . . . . . .  1  v
         // a b c d e f g h
         val queens = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('a', 3)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("a3")
         )
 
         val result = calculateNQueenConflicts(queens)
 
         assertEquals(2, result.conflictingQueens.size)
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 1)))
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 3)))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a1")))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a3")))
 
         val expectedAttackLine = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('a', 2),
-            ChessCoordinates.create('a', 3)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("a2"),
+            ChessCoordinates.create("a3")
         )
         assertEquals(expectedAttackLine, result.attackLines)
     }
@@ -101,20 +101,20 @@ class NQueenConflictVisualizationTest {
         // Q . . . . . . .  1  /
         // a b c d e f g h
         val queens = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('c', 3)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("c3")
         )
 
         val result = calculateNQueenConflicts(queens)
 
         assertEquals(2, result.conflictingQueens.size)
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 1)))
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('c', 3)))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a1")))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("c3")))
 
         val expectedAttackLine = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('b', 2),
-            ChessCoordinates.create('c', 3)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("b2"),
+            ChessCoordinates.create("c3")
         )
         assertEquals(expectedAttackLine, result.attackLines)
     }
@@ -131,23 +131,23 @@ class NQueenConflictVisualizationTest {
         // Q X Q . . . . .  1  <- horizontal attack line
         // a b c d e f g h
         val queens = setOf(
-            ChessCoordinates.create('a', 1),
-            ChessCoordinates.create('c', 1),
-            ChessCoordinates.create('a', 3)
+            ChessCoordinates.create("a1"),
+            ChessCoordinates.create("c1"),
+            ChessCoordinates.create("a3")
         )
 
         val result = calculateNQueenConflicts(queens)
 
         assertEquals(3, result.conflictingQueens.size)
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 1)))
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('c', 1)))
-        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create('a', 3)))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a1")))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("c1")))
+        assertTrue(result.conflictingQueens.contains(ChessCoordinates.create("a3")))
 
-        assertTrue(result.attackLines.contains(ChessCoordinates.create('a', 1)))
-        assertTrue(result.attackLines.contains(ChessCoordinates.create('b', 1)))
-        assertTrue(result.attackLines.contains(ChessCoordinates.create('c', 1)))
-        assertTrue(result.attackLines.contains(ChessCoordinates.create('a', 2)))
-        assertTrue(result.attackLines.contains(ChessCoordinates.create('a', 3)))
+        assertTrue(result.attackLines.contains(ChessCoordinates.create("a1")))
+        assertTrue(result.attackLines.contains(ChessCoordinates.create("b1")))
+        assertTrue(result.attackLines.contains(ChessCoordinates.create("c1")))
+        assertTrue(result.attackLines.contains(ChessCoordinates.create("a2")))
+        assertTrue(result.attackLines.contains(ChessCoordinates.create("a3")))
     }
 
     @Test
