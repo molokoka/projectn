@@ -37,6 +37,8 @@ fun AnalysisScreen(
 
     Column {
         ChessBoard(
+            position = state.position,
+            selected = state.selected,
             orientation = state.orientation,
             onSquareClicked = viewModel::onSquareClicked,
             modifier = Modifier

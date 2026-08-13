@@ -11,7 +11,7 @@ class PositionTest {
         val position = Position.parse("Ra1")
 
         assertEquals(
-            mapOf(Coordinates.create("a1") to Piece(PieceType.ROOK, Side.WHITE)),
+            mapOf(Coordinates.parse("a1") to Piece(PieceType.ROOK, Side.WHITE)),
             position.pieces
         )
     }
@@ -22,8 +22,8 @@ class PositionTest {
 
         assertEquals(
             mapOf(
-                Coordinates.create("a1") to Piece(PieceType.ROOK, Side.WHITE),
-                Coordinates.create("b8") to Piece(PieceType.QUEEN, Side.BLACK)
+                Coordinates.parse("a1") to Piece(PieceType.ROOK, Side.WHITE),
+                Coordinates.parse("b8") to Piece(PieceType.QUEEN, Side.BLACK)
             ),
             position.pieces
         )

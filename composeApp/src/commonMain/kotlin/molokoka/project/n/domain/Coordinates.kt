@@ -13,10 +13,10 @@ data class Coordinates(
 
     companion object {
 
-        fun create(square: String): Coordinates {
-            require(square.length == 2) { "Square must be a file and a rank, like 'a1', was '$square'" }
+        fun parse(notation: String): Coordinates {
+            require(notation.length == 2) { "Square must be a file and a rank, like 'a1', was '$notation'" }
 
-            return Coordinates(square[0], square[1] - '0')
+            return Coordinates(notation[0], notation[1] - '0')
         }
     }
 }

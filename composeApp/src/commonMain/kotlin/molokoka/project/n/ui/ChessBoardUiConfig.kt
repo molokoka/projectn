@@ -18,7 +18,12 @@ data class ChessBoardUiConfig(
         fontSize = 8.sp,
         fontWeight = FontWeight.Bold,
         color = Color.Black.copy(alpha = 0.6f)
-    )
+    ),
+    val pieceTextStyle: TextStyle = TextStyle(
+        fontSize = 30.sp,
+        color = Color.Black
+    ),
+    val selectedSquareColor: Color = Color(0xFF7FB069)
 )
 
 val LocalChessBoardUiConfig = staticCompositionLocalOf { ChessBoardUiConfig() }

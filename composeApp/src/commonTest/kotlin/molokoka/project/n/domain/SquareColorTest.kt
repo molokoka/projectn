@@ -9,12 +9,12 @@ class SquareColorTest {
 
     @Test
     fun `a1 is dark`() {
-        assertFalse(Coordinates.create("a1").isLightSquare)
+        assertFalse(Coordinates.parse("a1").isLightSquare)
     }
 
     @Test
     fun `h1 is light`() {
-        assertTrue(Coordinates.create("h1").isLightSquare)
+        assertTrue(Coordinates.parse("h1").isLightSquare)
     }
 
     @Test
