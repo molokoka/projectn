@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import molokoka.project.n.domain.ChessCoordinates
+import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.ui.BoardOrientation
 
 data class AnalysisState(
@@ -32,6 +32,6 @@ class AnalysisViewModel : ViewModel() {
         _state.value = AnalysisState()
     }
 
-    fun onSquareClicked(coordinates: ChessCoordinates) {
+    fun onSquareClicked(coordinates: Coordinates) {
     }
 }

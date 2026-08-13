@@ -8,14 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import molokoka.project.n.domain.ChessCoordinates
+import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.isLightSquare
 
 @Composable
 fun ChessBoard(
     modifier: Modifier = Modifier,
     orientation: BoardOrientation = BoardOrientation.WHITE,
-    onSquareClicked: (ChessCoordinates) -> Unit
+    onSquareClicked: (Coordinates) -> Unit
 ) {
     val uiConfig = chessBoardUiConfig()
 
@@ -26,7 +26,7 @@ fun ChessBoard(
         for (rank in ranks) {
             Row {
                 for (file in files) {
-                    val coordinate = ChessCoordinates(file, rank)
+                    val coordinate = Coordinates(file, rank)
 
                     val squareColor =
                         if (coordinate.isLightSquare) uiConfig.lightSquareColor else uiConfig.darkSquareColor

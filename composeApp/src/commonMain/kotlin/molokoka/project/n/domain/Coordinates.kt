@@ -1,6 +1,6 @@
 package molokoka.project.n.domain
 
-data class ChessCoordinates(
+data class Coordinates(
     val file: Char,
     val rank: Int
 ) {
@@ -13,12 +13,12 @@ data class ChessCoordinates(
 
     companion object {
 
-        fun create(square: String): ChessCoordinates {
+        fun create(square: String): Coordinates {
             require(square.length == 2) { "Square must be a file and a rank, like 'a1', was '$square'" }
 
-            return ChessCoordinates(square[0], square[1] - '0')
+            return Coordinates(square[0], square[1] - '0')
         }
     }
 }
 
-val ChessCoordinates.isLightSquare: Boolean get() = (file.code + rank) % 2 != 0
+val Coordinates.isLightSquare: Boolean get() = (file.code + rank) % 2 != 0

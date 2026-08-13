@@ -1,7 +1,5 @@
-package molokoka.project.n.domain.chess
+package molokoka.project.n.domain
 
-import molokoka.project.n.domain.ChessCoordinates
-import molokoka.project.n.domain.isLightSquare
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -11,12 +9,12 @@ class SquareColorTest {
 
     @Test
     fun `a1 is dark`() {
-        assertFalse(ChessCoordinates.create("a1").isLightSquare)
+        assertFalse(Coordinates.create("a1").isLightSquare)
     }
 
     @Test
     fun `h1 is light`() {
-        assertTrue(ChessCoordinates.create("h1").isLightSquare)
+        assertTrue(Coordinates.create("h1").isLightSquare)
     }
 
     @Test
@@ -24,8 +22,8 @@ class SquareColorTest {
         for (rank in 1..8) {
             for (file in 'a'..'g') {
                 assertNotEquals(
-                    ChessCoordinates(file, rank).isLightSquare,
-                    ChessCoordinates(file + 1, rank).isLightSquare
+                    Coordinates(file, rank).isLightSquare,
+                    Coordinates(file + 1, rank).isLightSquare
                 )
             }
         }
@@ -36,8 +34,8 @@ class SquareColorTest {
         for (rank in 1..7) {
             for (file in 'a'..'h') {
                 assertNotEquals(
-                    ChessCoordinates(file, rank).isLightSquare,
-                    ChessCoordinates(file, rank + 1).isLightSquare
+                    Coordinates(file, rank).isLightSquare,
+                    Coordinates(file, rank + 1).isLightSquare
                 )
             }
         }

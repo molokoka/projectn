@@ -87,6 +87,13 @@ Tests live in `composeApp/src/commonTest/kotlin/` and cover the board primitives
 only - coordinate parsing, square colour, draw order - not rendering. To check UI
 changes, run `./gradlew :desktopApp:run` and look at the app.
 
+**Name a test as a backticked sentence stating one acceptance criterion** -
+`` fun `rejects a rank below one`() ``, not `fun rejectsRankBelowOne()`. If the
+name needs an "and" to join two criteria, it is two tests. Backticked names with
+spaces compile for both the JVM and Kotlin/Native targets, so they are safe in
+`commonTest`; they would only break in an Android instrumented test, which this
+project does not have.
+
 ## Development Notes
 
 - Base package is `molokoka.project.n`, with platform-specific subpackages
