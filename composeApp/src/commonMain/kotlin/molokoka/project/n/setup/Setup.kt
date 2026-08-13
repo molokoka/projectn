@@ -1,4 +1,4 @@
-package molokoka.project.n
+package molokoka.project.n.setup
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -13,12 +13,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.analysis_board
 import projectn.composeapp.generated.resources.start
 
 @Composable
-fun Setup(onStart: () -> Unit) {
+fun Setup(
+    onStart: () -> Unit,
+    viewModel: SetupViewModel = koinViewModel()
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)

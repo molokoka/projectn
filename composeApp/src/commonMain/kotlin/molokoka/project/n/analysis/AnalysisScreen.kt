@@ -1,41 +1,44 @@
-package molokoka.project.n
+package molokoka.project.n.analysis
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import molokoka.project.n.domain.chess.ChessCoordinates
-import molokoka.project.n.ui.BoardOrientation
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import molokoka.project.n.ui.ChessBoard
 import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
-import projectn.composeapp.generated.resources.*
+import org.koin.compose.viewmodel.koinViewModel
+import projectn.composeapp.generated.resources.Res
+import projectn.composeapp.generated.resources.exit
+import projectn.composeapp.generated.resources.flip_board
+import projectn.composeapp.generated.resources.reset
 
 @Composable
 fun AnalysisScreen(
-    onSquareClicked: (ChessCoordinates) -> Unit,
     onBackToInit: () -> Unit,
-    onReset: () -> Unit
+    viewModel: AnalysisViewModel = koinViewModel()
 ) {
-    var orientation by remember { mutableStateOf(BoardOrientation.WHITE) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Column {
         ChessBoard(
-            orientation = orientation,
-            onSquareClicked = onSquareClicked,
+            orientation = state.orientation,
+            onSquareClicked = viewModel::onSquareClicked,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterHorizontally)
@@ -45,13 +48,8 @@ fun AnalysisScreen(
         )
 
         BottomBar(
-            onFlipBoard = {
-                orientation = when (orientation) {
-                    BoardOrientation.WHITE -> BoardOrientation.BLACK
-                    BoardOrientation.BLACK -> BoardOrientation.WHITE
-                }
-            },
-            onReset = onReset,
+            onFlipBoard = viewModel::flipBoard,
+            onReset = viewModel::reset,
             onBackToInit = onBackToInit
         )
     }

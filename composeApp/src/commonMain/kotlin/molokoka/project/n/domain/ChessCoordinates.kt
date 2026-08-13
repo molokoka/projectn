@@ -1,4 +1,4 @@
-package molokoka.project.n.domain.chess
+package molokoka.project.n.domain
 
 data class ChessCoordinates(
     val file: Char,

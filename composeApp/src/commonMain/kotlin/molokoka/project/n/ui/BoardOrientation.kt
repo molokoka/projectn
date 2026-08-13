@@ -1,7 +1,7 @@
 package molokoka.project.n.ui
 
-import molokoka.project.n.domain.chess.FILE_RANGE
-import molokoka.project.n.domain.chess.RANK_RANGE
+import molokoka.project.n.domain.FILE_RANGE
+import molokoka.project.n.domain.RANK_RANGE
 
 enum class BoardOrientation {
     WHITE,

@@ -89,8 +89,9 @@ Run unit tests for all platforms:
 ### Test Locations
 - **Unit tests**: `composeApp/src/commonTest/kotlin/` - Kotlin multiplatform tests using kotlin.test
 
-Coverage is currently the board primitives: coordinate parsing and validation,
-square colour, and draw order under both orientations.
+Coverage is currently the board primitives - coordinate parsing and validation,
+square colour, and draw order under both orientations - plus the analysis view
+model's orientation state: flip, double flip, and reset.
 
 ## Project Structure
 
@@ -105,6 +106,15 @@ forced - AGP 9 no longer allows the Android application plugin inside a Kotlin
 Multiplatform module - and desktop follows the same shape for symmetry.
 
 ## TODO List
+
+### Verification Tasks
+- [ ] Confirm the analysis view model is cleared on exit: Start, flip the board,
+      Exit, then Start again - the board must come back white. This proves the
+      navigation entry decorator cleared the entry's view model store on pop,
+      which unit tests cannot reach.
+- [ ] Decide whether screens should stay top-left or return to horizontally
+      centred - `NavDisplay` defaults to `Alignment.TopStart`, and passing
+      `contentAlignment = Alignment.TopCenter` restores the previous centring
 
 ### Development Tasks
 - [ ] Pieces and the starting position from [task_2.md](task_2.md)

@@ -1,5 +1,7 @@
 package molokoka.project.n.domain.chess
 
+import molokoka.project.n.domain.ChessCoordinates
+import molokoka.project.n.domain.isLightSquare
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals

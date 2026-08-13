@@ -1,4 +1,4 @@
-package molokoka.project.n.domain.chess
+package molokoka.project.n.domain
 
 const val FIRST_FILE = 'a'
 const val BOARD_SIZE = 8

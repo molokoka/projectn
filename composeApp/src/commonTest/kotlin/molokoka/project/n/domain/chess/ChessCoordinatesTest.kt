@@ -1,5 +1,8 @@
 package molokoka.project.n.domain.chess
 
+import molokoka.project.n.domain.ChessCoordinates
+import molokoka.project.n.domain.FILE_RANGE
+import molokoka.project.n.domain.RANK_RANGE
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -1,12 +1,11 @@
 package molokoka.project.n.di
 
+import molokoka.project.n.analysis.AnalysisViewModel
+import molokoka.project.n.setup.SetupViewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-/**
- * Dependency graph for the app.
- *
- * Empty for now - the leaderboard's DataStore-backed repository was the only
- * binding. Kept wired so the analysis board's view model has somewhere to go.
- */
 val appModule = module {
+    viewModelOf(::AnalysisViewModel)
+    viewModelOf(::SetupViewModel)
 }

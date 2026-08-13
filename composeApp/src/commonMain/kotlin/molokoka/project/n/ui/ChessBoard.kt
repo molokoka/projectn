@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import molokoka.project.n.domain.chess.ChessCoordinates
-import molokoka.project.n.domain.chess.isLightSquare
+import molokoka.project.n.domain.ChessCoordinates
+import molokoka.project.n.domain.isLightSquare
 
 @Composable
 fun ChessBoard(
