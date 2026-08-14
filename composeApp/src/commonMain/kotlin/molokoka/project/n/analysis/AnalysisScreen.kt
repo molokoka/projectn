@@ -27,10 +27,17 @@ import molokoka.project.n.ui.chessBoardUiConfig
 import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import molokoka.project.n.analysis.AnalysisIntent.OnSquareClick
+import molokoka.project.n.analysis.AnalysisIntent.FlipBoard
+import molokoka.project.n.analysis.AnalysisIntent.RequestComputerMove
+import molokoka.project.n.analysis.AnalysisIntent.Reset
+import molokoka.project.n.analysis.AnalysisIntent.SelectNode
 import projectn.composeapp.generated.resources.Res
+import projectn.composeapp.generated.resources.computer_move
 import projectn.composeapp.generated.resources.exit
 import projectn.composeapp.generated.resources.flip_board
 import projectn.composeapp.generated.resources.reset
+import projectn.composeapp.generated.resources.thinking
 
 @Composable
 fun AnalysisScreen(
@@ -45,7 +52,7 @@ fun AnalysisScreen(
             position = state.position,
             selected = state.selected,
             orientation = state.orientation,
-            onSquareClicked = viewModel::onSquareClicked,
+            onSquareClicked = { viewModel.onIntent(OnSquareClick(it)) },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(20.dp)
@@ -55,7 +62,7 @@ fun AnalysisScreen(
         AnalyticsView(
             tree = state.tree,
             moves = state.moves,
-            onNodeSelected = viewModel::onAnalyticsNodeSelected,
+            onNodeSelected = { viewModel.onIntent(SelectNode(it)) },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .width(uiConfig.squareSize * BOARD_SIZE)
@@ -63,15 +70,25 @@ fun AnalysisScreen(
         )
 
         BottomBar(
-            onFlipBoard = viewModel::flipBoard,
-            onReset = viewModel::reset,
+            computerMovePending = state.computerMovePending,
+            onComputerMove = { viewModel.onIntent(RequestComputerMove) },
+            onFlipBoard = { viewModel.onIntent(FlipBoard) },
+            onReset = { viewModel.onIntent(Reset) },
             onBackToInit = onBackToInit
         )
     }
 }
 
 @Composable
-private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit: () -> Unit) {
+private fun BottomBar(
+    computerMovePending: Boolean,
+    onComputerMove: () -> Unit,
+    onFlipBoard: () -> Unit,
+    onReset: () -> Unit,
+    onBackToInit: () -> Unit
+) {
+    val uiConfig = chessBoardUiConfig()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,6 +100,22 @@ private fun BottomBar(onFlipBoard: () -> Unit, onReset: () -> Unit, onBackToInit
             fontSize = 16.sp,
             color = Color.Blue
         )
+
+        BasicText(
+            text = if (computerMovePending) {
+                stringResource(Res.string.thinking)
+            } else {
+                stringResource(Res.string.computer_move)
+            },
+            style = labelStyle.copy(
+                color = if (computerMovePending) uiConfig.analytics.mutedTextColor else Color.Blue
+            ),
+            modifier = Modifier
+                .clickable(enabled = !computerMovePending) { onComputerMove() }
+                .padding(8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         BasicText(
             text = stringResource(Res.string.flip_board),

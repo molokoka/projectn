@@ -1,72 +1,48 @@
 package molokoka.project.n.analysis
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import molokoka.project.n.domain.Coordinates
-import molokoka.project.n.domain.Move
+import kotlinx.coroutines.launch
 import molokoka.project.n.domain.AnalyticsTree
-import molokoka.project.n.domain.Position
-import molokoka.project.n.domain.Side
-import molokoka.project.n.domain.sideToMove
-import molokoka.project.n.ui.BoardOrientation
+import molokoka.project.n.domain.Move
+import molokoka.project.n.computer.ComputerMoveSource
 
-data class AnalysisState(
-    val orientation: BoardOrientation = BoardOrientation.WHITE,
-    val tree: AnalyticsTree = AnalyticsTree(),
-    val moves: List<Move> = emptyList(),
-    val selected: Coordinates? = null
-) {
-    val position: Position get() = tree.positionAt(moves)
-
-    val sideToMove: Side get() = sideToMove(moves.size)
-}
-
-class AnalysisViewModel : ViewModel() {
+class AnalysisViewModel(
+    private val computerMoveSource: ComputerMoveSource
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AnalysisState())
     val state: StateFlow<AnalysisState> = _state.asStateFlow()
 
-    fun flipBoard() {
-        _state.update {
-            it.copy(
-                orientation = when (it.orientation) {
-                    BoardOrientation.WHITE -> BoardOrientation.BLACK
-                    BoardOrientation.BLACK -> BoardOrientation.WHITE
-                }
-            )
+    private var computerMoveRequest: Job? = null
+
+    fun onIntent(intent: AnalysisIntent) {
+        val (newState, effect) = _state.value.reduce(intent)
+        _state.value = newState
+        if (effect != null) runEffect(effect)
+    }
+
+    private fun runEffect(effect: AnalysisEffect) = when (effect) {
+        AnalysisEffect.CancelComputerMove -> cancelComputerMove()
+        is AnalysisEffect.StartComputerMove -> startComputerMove(effect.tree, effect.path)
+    }
+
+    private fun startComputerMove(tree: AnalyticsTree, path: List<Move>) {
+        computerMoveRequest?.cancel()
+
+        computerMoveRequest = viewModelScope.launch {
+            val move = computerMoveSource.nextMove(tree, path)
+
+            onIntent(AnalysisIntent.ComputerMoveReady(path, move))
         }
     }
 
-    fun reset() {
-        _state.value = AnalysisState()
+    private fun cancelComputerMove() {
+        computerMoveRequest?.cancel()
+        computerMoveRequest = null
     }
-
-    fun onAnalyticsNodeSelected(moves: List<Move>) {
-        _state.update { state ->
-            if (state.tree.contains(moves)) state.copy(moves = moves, selected = null) else state
-        }
-    }
-
-    fun onSquareClicked(coordinates: Coordinates) {
-        _state.update { state ->
-            when (state.selected) {
-                null -> state.select(coordinates)
-                coordinates -> state.copy(selected = null)
-                else -> state.playOrReselect(Move(state.selected, coordinates))
-            }
-        }
-    }
-
-    private fun AnalysisState.select(coordinates: Coordinates): AnalysisState =
-        if (position.pieces[coordinates]?.side == sideToMove) copy(selected = coordinates) else this
-
-    private fun AnalysisState.playOrReselect(move: Move): AnalysisState =
-        runCatching { tree.play(moves, move) }
-            .fold(
-                onSuccess = { copy(tree = it, moves = moves + move, selected = null) },
-                onFailure = { copy(selected = null).select(move.to) }
-            )
 }
