@@ -94,6 +94,61 @@ spaces compile for both the JVM and Kotlin/Native targets, so they are safe in
 `commonTest`; they would only break in an Android instrumented test, which this
 project does not have.
 
+## Readable Code
+
+`domain/move_requirements/Shared.kt` is the reference for how code here should
+read. Match it.
+
+```kotlin
+internal fun squaresBetweenOnRank(move: Move): List<Coordinates> {
+    val start = minOf(move.from.file, move.to.file) + 1
+    val end = maxOf(move.from.file, move.to.file)
+
+    return (start until end)
+        .map { fileStep ->
+            Coordinates(fileStep, move.from.rank)
+        }
+}
+
+internal fun squaresBetweenOnDiagonal(move: Move): List<Coordinates> {
+    val fileDirection = if (move.from.file < move.to.file) 1 else -1
+    val rankDirection = if (move.from.rank < move.to.rank) 1 else -1
+
+    val start = 1
+    val end = abs(move.to.file - move.from.file)
+
+    return (start until end)
+        .map { diagonalStep ->
+            Coordinates(
+                move.from.file + fileDirection * diagonalStep,
+                move.from.rank + rankDirection * diagonalStep
+            )
+        }
+}
+```
+
+What to copy from it:
+
+- **Name every intermediate value, then compute with the names.** `start` and
+  `end` on their own lines beat `(minOf(a, b) + 1 until maxOf(a, b))` inline. A
+  reader checks one bound at a time instead of unpacking a nested expression.
+- **Name the lambda parameter for the thing it is** - `fileStep`, `diagonalStep`,
+  not `it`.
+- **Keep sibling functions structurally identical.** All three read
+  `start`, `end`, `(start until end).map { ... }`. When they match, a function
+  that differs is visible; when each is written its own way, a bug hides in the
+  difference. A real one did: one helper walked from the origin while its twin
+  walked from one square past it, and the asymmetry was invisible until the
+  tests caught it.
+- **No comments.** If a line needs one, name something instead.
+- **Build a result independently rather than relying on two results lining up.**
+  The diagonal used to `zip` a file list with a rank list, which was only correct
+  while both happened to be ordered the same way - a coupling neither signature
+  declared. Computing each square from the origin removed it.
+
+Prefer clarity over cleverness where the cost is a few lines and no measurable
+performance difference. These functions run on a click, over at most six squares.
+
 ## Development Notes
 
 - Base package is `molokoka.project.n`, with platform-specific subpackages
