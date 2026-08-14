@@ -122,3 +122,10 @@ Multiplatform module - and desktop follows the same shape for symmetry.
 - [ ] Move tree with variations and node selection
 - [ ] Delayed computer move, cancelling any pending request
 - [ ] Asynchronous analysis with out-of-order result handling
+
+### Refactoring Tasks
+- [ ] Unify board and analytics sizing and scrolling: both should sit in one
+      wrapper column that owns the width (`uiConfig.squareSize * BOARD_SIZE`) and
+      the padding, so neither states it again, and the board's horizontal pan
+      should be shared with the analytics panel rather than being its own scroll
+      state

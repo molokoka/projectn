@@ -5,4 +5,6 @@
     <string name="exit">exit</string>
     <string name="reset">reset</string>
     <string name="flip_board">flip board</string>
+    <string name="current_moves">current moves: (%1$s)</string>
+    <string name="moves_tree">moves tree</string>
 </resources>

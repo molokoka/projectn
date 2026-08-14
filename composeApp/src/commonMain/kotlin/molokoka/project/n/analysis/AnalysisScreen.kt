@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
@@ -19,7 +20,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import molokoka.project.n.domain.BOARD_SIZE
 import molokoka.project.n.ui.ChessBoard
+import molokoka.project.n.ui.AnalyticsView
+import molokoka.project.n.ui.chessBoardUiConfig
 import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -34,19 +38,28 @@ fun AnalysisScreen(
     viewModel: AnalysisViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val uiConfig = chessBoardUiConfig()
 
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         ChessBoard(
             position = state.position,
             selected = state.selected,
             orientation = state.orientation,
             onSquareClicked = viewModel::onSquareClicked,
             modifier = Modifier
-                .weight(1f)
                 .align(Alignment.CenterHorizontally)
                 .padding(20.dp)
-                .verticalScroll(rememberScrollState())
                 .horizontalScroll(rememberScrollState())
+        )
+
+        AnalyticsView(
+            tree = state.tree,
+            moves = state.moves,
+            onNodeSelected = viewModel::onAnalyticsNodeSelected,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .width(uiConfig.squareSize * BOARD_SIZE)
+                .height(260.dp)
         )
 
         BottomBar(

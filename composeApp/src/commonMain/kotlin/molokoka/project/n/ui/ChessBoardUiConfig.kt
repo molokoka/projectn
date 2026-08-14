@@ -9,6 +9,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import molokoka.project.n.domain.Side
+
+data class AnalyticsUiConfig(
+    val mutedTextColor: Color = Color(0xFF757575),
+    val headerColor: Color = Color(0xFFE0E0E0),
+    val whiteMoveColor: Color = Color.White,
+    val blackMoveColor: Color = Color(0xFFF0F0F0),
+    val selectedRowColor: Color = Color.Black,
+    val selectedRowBorder: Dp = 2.dp
+) {
+    fun moveColor(side: Side): Color =
+        if (side == Side.WHITE) whiteMoveColor else blackMoveColor
+}
 
 data class ChessBoardUiConfig(
     val squareSize: Dp = 40.dp,
@@ -23,7 +36,8 @@ data class ChessBoardUiConfig(
         fontSize = 30.sp,
         color = Color.Black
     ),
-    val selectedSquareColor: Color = Color(0xFF7FB069)
+    val selectedSquareColor: Color = Color(0xFF7FB069),
+    val analytics: AnalyticsUiConfig = AnalyticsUiConfig()
 )
 
 val LocalChessBoardUiConfig = staticCompositionLocalOf { ChessBoardUiConfig() }
