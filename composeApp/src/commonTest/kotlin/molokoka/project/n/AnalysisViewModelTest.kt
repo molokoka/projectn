@@ -6,6 +6,7 @@ import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
+import molokoka.project.n.domain.asDiagram
 import molokoka.project.n.ui.BoardOrientation.BLACK
 import molokoka.project.n.ui.BoardOrientation.WHITE
 import kotlin.test.Test
@@ -107,18 +108,19 @@ class AnalysisViewModelTest {
         viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
-        // 8 . r . r . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . . . . . . . .
-        // 4 R . . . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . R . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . r . r . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . . . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . R . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
         assertNull(viewModel.state.value.selected)
     }
@@ -159,18 +161,19 @@ class AnalysisViewModelTest {
             listOf(Move.parse("a1a4"), Move.parse("b8b5")),
             viewModel.state.value.moves
         )
-        // 8 . . . r . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . r . . . . . .
-        // 4 R . . . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . R . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . . . r . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . r . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . R . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
     }
 
@@ -196,18 +199,19 @@ class AnalysisViewModelTest {
             ),
             viewModel.state.value.moves
         )
-        // 8 . . . . . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . r . r . . . .
-        // 4 R . R . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . . . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 Rc4 rb5 rd5 qa7 qc7 qe7 qg7 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . . . . . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . r . r . . . .
+            4 R . R . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . . . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
         assertEquals(Side.WHITE, viewModel.state.value.sideToMove)
     }
@@ -294,18 +298,19 @@ class AnalysisViewModelTest {
 
         assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
         // b8b5 is undone: the black rook is back on b8
-        // 8 . r . r . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . . . . . . . .
-        // 4 R . . . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . R . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . r . r . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . . . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . R . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
     }
 
@@ -330,18 +335,19 @@ class AnalysisViewModelTest {
             viewModel.state.value.moves
         )
         // the last two moves are undone: c1 and d8 are occupied again
-        // 8 . . . r . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . r . . . . . .
-        // 4 R . . . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . R . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . . . r . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . r . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . R . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
     }
 
@@ -359,18 +365,19 @@ class AnalysisViewModelTest {
 
         assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
         // the c1c4 branch is not replayed: c1 still holds its rook
-        // 8 . r . r . r . r
-        // 7 q . q . q . q .
-        // 6 . . . . . . . .
-        // 5 . . . . . . . .
-        // 4 R . . . . . . .
-        // 3 . . . . . . . .
-        // 2 . Q . Q . Q . Q
-        // 1 . . R . R . R .
-        //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
-            viewModel.state.value.position
+            """
+            8 . r . r . r . r
+            7 q . q . q . q .
+            6 . . . . . . . .
+            5 . . . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . Q . Q . Q . Q
+            1 . . R . R . R .
+              a b c d e f g h
+            """.trimIndent(),
+            viewModel.state.value.position.asDiagram()
         )
     }
 
