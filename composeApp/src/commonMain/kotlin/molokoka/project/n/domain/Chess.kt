@@ -1,5 +1,6 @@
 package molokoka.project.n.domain
 
+import molokoka.project.n.domain.move_requirements.requireValidQueenMove
 import molokoka.project.n.domain.move_requirements.requireValidRookMove
 
 fun sideToMove(playedMoves: Int): Side =
@@ -20,8 +21,9 @@ fun Position.play(move: Move, side: Side): Position {
         "Move must move a piece of the side to move, was '$move' for $side"
     }
 
-    if (fromPiece.type == PieceType.ROOK) {
-        requireValidRookMove(move)
+    when (fromPiece.type) {
+        PieceType.ROOK -> requireValidRookMove(move)
+        PieceType.QUEEN -> requireValidQueenMove(move)
     }
 
     require(pieces[move.to]?.side != fromPiece.side) {
