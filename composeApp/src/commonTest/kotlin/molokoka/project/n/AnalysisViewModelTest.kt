@@ -6,7 +6,8 @@ import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
-import molokoka.project.n.domain.asDiagram
+import molokoka.project.n.domain.util.moveTreeDiagram
+import molokoka.project.n.domain.util.positionDiagram
 import molokoka.project.n.ui.BoardOrientation.BLACK
 import molokoka.project.n.ui.BoardOrientation.WHITE
 import kotlin.test.Test
@@ -120,7 +121,7 @@ class AnalysisViewModelTest {
             1 . . R . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
         assertNull(viewModel.state.value.selected)
     }
@@ -173,7 +174,7 @@ class AnalysisViewModelTest {
             1 . . R . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
     }
 
@@ -211,7 +212,7 @@ class AnalysisViewModelTest {
             1 . . . . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
         assertEquals(Side.WHITE, viewModel.state.value.sideToMove)
     }
@@ -226,15 +227,13 @@ class AnalysisViewModelTest {
         viewModel.onSquareClicked(Coordinates.parse("c1"))
         viewModel.onSquareClicked(Coordinates.parse("c4")) // white c1c4, from the root again
 
-        // Start
-        // ├── a1a4
-        // └── c1c4
         assertEquals(
-            listOf(
-                listOf(Move.parse("a1a4")),
-                listOf(Move.parse("c1c4"))
-            ),
-            viewModel.state.value.tree.paths()
+            """
+            Start
+            ├── a1a4
+            └── c1c4
+            """.trimIndent(),
+            viewModel.state.value.tree.moveTreeDiagram()
         )
     }
 
@@ -252,17 +251,14 @@ class AnalysisViewModelTest {
         viewModel.onSquareClicked(Coordinates.parse("d8"))
         viewModel.onSquareClicked(Coordinates.parse("d5")) // black d8d5, instead of b8b5
 
-        // Start
-        // └── a1a4
-        //     ├── b8b5
-        //     └── d8d5
         assertEquals(
-            listOf(
-                listOf(Move.parse("a1a4")),
-                listOf(Move.parse("a1a4"), Move.parse("b8b5")),
-                listOf(Move.parse("a1a4"), Move.parse("d8d5"))
-            ),
-            viewModel.state.value.tree.paths()
+            """
+            Start
+            └── a1a4
+                ├── b8b5
+                └── d8d5
+            """.trimIndent(),
+            viewModel.state.value.tree.moveTreeDiagram()
         )
         assertEquals(
             listOf(Move.parse("a1a4"), Move.parse("d8d5")),
@@ -310,7 +306,7 @@ class AnalysisViewModelTest {
             1 . . R . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
     }
 
@@ -347,7 +343,7 @@ class AnalysisViewModelTest {
             1 . . R . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
     }
 
@@ -377,7 +373,7 @@ class AnalysisViewModelTest {
             1 . . R . R . R .
               a b c d e f g h
             """.trimIndent(),
-            viewModel.state.value.position.asDiagram()
+            viewModel.state.value.position.positionDiagram()
         )
     }
 

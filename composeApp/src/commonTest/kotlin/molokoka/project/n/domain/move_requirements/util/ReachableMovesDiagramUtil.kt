@@ -12,25 +12,29 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * A board with rank eight on top and the a file on the left:
+ * A reachable moves board representation
  *
  * - every square in [pieces] as that piece's own symbol
  * - `.` on an empty square [isReachable] accepts
  * - `x` on an empty square it does not
- *
- * A piece hides the mark, so whether an occupied square is reachable is not drawn.
  */
 fun reachableMovesDiagram(
     pieces: Map<Coordinates, Piece>,
     isReachable: (Coordinates) -> Boolean
-): String =
-    RANK_RANGE.reversed().joinToString("\n") { rank ->
-        FILE_RANGE.joinToString(" ") { file ->
+): String {
+    val ranks = RANK_RANGE.reversed().map { rank ->
+        val squares = FILE_RANGE.joinToString(" ") { file ->
             val square = Coordinates(file, rank)
 
             pieces[square]?.symbol?.toString() ?: if (isReachable(square)) "." else "x"
         }
+
+        "$rank $squares"
     }
+    val files = "  " + FILE_RANGE.joinToString(" ")
+
+    return (ranks + files).joinToString("\n")
+}
 
 fun Position.reachableMovesDiagram(from: String, side: Side = Side.WHITE): String {
     val origin = Coordinates.parse(from)
@@ -50,14 +54,15 @@ class ReachableMovesDiagramUtilTest {
     fun `draws rank eight on the top row and rank one on the bottom`() {
         assertEquals(
             """
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            . . . . . . . .
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
+            8 x x x x x x x x
+            7 x x x x x x x x
+            6 x x x x x x x x
+            5 x x x x x x x x
+            4 . . . . . . . .
+            3 x x x x x x x x
+            2 x x x x x x x x
+            1 x x x x x x x x
+              a b c d e f g h
             """.trimIndent(),
             reachableMovesDiagram(emptyMap()) { square -> square.rank == 4 }
         )
@@ -67,14 +72,15 @@ class ReachableMovesDiagramUtilTest {
     fun `draws the a file on the left and the h file on the right`() {
         assertEquals(
             """
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
-            . x x x x x x x
+            8 . x x x x x x x
+            7 . x x x x x x x
+            6 . x x x x x x x
+            5 . x x x x x x x
+            4 . x x x x x x x
+            3 . x x x x x x x
+            2 . x x x x x x x
+            1 . x x x x x x x
+              a b c d e f g h
             """.trimIndent(),
             reachableMovesDiagram(emptyMap()) { square -> square.file == 'a' }
         )
@@ -84,14 +90,15 @@ class ReachableMovesDiagramUtilTest {
     fun `draws every piece as its own symbol`() {
         assertEquals(
             """
-            x x x x x x x q
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x r x Q x x x x
-            x x x x x x x x
-            x x x x x x x x
-            R x x x x x x x
+            8 x x x x x x x q
+            7 x x x x x x x x
+            6 x x x x x x x x
+            5 x x x x x x x x
+            4 x r x Q x x x x
+            3 x x x x x x x x
+            2 x x x x x x x x
+            1 R x x x x x x x
+              a b c d e f g h
             """.trimIndent(),
             reachableMovesDiagram(Position.parse("Ra1 Qd4 rb4 qh8").pieces) { false }
         )
@@ -101,14 +108,15 @@ class ReachableMovesDiagramUtilTest {
     fun `draws a piece in place of the mark on an occupied square`() {
         assertEquals(
             """
-            . . . . . . . .
-            . . . . . . . .
-            . . . . . . . .
-            . . . . . . . .
-            . . . R . . . .
-            . . . . . . . .
-            . . . . . . . .
-            . . . . . . . .
+            8 . . . . . . . .
+            7 . . . . . . . .
+            6 . . . . . . . .
+            5 . . . . . . . .
+            4 . . . R . . . .
+            3 . . . . . . . .
+            2 . . . . . . . .
+            1 . . . . . . . .
+              a b c d e f g h
             """.trimIndent(),
             reachableMovesDiagram(Position.parse("Rd4").pieces) { true }
         )

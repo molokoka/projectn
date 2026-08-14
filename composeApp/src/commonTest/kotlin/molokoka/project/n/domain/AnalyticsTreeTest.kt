@@ -1,5 +1,8 @@
 package molokoka.project.n.domain
 
+import molokoka.project.n.domain.util.fromDiagram
+import molokoka.project.n.domain.util.moveTreeDiagram
+import molokoka.project.n.domain.util.positionDiagram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -10,19 +13,6 @@ class AnalyticsTreeTest {
 
     // positionAt
 
-    /**
-     * ```
-     * 8 r . . . . . . .
-     * 7 . . . . . . . .
-     * 6 . . . . . . . .
-     * 5 . . . . . . . .
-     * 4 . . . . . . . .   the root shows the initial position, no moves played
-     * 3 . . . . . . . .
-     * 2 . . . . . . . .
-     * 1 R . . . . . . .
-     *   a b c d e f g h
-     * ```
-     */
     @Test
     fun `shows the initial position at the root`() {
         val tree = AnalyticsTree(Position.parse("Ra1 ra8"))
@@ -30,28 +20,42 @@ class AnalyticsTreeTest {
         assertEquals("Ra1 ra8", tree.positionAt(emptyList()).toString())
     }
 
-    /**
-     * ```
-     * 8 r . . . . . . .        8 . . . . . . . .
-     * 7 . . . . . . . .        7 . . . . . . . .
-     * 6 . . . . . . . .        6 . . . . . . . .
-     * 5 . . . . . . . .  a1a4  5 r . . . . . . .
-     * 4 . . . . . . . .  a8a5  4 R . . . . . . .
-     * 3 . . . . . . . .        3 . . . . . . . .
-     * 2 . . . . . . . .        2 . . . . . . . .
-     * 1 R . . . . . . .        1 . . . . . . . .
-     *   a b c d e f g h          a b c d e f g h
-     * ```
-     */
     @Test
     fun `replays a path onto the initial position`() {
-        val tree = AnalyticsTree(Position.parse("Ra1 ra8"))
+        val initialPosition = fromDiagram(
+            """
+            8 r . . . . . . .
+            7 . . . . . . . .
+            6 . . . . . . . .
+            5 . . . . . . . .
+            4 . . . . . . . .
+            3 . . . . . . . .
+            2 . . . . . . . .
+            1 R . . . . . . .
+              a b c d e f g h
+            """
+        )
+
+        val tree = AnalyticsTree(initialPosition)
             .play(emptyList(), Move.parse("a1a4"))
             .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
 
         val position = tree.positionAt(listOf(Move.parse("a1a4"), Move.parse("a8a5")))
 
-        assertEquals("Ra4 ra5", position.toString())
+        assertEquals(
+            """
+            8 . . . . . . . .
+            7 . . . . . . . .
+            6 . . . . . . . .
+            5 r . . . . . . .
+            4 R . . . . . . .
+            3 . . . . . . . .
+            2 . . . . . . . .
+            1 . . . . . . . .
+              a b c d e f g h
+            """.trimIndent(),
+            position.positionDiagram()
+        )
     }
 
     @Test
@@ -64,27 +68,20 @@ class AnalyticsTreeTest {
 
     // play
 
-    /**
-     * ```
-     * Start
-     * └── a1a4
-     * ```
-     */
     @Test
     fun `adds a node at the root`() {
         val tree = AnalyticsTree(Position.parse("Ra1 ra8"))
             .play(emptyList(), Move.parse("a1a4"))
 
-        assertEquals(listOf(MoveNode(Move.parse("a1a4"))), tree.nodes)
+        assertEquals(
+            """
+            Start
+            └── a1a4
+            """.trimIndent(),
+            tree.moveTreeDiagram()
+        )
     }
 
-    /**
-     * ```
-     * Start
-     * └── a1a4
-     *     └── a8a5
-     * ```
-     */
     @Test
     fun `adds a node at depth`() {
         val tree = AnalyticsTree(Position.parse("Ra1 ra8"))
@@ -92,25 +89,18 @@ class AnalyticsTreeTest {
             .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
 
         assertEquals(
-            listOf(
-                MoveNode(
-                    move = Move.parse("a1a4"),
-                    nodes = listOf(MoveNode(Move.parse("a8a5")))
-                )
-            ),
-            tree.nodes
+            """
+            Start
+            └── a1a4
+                └── a8a5
+            """.trimIndent(),
+            tree.moveTreeDiagram()
         )
     }
 
     /**
      * A different move from the same node stands beside the first rather than
      * replacing it.
-     *
-     * ```
-     * Start
-     * ├── a1a4
-     * └── a1a3
-     * ```
      */
     @Test
     fun `adds a sibling node for a different move`() {
@@ -119,22 +109,15 @@ class AnalyticsTreeTest {
             .play(emptyList(), Move.parse("a1a3"))
 
         assertEquals(
-            listOf(
-                MoveNode(Move.parse("a1a4")),
-                MoveNode(Move.parse("a1a3"))
-            ),
-            tree.nodes
+            """
+            Start
+            ├── a1a4
+            └── a1a3
+            """.trimIndent(),
+            tree.moveTreeDiagram()
         )
     }
 
-    /**
-     * ```
-     * Start
-     * └── a1a4
-     *     ├── a8a5
-     *     └── a8a6
-     * ```
-     */
     @Test
     fun `adds a sibling node at depth`() {
         val path = listOf(Move.parse("a1a4"))
@@ -144,28 +127,19 @@ class AnalyticsTreeTest {
             .play(path, Move.parse("a8a6"))
 
         assertEquals(
-            listOf(
-                MoveNode(
-                    move = Move.parse("a1a4"),
-                    nodes = listOf(
-                        MoveNode(Move.parse("a8a5")),
-                        MoveNode(Move.parse("a8a6"))
-                    )
-                )
-            ),
-            tree.nodes
+            """
+            Start
+            └── a1a4
+                ├── a8a5
+                └── a8a6
+            """.trimIndent(),
+            tree.moveTreeDiagram()
         )
     }
 
     /**
      * Playing a1a4 again from the root must reuse the existing node, keeping the
      * a8a5 branch beneath it, rather than adding a second a1a4 or replacing it.
-     *
-     * ```
-     * Start
-     * └── a1a4
-     *     └── a8a5
-     * ```
      */
     @Test
     fun `reuses a node that already carries the move`() {
@@ -175,26 +149,18 @@ class AnalyticsTreeTest {
             .play(emptyList(), Move.parse("a1a4"))
 
         assertEquals(
-            listOf(
-                MoveNode(
-                    move = Move.parse("a1a4"),
-                    nodes = listOf(MoveNode(Move.parse("a8a5")))
-                )
-            ),
-            tree.nodes
+            """
+            Start
+            └── a1a4
+                └── a8a5
+            """.trimIndent(),
+            tree.moveTreeDiagram()
         )
     }
 
     /**
      * The rook standing on a4 (after two moves in) must be movable, even though a4 is
      * empty in the initial position.
-     *
-     * ```
-     * Start
-     * └── a1a4
-     *     └── a8a5
-     *         └── a4b4
-     * ```
      */
     @Test
     fun `plays a move from a node two levels deep`() {
@@ -205,6 +171,15 @@ class AnalyticsTreeTest {
 
         val played = tree.play(path, Move.parse("a4b4"))
 
+        assertEquals(
+            """
+            Start
+            └── a1a4
+                └── a8a5
+                    └── a4b4
+            """.trimIndent(),
+            played.moveTreeDiagram()
+        )
         assertEquals("Rb4 ra5", played.positionAt(path + Move.parse("a4b4")).toString())
     }
 
@@ -218,11 +193,6 @@ class AnalyticsTreeTest {
 
     /**
      * The root is depth zero, so white cannot move and black's rook.
-     *
-     * ```
-     * Start
-     * └── a8a5  rejected
-     * ```
      */
     @Test
     fun `rejects initial opposite piece move`() {
@@ -234,12 +204,6 @@ class AnalyticsTreeTest {
 
     /**
      * One move deep it is black's turn, so white's rook cannot move again.
-     *
-     * ```
-     * Start
-     * └── a1a4
-     *     └── a4a6  rejected
-     * ```
      */
     @Test
     fun `rejects an opposite piece move`() {
@@ -255,13 +219,6 @@ class AnalyticsTreeTest {
 
     /**
      * Depth first, so a branch is listed under the move it follows.
-     *
-     * ```
-     * Start
-     * ├── a1a4
-     * │   └── a8a5
-     * └── a1a3
-     * ```
      */
     @Test
     fun `lists the path to every node depth first`() {
@@ -270,6 +227,15 @@ class AnalyticsTreeTest {
             .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
             .play(emptyList(), Move.parse("a1a3"))
 
+        assertEquals(
+            """
+            Start
+            ├── a1a4
+            │   └── a8a5
+            └── a1a3
+            """.trimIndent(),
+            tree.moveTreeDiagram()
+        )
         assertEquals(
             listOf(
                 listOf(Move.parse("a1a4")),
@@ -300,13 +266,6 @@ class AnalyticsTreeTest {
         assertTrue(tree.contains(listOf(Move.parse("a1a4"))))
     }
 
-    /**
-     * ```
-     * Start
-     * └── a1a4
-     *     └── a8a5   <- contained
-     * ```
-     */
     @Test
     fun `contains a path two levels deep`() {
         val tree = AnalyticsTree(Position.parse("Ra1 ra8"))
@@ -324,11 +283,6 @@ class AnalyticsTreeTest {
     /**
      * The first move is in the tree and the second is not, so the path as a
      * whole is absent.
-     *
-     * ```
-     * Start
-     * └── a1a4
-     * ```
      */
     @Test
     fun `does not contain a path whose last move was never played`() {

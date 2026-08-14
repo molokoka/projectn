@@ -17,14 +17,15 @@ class RookTest {
         fun `a rook reaches its whole rank and file`() {
             assertEquals(
                 """
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                . . . R . . . .
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
+                8 x x x . x x x x
+                7 x x x . x x x x
+                6 x x x . x x x x
+                5 x x x . x x x x
+                4 . . . R . . . .
+                3 x x x . x x x x
+                2 x x x . x x x x
+                1 x x x . x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd4").reachableMovesDiagram("d4")
             )
@@ -34,14 +35,15 @@ class RookTest {
         fun `a rook on a1 reaches the two edges meeting there`() {
             assertEquals(
                 """
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                R . . . . . . .
+                8 . x x x x x x x
+                7 . x x x x x x x
+                6 . x x x x x x x
+                5 . x x x x x x x
+                4 . x x x x x x x
+                3 . x x x x x x x
+                2 . x x x x x x x
+                1 R . . . . . . .
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Ra1").reachableMovesDiagram("a1")
             )
@@ -51,14 +53,15 @@ class RookTest {
         fun `a rook on h1 reaches the two edges meeting there`() {
             assertEquals(
                 """
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                . . . . . . . R
+                8 x x x x x x x .
+                7 x x x x x x x .
+                6 x x x x x x x .
+                5 x x x x x x x .
+                4 x x x x x x x .
+                3 x x x x x x x .
+                2 x x x x x x x .
+                1 . . . . . . . R
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rh1").reachableMovesDiagram("h1")
             )
@@ -68,14 +71,15 @@ class RookTest {
         fun `a rook on a8 reaches the two edges meeting there`() {
             assertEquals(
                 """
-                R . . . . . . .
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
+                8 R . . . . . . .
+                7 . x x x x x x x
+                6 . x x x x x x x
+                5 . x x x x x x x
+                4 . x x x x x x x
+                3 . x x x x x x x
+                2 . x x x x x x x
+                1 . x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Ra8").reachableMovesDiagram("a8")
             )
@@ -85,14 +89,15 @@ class RookTest {
         fun `a rook on h8 reaches the two edges meeting there`() {
             assertEquals(
                 """
-                . . . . . . . R
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x .
+                8 . . . . . . . R
+                7 x x x x x x x .
+                6 x x x x x x x .
+                5 x x x x x x x .
+                4 x x x x x x x .
+                3 x x x x x x x .
+                2 x x x x x x x .
+                1 x x x x x x x .
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rh8").reachableMovesDiagram("h8")
             )
@@ -102,14 +107,15 @@ class RookTest {
         fun `a rook on an edge reaches three directions`() {
             assertEquals(
                 """
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                . . . R . . . .
+                8 x x x . x x x x
+                7 x x x . x x x x
+                6 x x x . x x x x
+                5 x x x . x x x x
+                4 x x x . x x x x
+                3 x x x . x x x x
+                2 x x x . x x x x
+                1 . . . R . . . .
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd1").reachableMovesDiagram("d1")
             )
@@ -119,14 +125,15 @@ class RookTest {
         fun `a black rook reaches the same squares`() {
             assertEquals(
                 """
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
-                . . . r . . . .
-                x x x . x x x x
-                x x x . x x x x
-                x x x . x x x x
+                8 x x x . x x x x
+                7 x x x . x x x x
+                6 x x x . x x x x
+                5 x x x . x x x x
+                4 . . . r . . . .
+                3 x x x . x x x x
+                2 x x x . x x x x
+                1 x x x . x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("rd4").reachableMovesDiagram("d4", Side.BLACK)
             )
@@ -140,14 +147,15 @@ class RookTest {
         fun `a rook stops short of its own pieces on every side`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x x x x x
-                x x x Q x x x x
-                x x x . x x x x
-                x R . R . Q x x
-                x x x . x x x x
-                x x x R x x x x
-                x x x x x x x x
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x Q x x x x
+                5 x x x . x x x x
+                4 x R . R . Q x x
+                3 x x x . x x x x
+                2 x x x R x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd4 Qd6 Qf4 Rd2 Rb4").reachableMovesDiagram("d4")
             )
@@ -157,14 +165,15 @@ class RookTest {
         fun `a rook reaches up to the opposing pieces on every side`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x x x x x
-                x x x q x x x x
-                x x x . x x x x
-                x r . R . q x x
-                x x x . x x x x
-                x x x r x x x x
-                x x x x x x x x
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x q x x x x
+                5 x x x . x x x x
+                4 x r . R . q x x
+                3 x x x . x x x x
+                2 x x x r x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd4 qd6 qf4 rd2 rb4").reachableMovesDiagram("d4")
             )
@@ -194,14 +203,15 @@ class RookTest {
         fun `a rook hemmed in by its own pieces has nowhere to go`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
-                x x x Q x x x x
-                x x R R Q x x x
-                x x x R x x x x
-                x x x x x x x x
-                x x x x x x x x
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x x x x x x
+                5 x x x Q x x x x
+                4 x x R R Q x x x
+                3 x x x R x x x x
+                2 x x x x x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd4 Qd5 Qe4 Rd3 Rc4").reachableMovesDiagram("d4")
             )
@@ -211,14 +221,15 @@ class RookTest {
         fun `a rook in the a1 corner is stopped on both its rays`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
-                Q x x x x x x x
-                . x x x x x x x
-                . x x x x x x x
-                R . . q x x x x
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x x x x x x
+                5 x x x x x x x x
+                4 Q x x x x x x x
+                3 . x x x x x x x
+                2 . x x x x x x x
+                1 R . . q x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Ra1 Qa4 qd1").reachableMovesDiagram("a1")
             )
@@ -228,14 +239,15 @@ class RookTest {
         fun `a rook in the h8 corner is stopped on both its rays`() {
             assertEquals(
                 """
-                x x x q . . . R
-                x x x x x x x .
-                x x x x x x x .
-                x x x x x x x Q
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
+                8 x x x q . . . R
+                7 x x x x x x x .
+                6 x x x x x x x .
+                5 x x x x x x x Q
+                4 x x x x x x x x
+                3 x x x x x x x x
+                2 x x x x x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rh8 Qh5 qd8").reachableMovesDiagram("h8")
             )
@@ -245,14 +257,15 @@ class RookTest {
         fun `a rook hemmed in by opposing pieces captures any of them`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x x x x x
-                x x x x x x x x
-                x x x q x x x x
-                x x r R q x x x
-                x x x r x x x x
-                x x x x x x x x
-                x x x x x x x x
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x x x x x x
+                5 x x x q x x x x
+                4 x x r R q x x x
+                3 x x x r x x x x
+                2 x x x x x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Rd4 qd5 qe4 rd3 rc4").reachableMovesDiagram("d4")
             )
@@ -266,14 +279,15 @@ class RookTest {
         fun `a rook runs out on each ray at whatever it meets first`() {
             assertEquals(
                 """
-                x x x x x x x x
-                x x x x q x x x
-                x x x x . x x x
-                x r . . R . Q x
-                x x x x . x x x
-                x x x x . x x x
-                x x x x R x x x
-                x x x x x x x x
+                8 x x x x x x x x
+                7 x x x x q x x x
+                6 x x x x . x x x
+                5 x r . . R . Q x
+                4 x x x x . x x x
+                3 x x x x . x x x
+                2 x x x x R x x x
+                1 x x x x x x x x
+                  a b c d e f g h
                 """.trimIndent(),
                 Position.parse("Re5 qe7 Re2 rb5 Qg5").reachableMovesDiagram("e5")
             )
