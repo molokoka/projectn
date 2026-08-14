@@ -59,7 +59,7 @@ class AnalysisViewModelTest {
     }
 
     @Test
-    fun `clicking a piece of the other side selects nothing`() {
+    fun `clicking an opposing piece selects nothing`() {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("b8"))
@@ -71,7 +71,7 @@ class AnalysisViewModelTest {
     fun `clicking an empty square selects nothing`() {
         val viewModel = AnalysisViewModel()
 
-        viewModel.onSquareClicked(Coordinates.parse("d4"))
+        viewModel.onSquareClicked(Coordinates.parse("a4"))
 
         assertNull(viewModel.state.value.selected)
     }
@@ -104,20 +104,20 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
-        assertEquals(listOf(Move.parse("a1d4")), viewModel.state.value.moves)
+        assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
         // 8 . r . r . r . r
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . . . . . . . .
-        // 4 . . . R . . . .
+        // 4 R . . . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . R . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rd4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
+            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
             viewModel.state.value.position
         )
         assertNull(viewModel.state.value.selected)
@@ -128,7 +128,7 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         assertEquals(Side.BLACK, viewModel.state.value.sideToMove)
     }
@@ -138,10 +138,10 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         assertEquals(
-            listOf(listOf(Move.parse("a1d4"))),
+            listOf(listOf(Move.parse("a1a4"))),
             viewModel.state.value.tree.paths()
         )
     }
@@ -151,25 +151,25 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
 
         assertEquals(
-            listOf(Move.parse("a1d4"), Move.parse("b8b5")),
+            listOf(Move.parse("a1a4"), Move.parse("b8b5")),
             viewModel.state.value.moves
         )
         // 8 . . . r . r . r
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . r . . . . . .
-        // 4 . . . R . . . .
+        // 4 R . . . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . R . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rd4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
+            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
             viewModel.state.value.position
         )
     }
@@ -179,7 +179,7 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
         viewModel.onSquareClicked(Coordinates.parse("c1"))
@@ -189,7 +189,7 @@ class AnalysisViewModelTest {
 
         assertEquals(
             listOf(
-                Move.parse("a1d4"),
+                Move.parse("a1a4"),
                 Move.parse("b8b5"),
                 Move.parse("c1c4"),
                 Move.parse("d8d5")
@@ -200,13 +200,13 @@ class AnalysisViewModelTest {
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . r . r . . . .
-        // 4 . . R R . . . .
+        // 4 R . R . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . . . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rc4 Rd4 rb5 rd5 qa7 qc7 qe7 qg7 rf8 rh8"),
+            Position.parse("Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 Rc4 rb5 rd5 qa7 qc7 qe7 qg7 rf8 rh8"),
             viewModel.state.value.position
         )
         assertEquals(Side.WHITE, viewModel.state.value.sideToMove)
@@ -217,17 +217,17 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onAnalyticsNodeSelected(emptyList())
         viewModel.onSquareClicked(Coordinates.parse("c1"))
         viewModel.onSquareClicked(Coordinates.parse("c4")) // white c1c4, from the root again
 
         // Start
-        // ├── a1d4
+        // ├── a1a4
         // └── c1c4
         assertEquals(
             listOf(
-                listOf(Move.parse("a1d4")),
+                listOf(Move.parse("a1a4")),
                 listOf(Move.parse("c1c4"))
             ),
             viewModel.state.value.tree.paths()
@@ -239,29 +239,29 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4")))
 
         viewModel.onSquareClicked(Coordinates.parse("d8"))
         viewModel.onSquareClicked(Coordinates.parse("d5")) // black d8d5, instead of b8b5
 
         // Start
-        // └── a1d4
+        // └── a1a4
         //     ├── b8b5
         //     └── d8d5
         assertEquals(
             listOf(
-                listOf(Move.parse("a1d4")),
-                listOf(Move.parse("a1d4"), Move.parse("b8b5")),
-                listOf(Move.parse("a1d4"), Move.parse("d8d5"))
+                listOf(Move.parse("a1a4")),
+                listOf(Move.parse("a1a4"), Move.parse("b8b5")),
+                listOf(Move.parse("a1a4"), Move.parse("d8d5"))
             ),
             viewModel.state.value.tree.paths()
         )
         assertEquals(
-            listOf(Move.parse("a1d4"), Move.parse("d8d5")),
+            listOf(Move.parse("a1a4"), Move.parse("d8d5")),
             viewModel.state.value.moves
         )
     }
@@ -273,7 +273,7 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         viewModel.onAnalyticsNodeSelected(emptyList())
 
@@ -286,25 +286,25 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4")))
 
-        assertEquals(listOf(Move.parse("a1d4")), viewModel.state.value.moves)
+        assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
         // b8b5 is undone: the black rook is back on b8
         // 8 . r . r . r . r
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . . . . . . . .
-        // 4 . . . R . . . .
+        // 4 R . . . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . R . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rd4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
+            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
             viewModel.state.value.position
         )
     }
@@ -314,7 +314,7 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
         viewModel.onSquareClicked(Coordinates.parse("c1"))
@@ -323,10 +323,10 @@ class AnalysisViewModelTest {
         viewModel.onSquareClicked(Coordinates.parse("d5")) // black d8d5
         viewModel.onAnalyticsNodeSelected(emptyList())
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4"), Move.parse("b8b5")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4"), Move.parse("b8b5")))
 
         assertEquals(
-            listOf(Move.parse("a1d4"), Move.parse("b8b5")),
+            listOf(Move.parse("a1a4"), Move.parse("b8b5")),
             viewModel.state.value.moves
         )
         // the last two moves are undone: c1 and d8 are occupied again
@@ -334,13 +334,13 @@ class AnalysisViewModelTest {
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . r . . . . . .
-        // 4 . . . R . . . .
+        // 4 R . . . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . R . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rd4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
+            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 rb5 qa7 qc7 qe7 qg7 rd8 rf8 rh8"),
             viewModel.state.value.position
         )
     }
@@ -350,26 +350,26 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onAnalyticsNodeSelected(emptyList())
         viewModel.onSquareClicked(Coordinates.parse("c1"))
         viewModel.onSquareClicked(Coordinates.parse("c4")) // white c1c4, a second branch
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4")))
 
-        assertEquals(listOf(Move.parse("a1d4")), viewModel.state.value.moves)
+        assertEquals(listOf(Move.parse("a1a4")), viewModel.state.value.moves)
         // the c1c4 branch is not replayed: c1 still holds its rook
         // 8 . r . r . r . r
         // 7 q . q . q . q .
         // 6 . . . . . . . .
         // 5 . . . . . . . .
-        // 4 . . . R . . . .
+        // 4 R . . . . . . .
         // 3 . . . . . . . .
         // 2 . Q . Q . Q . Q
         // 1 . . R . R . R .
         //   a b c d e f g h
         assertEquals(
-            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Rd4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
+            Position.parse("Rc1 Re1 Rg1 Qb2 Qd2 Qf2 Qh2 Ra4 qa7 qc7 qe7 qg7 rb8 rd8 rf8 rh8"),
             viewModel.state.value.position
         )
     }
@@ -379,11 +379,11 @@ class AnalysisViewModelTest {
         val viewModel = AnalysisViewModel()
 
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
         viewModel.onSquareClicked(Coordinates.parse("b8"))
         viewModel.onSquareClicked(Coordinates.parse("b5")) // black b8b5
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4")))
 
         assertEquals(Side.BLACK, viewModel.state.value.sideToMove)
     }
@@ -392,7 +392,7 @@ class AnalysisViewModelTest {
     fun `selecting a node that is not in the tree changes nothing`() {
         val viewModel = AnalysisViewModel()
 
-        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1d4")))
+        viewModel.onAnalyticsNodeSelected(listOf(Move.parse("a1a4")))
 
         assertEquals(emptyList(), viewModel.state.value.moves)
     }
@@ -413,7 +413,7 @@ class AnalysisViewModelTest {
     fun `resetting clears the tree`() {
         val viewModel = AnalysisViewModel()
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         viewModel.reset()
 
@@ -434,7 +434,7 @@ class AnalysisViewModelTest {
     fun `resetting clears the moves played`() {
         val viewModel = AnalysisViewModel()
         viewModel.onSquareClicked(Coordinates.parse("a1"))
-        viewModel.onSquareClicked(Coordinates.parse("d4")) // white a1d4
+        viewModel.onSquareClicked(Coordinates.parse("a4")) // white a1a4
 
         viewModel.reset()
 

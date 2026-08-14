@@ -193,7 +193,7 @@ class AnalyticsTreeTest {
      * Start
      * └── a1a4
      *     └── a8a5
-     *         └── a4a6
+     *         └── a4b4
      * ```
      */
     @Test
@@ -203,9 +203,9 @@ class AnalyticsTreeTest {
             .play(emptyList(), Move.parse("a1a4"))
             .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
 
-        val played = tree.play(path, Move.parse("a4a6"))
+        val played = tree.play(path, Move.parse("a4b4"))
 
-        assertEquals("ra5 Ra6", played.positionAt(path + Move.parse("a4a6")).toString())
+        assertEquals("Rb4 ra5", played.positionAt(path + Move.parse("a4b4")).toString())
     }
 
     @Test
