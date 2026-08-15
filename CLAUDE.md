@@ -96,7 +96,7 @@ project does not have.
 
 ## Readable Code
 
-`domain/move_requirements/Shared.kt` is the reference for how code here should
+`domain/pieces/Shared.kt` is the reference for how code here should
 read. Match it.
 
 ```kotlin
@@ -152,6 +152,14 @@ performance difference. These functions run on a click, over at most six squares
 ## Development Notes
 
 - Base package is `molokoka.project.n`, with platform-specific subpackages
+- `domain/pieces/` holds the piece model - `Piece`, `PieceType` - and the
+  movement rules built on it. Each piece there exposes exactly two functions:
+  `<piece>ReachableSquares(origin): Set<Coordinates>` generates, and
+  `requireValid<Piece>Move(move)` validates. `Shared.kt` holds what they have in
+  common - the geometry predicates, the ray builders, and `reachableAlong`.
+  Three exhaustive `when`s dispatch on `PieceType` - `domain/ReachableSquares.kt`
+  (generation), `Chess.kt` (validation), and `ui/PieceGlyph.kt` (display) - so a
+  new entry in the enum breaks the build in exactly the places that need editing
 - All dependency versions belong in `gradle/libs.versions.toml`, never inline in
   a build script
 - JVM target is Java 11 for Android compilations (set in the

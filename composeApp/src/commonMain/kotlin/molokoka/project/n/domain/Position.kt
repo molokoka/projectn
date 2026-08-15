@@ -1,5 +1,7 @@
 package molokoka.project.n.domain
 
+import molokoka.project.n.domain.pieces.Piece
+
 data class Position(val pieces: Map<Coordinates, Piece>) {
 
     override fun toString(): String =

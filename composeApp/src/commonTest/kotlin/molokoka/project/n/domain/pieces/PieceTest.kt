@@ -1,5 +1,6 @@
-package molokoka.project.n.domain
+package molokoka.project.n.domain.pieces
 
+import molokoka.project.n.domain.Side
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

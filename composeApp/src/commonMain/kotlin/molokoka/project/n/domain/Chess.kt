@@ -1,7 +1,8 @@
 package molokoka.project.n.domain
 
-import molokoka.project.n.domain.move_requirements.requireValidQueenMove
-import molokoka.project.n.domain.move_requirements.requireValidRookMove
+import molokoka.project.n.domain.pieces.PieceType
+import molokoka.project.n.domain.pieces.requireValidQueenMove
+import molokoka.project.n.domain.pieces.requireValidRookMove
 
 fun sideToMove(playedMoves: Int): Side =
     if (playedMoves % 2 == 0) Side.WHITE else Side.BLACK
@@ -24,10 +25,6 @@ fun Position.play(move: Move, side: Side): Position {
     when (fromPiece.type) {
         PieceType.ROOK -> requireValidRookMove(move)
         PieceType.QUEEN -> requireValidQueenMove(move)
-    }
-
-    require(pieces[move.to]?.side != fromPiece.side) {
-        "Move must land on an empty square or an opposing piece, was '$move'"
     }
 
     return Position(pieces - move.from + (move.to to fromPiece))

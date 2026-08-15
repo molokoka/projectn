@@ -1,4 +1,6 @@
-package molokoka.project.n.domain
+package molokoka.project.n.domain.pieces
+
+import molokoka.project.n.domain.Side
 
 data class Piece(val type: PieceType, val side: Side) {
 

@@ -4,7 +4,7 @@ import molokoka.project.n.domain.BOARD_SIZE
 import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.FILE_RANGE
 import molokoka.project.n.domain.FIRST_FILE
-import molokoka.project.n.domain.Piece
+import molokoka.project.n.domain.pieces.Piece
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.RANK_RANGE
 import kotlin.test.Test
