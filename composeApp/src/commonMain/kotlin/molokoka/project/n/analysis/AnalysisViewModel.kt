@@ -7,8 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import molokoka.project.n.domain.AnalyticsTree
 import molokoka.project.n.domain.Move
+import molokoka.project.n.domain.Position
+import molokoka.project.n.domain.Side
 import molokoka.project.n.computer.ComputerMoveSource
 
 class AnalysisViewModel(
@@ -28,16 +29,19 @@ class AnalysisViewModel(
 
     private fun runEffect(effect: AnalysisEffect) = when (effect) {
         AnalysisEffect.CancelComputerMove -> cancelComputerMove()
-        is AnalysisEffect.StartComputerMove -> startComputerMove(effect.tree, effect.path)
+        is AnalysisEffect.StartComputerMove ->
+            startComputerMove(effect.position, effect.side, effect.path)
     }
 
-    private fun startComputerMove(tree: AnalyticsTree, path: List<Move>) {
+    private fun startComputerMove(position: Position, side: Side, path: List<Move>) {
         computerMoveRequest?.cancel()
 
         computerMoveRequest = viewModelScope.launch {
-            val move = computerMoveSource.nextMove(tree, path)
+            val intent = computerMoveSource.nextMove(position, side)
+                ?.let { move -> AnalysisIntent.ComputerMoveReady(path, move) }
+                ?: AnalysisIntent.ComputerMoveNotFound(path)
 
-            onIntent(AnalysisIntent.ComputerMoveReady(path, move))
+            onIntent(intent)
         }
     }
 

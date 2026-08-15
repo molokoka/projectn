@@ -32,14 +32,20 @@ sealed interface AnalysisIntent {
 
     data class OnSquareClick(val coordinates: Coordinates) : AnalysisIntent
 
-    data class ComputerMoveReady(val path: List<Move>, val move: Move?) : AnalysisIntent
+    data class ComputerMoveReady(val path: List<Move>, val move: Move) : AnalysisIntent
+
+    data class ComputerMoveNotFound(val path: List<Move>) : AnalysisIntent
 }
 
 sealed interface AnalysisEffect {
 
     data object CancelComputerMove : AnalysisEffect
 
-    data class StartComputerMove(val tree: AnalyticsTree, val path: List<Move>) : AnalysisEffect
+    data class StartComputerMove(
+        val position: Position,
+        val side: Side,
+        val path: List<Move>
+    ) : AnalysisEffect
 }
 
 typealias AnalysisUpdate = Pair<AnalysisState, AnalysisEffect?>
@@ -58,11 +64,16 @@ fun AnalysisState.reduce(intent: AnalysisIntent): AnalysisUpdate = when (intent)
     }
 
     AnalysisIntent.RequestComputerMove -> {
-        copy(computerMovePending = true) to AnalysisEffect.StartComputerMove(tree, moves)
+        copy(computerMovePending = true) to
+            AnalysisEffect.StartComputerMove(position, sideToMove, moves)
     }
 
     is AnalysisIntent.ComputerMoveReady -> {
         playComputerMove(intent.path, intent.move)
+    }
+
+    is AnalysisIntent.ComputerMoveNotFound -> {
+        computerMoveNotFound(intent.path)
     }
 
     AnalysisIntent.FlipBoard -> {
@@ -117,24 +128,29 @@ private fun AnalysisState.selectNode(path: List<Move>): AnalysisUpdate =
         }
     }
 
-private fun AnalysisState.playComputerMove(path: List<Move>, move: Move?): AnalysisUpdate {
-    val notWaiting = copy(computerMovePending = false)
-
-    if (move == null || path != moves) return notWaiting to null
+private fun AnalysisState.playComputerMove(path: List<Move>, move: Move): AnalysisUpdate {
+    if (path != moves) return this to null
 
     return runCatching { tree.play(path, move) }
         .fold(
             onSuccess = { played ->
-                notWaiting.copy(
+                copy(
                     tree = played,
                     moves = path + move,
-                    selected = null
+                    selected = null,
+                    computerMovePending = false
                 ) to null
             },
             onFailure = {
-                notWaiting to null
+                copy(computerMovePending = false) to null
             }
         )
+}
+
+private fun AnalysisState.computerMoveNotFound(path: List<Move>): AnalysisUpdate {
+    if (path != moves) return this to null
+
+    return copy(computerMovePending = false) to null
 }
 
 private fun AnalysisState.flipBoard(): AnalysisUpdate =

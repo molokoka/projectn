@@ -8,7 +8,7 @@ computer move, and simulated asynchronous analysis.
 
 - **Board rendering**: 8x8 board with file and rank labels, flippable
 - **Part 1 - move variations**: implemented
-- **Part 2 - delayed computer move**: implemented, against a scripted move source
+- **Part 2 - delayed computer move**: implemented
 - **Part 3 - asynchronous analysis**: not implemented
 
 Tapping a piece of the side to move selects it; tapping a legal target plays the
@@ -17,10 +17,11 @@ variation rather than overwriting the line.
 
 The computer move applies after a random 1-3 second delay, and a pending request
 is cancelled when the board is reset, when a move is played, or when a different
-node is selected. **The move it plays is scripted, not generated** - nothing in
-the codebase enumerates legal moves yet, so `ScriptedComputerMoveSource` knows a
-single four-move line and returns nothing from any other position. Everything
-around it - the delay, cancellation, and stale-result handling - is real.
+node is selected. The move itself is generated: `DelayedRandomComputerMoveSource`
+takes the pieces of the side to move in a random order, passes over any piece with
+nowhere to go, and draws a destination from the squares that piece reaches. A
+position the side to move cannot play in comes back as `null`, which the view model
+turns into an `AnalysisIntent.ComputerMoveNotFound`.
 
 ## Features
 
@@ -50,8 +51,10 @@ cancelling a pending computer move, is a value that can be asserted directly.
 that is all it does. View models are provided by Koin.
 
 The computer move sits behind `ComputerMoveSource`, so the view model knows
-nothing about how a move is chosen or how long it takes. Replacing the scripted
-implementation with real generation is a one-class change.
+nothing about how a move is chosen or how long it takes - it maps the answer onto
+one of two intents and lets the reducer decide the rest.
+`DelayedRandomComputerMoveSource` takes its `Random` as a constructor argument, so
+a test can drive the same generation the app runs rather than a stand-in.
 
 ### Fixed board size
 
@@ -116,10 +119,12 @@ Multiplatform library, so its JVM target is `desktopTest`.
 
 Coverage is the board primitives - coordinate parsing and validation, square
 colour, and draw order under both orientations - the rook and queen move rules,
-the move tree, and the analysis screen. The analysis tests are split by unit
-under test: `AnalysisStateTest` drives the pure reducer with no coroutines, and
-`AnalysisViewModelTest` covers only what needs a dispatcher - the delay, the
-result round trip, and cancellation.
+the move tree, the computer move, and the analysis screen. The analysis tests are
+split by unit under test: `AnalysisStateTest` drives the pure reducer with no
+coroutines, and `AnalysisViewModelTest` covers only what needs a dispatcher - the
+delay, the result round trip, and cancellation. The analysis and piece test classes
+group their cases into nested classes, one per behaviour, so a failure names the
+rule that broke.
 
 Board positions and move trees are asserted as diagrams rather than object
 graphs, so a failure prints a readable board or tree.
@@ -152,7 +157,7 @@ Multiplatform module - and desktop follows the same shape for symmetry.
 - [x] Rook and queen move rules, LAN move application
 - [x] Move tree with variations and node selection
 - [x] Delayed computer move, cancelling any pending request
-- [ ] Generate a random valid move, replacing `ScriptedComputerMoveSource`
+- [x] Generate a random valid move for the computer
 - [ ] Asynchronous analysis with out-of-order result handling
 
 ### Refactoring Tasks

@@ -12,17 +12,20 @@ import kotlinx.coroutines.test.setMain
 import molokoka.project.n.computer.ComputerMoveSource
 import molokoka.project.n.domain.AnalyticsTree
 import molokoka.project.n.domain.Move
+import molokoka.project.n.domain.Position
+import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.util.moveTreeDiagram
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 private const val DELAY = 1_000L
 
 private class FakeComputerMoveSource(private val move: Move?) : ComputerMoveSource {
 
-    override suspend fun nextMove(tree: AnalyticsTree, path: List<Move>): Move? {
+    override suspend fun nextMove(position: Position, side: Side): Move? {
         delay(DELAY)
 
         return move
@@ -33,7 +36,7 @@ private class QueuedComputerMoveSource(private val moves: List<Move>) : Computer
 
     private var answered = 0
 
-    override suspend fun nextMove(tree: AnalyticsTree, path: List<Move>): Move? {
+    override suspend fun nextMove(position: Position, side: Side): Move? {
         val move = moves.getOrNull(answered)
         answered++
 
@@ -83,13 +86,23 @@ class AnalysisViewModelTest {
     }
 
     @Test
-    fun `plays no move when the source has none to give`() = runTest {
+    fun `plays no move when no computer move is found`() = runTest {
         val viewModel = viewModelPlaying(null)
 
         viewModel.onIntent(AnalysisIntent.RequestComputerMove)
         advanceUntilIdle()
 
         assertEquals(AnalyticsTree(), viewModel.state.value.tree)
+    }
+
+    @Test
+    fun `stops waiting when no computer move is found`() = runTest {
+        val viewModel = viewModelPlaying(null)
+
+        viewModel.onIntent(AnalysisIntent.RequestComputerMove)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.computerMovePending)
     }
 
     @Test
@@ -123,6 +136,6 @@ class AnalysisViewModelTest {
         )
     }
 
-    private fun viewModelPlaying(move: Move?): AnalysisViewModel =
-        AnalysisViewModel(FakeComputerMoveSource(move))
+    private fun viewModelPlaying(fakeComputeMove: Move?): AnalysisViewModel =
+        AnalysisViewModel(FakeComputerMoveSource(fakeComputeMove))
 }
