@@ -16,7 +16,8 @@ data class AppColors(
     val headerBackground: Color = Color(0xFFE0E0E0),
     val whiteMoveRow: Color = Color.White,
     val blackMoveRow: Color = Color(0xFFF0F0F0),
-    val selectedMoveRow: Color = Color.Black
+    val selectedMoveRow: Color = Color.Black,
+    val pressedOverlay: Color = Color.Black.copy(alpha = 0.3f)
 ) {
     fun moveRow(side: Side): Color =
         if (side == Side.WHITE) whiteMoveRow else blackMoveRow

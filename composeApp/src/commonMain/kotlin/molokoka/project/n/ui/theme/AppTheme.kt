@@ -1,5 +1,6 @@
 package molokoka.project.n.ui.theme
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -35,6 +36,7 @@ fun AppTheme(
         LocalAppColors provides colors,
         LocalAppTypography provides typography,
         LocalAppDimens provides dimens,
+        LocalIndication provides AppIndication(colors.pressedOverlay),
         content = content
     )
 }
