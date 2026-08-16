@@ -14,6 +14,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+/**
+ * A board representation of the squares a mover on [origin] reaches
+ *
+ * - the mover as its own symbol
+ *
+ * - `.` on an empty square in [reachable]
+ * - `x` on an empty square the mover does not reach
+ *
+ * - `o` on a square in [reachable] holding a piece, a capture
+ * - `#` on a square holding a piece the mover does not reach, a blocker
+ */
 fun reachableMovesDiagram(
     pieces: Map<Coordinates, Piece>,
     origin: Coordinates,
