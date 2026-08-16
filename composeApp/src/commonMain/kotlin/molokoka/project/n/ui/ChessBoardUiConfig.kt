@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import molokoka.project.n.domain.Side
 
-data class AnalyticsUiConfig(
+data class AnalysisUiConfig(
     val mutedTextColor: Color = Color(0xFF757575),
     val headerColor: Color = Color(0xFFE0E0E0),
     val whiteMoveColor: Color = Color.White,
@@ -37,7 +37,7 @@ data class ChessBoardUiConfig(
         color = Color.Black
     ),
     val selectedSquareColor: Color = Color(0xFF7FB069),
-    val analytics: AnalyticsUiConfig = AnalyticsUiConfig()
+    val analysis: AnalysisUiConfig = AnalysisUiConfig()
 )
 
 val LocalChessBoardUiConfig = staticCompositionLocalOf { ChessBoardUiConfig() }

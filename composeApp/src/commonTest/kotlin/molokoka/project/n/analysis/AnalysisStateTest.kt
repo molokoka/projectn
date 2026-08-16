@@ -1,12 +1,12 @@
 package molokoka.project.n.analysis
 
-import molokoka.project.n.domain.AnalyticsTree
+import molokoka.project.n.analysis.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.play
-import molokoka.project.n.domain.util.moveTreeDiagram
+import molokoka.project.n.analysis.util.moveTreeDiagram
 import molokoka.project.n.domain.util.positionDiagram
 import molokoka.project.n.ui.BoardOrientation
 import kotlin.test.Test
@@ -150,7 +150,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `playing a move deselects piece`() {
+        fun `playing a move deselects the piece`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
@@ -168,7 +168,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `playing a move records it in the tree`() {
+        fun `playing a move creates a child node`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
@@ -237,6 +237,27 @@ class AnalysisStateTest {
                 state.position.positionDiagram()
             )
             assertEquals(Side.WHITE, state.sideToMove)
+        }
+
+        @Test
+        fun `playing a move that already exists selects it instead of duplicating it`() {
+            val move = Move.parse("a1a4")
+
+            val state = AnalysisState()
+                .reduce(AnalysisIntent.OnSquareClick(move.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(move.to)).first // white a1a4
+                .reduce(AnalysisIntent.SelectNode(emptyList())).first
+                .reduce(AnalysisIntent.OnSquareClick(move.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(move.to)).first // white a1a4 again
+
+            assertEquals(
+                """
+                Start
+                └── $move
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+            assertEquals(listOf(move), state.moves)
         }
 
         @Test
@@ -423,7 +444,7 @@ class AnalysisStateTest {
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
                 .reduce(AnalysisIntent.Reset).first
 
-            assertEquals(AnalyticsTree(), state.tree)
+            assertEquals(AnalysisTree(), state.tree)
         }
 
         @Test
@@ -450,11 +471,11 @@ class AnalysisStateTest {
     class RequestingAComputerMove {
 
         @Test
-        fun `requesting a computer move marks it pending`() {
+        fun `requesting a computer move shows loading`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
 
-            assertTrue(state.computerMovePending)
+            assertTrue(state.isComputerMovePending)
         }
 
         @Test
@@ -465,10 +486,12 @@ class AnalysisStateTest {
                 .reduce(AnalysisIntent.RequestComputerMove).second
 
             assertEquals(
-                AnalysisEffect.StartComputerMove(
-                    Position.INITIAL.play(Move.parse("a1a4"), Side.WHITE),
-                    Side.BLACK,
-                    listOf(Move.parse("a1a4"))
+                listOf(
+                    AnalysisEffect.StartComputerMove(
+                        Position.INITIAL.play(Move.parse("a1a4"), Side.WHITE),
+                        Side.BLACK,
+                        listOf(Move.parse("a1a4"))
+                    )
                 ),
                 effect
             )
@@ -478,81 +501,72 @@ class AnalysisStateTest {
     class CancellingAPendingComputerMove {
 
         @Test
-        fun `selecting another node cancels the computer move`() {
+        fun `changing the visible position cancels the computer move`() {
             val effect = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.SelectNode(emptyList())).second
 
-            assertEquals(AnalysisEffect.CancelComputerMove, effect)
+            assertEquals(listOf(AnalysisEffect.CancelComputerMove), effect)
         }
 
         @Test
-        fun `selecting another node stops waiting for the computer`() {
+        fun `changing the visible position hides the computer move loading`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.SelectNode(emptyList())).first
 
-            assertFalse(state.computerMovePending)
+            assertFalse(state.isComputerMovePending)
         }
 
         @Test
-        fun `selecting the node already shown keeps waiting for the computer`() {
+        fun `selecting the position already shown keeps the computer move loading`() {
             val update = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.SelectNode(emptyList()))
 
-            assertTrue(update.first.computerMovePending)
-            assertNull(update.second)
+            assertTrue(update.first.isComputerMovePending)
+            assertTrue(update.second.isEmpty())
         }
 
         @Test
-        fun `playing a move cancels the computer move`() {
-            val effect = AnalysisState()
+        fun `playing a move hides the computer move loading and cancels it`() {
+            val update = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c1"))).first
-                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))).second // white c1c4
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))) // white c1c4
 
-            assertEquals(AnalysisEffect.CancelComputerMove, effect)
+            assertFalse(update.first.isComputerMovePending)
+            assertEquals(listOf(AnalysisEffect.CancelComputerMove), update.second)
         }
 
         @Test
-        fun `playing a move stops waiting for the computer`() {
-            val state = AnalysisState()
-                .reduce(AnalysisIntent.RequestComputerMove).first
-                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c1"))).first
-                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))).first // white c1c4
-
-            assertFalse(state.computerMovePending)
-        }
-
-        @Test
-        fun `picking up a piece keeps waiting for the computer`() {
+        fun `picking up a piece keeps the computer move loading`() {
             val update = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c1")))
 
-            assertTrue(update.first.computerMovePending)
-            assertNull(update.second)
+            assertTrue(update.first.isComputerMovePending)
+            assertTrue(update.second.isEmpty())
         }
 
         @Test
         fun `resetting cancels the computer move`() {
-            val effect = AnalysisState()
+            val effects = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.Reset).second
 
-            assertEquals(AnalysisEffect.CancelComputerMove, effect)
+            assertTrue(effects.contains(AnalysisEffect.CancelComputerMove))
         }
     }
 
     class ReceivingAComputerMove {
 
         @Test
-        fun `receiving a computer move plays it at the node that asked`() {
+        fun `receiving a computer move adds it when the visible position has not changed`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveReady(emptyList(), Move.parse("a1a4"))).first
@@ -567,7 +581,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `receiving a computer move selects it`() {
+        fun `receiving a computer move selects the child it added`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveReady(emptyList(), Move.parse("a1a4"))).first
@@ -576,7 +590,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `receiving a computer move for an abandoned node leaves the tree alone`() {
+        fun `a computer move for a position no longer visible is not added to the tree`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
@@ -600,7 +614,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `receiving a computer move for an abandoned node leaves the board alone`() {
+        fun `a computer move for a position no longer visible does not change the selected node`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
@@ -617,7 +631,7 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `receiving a computer move after reset leaves the tree cleared`() {
+        fun `a computer move arriving after reset cannot alter the reset state`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
@@ -630,61 +644,227 @@ class AnalysisStateTest {
                     )
                 ).first
 
-            assertEquals(AnalyticsTree(), state.tree)
+            assertEquals(AnalysisTree(), state.tree)
         }
 
         @Test
-        fun `receiving an illegal computer move plays nothing`() {
+        fun `receiving an invalid computer move plays nothing`() {
             // a1a8 is blocked: a7 holds a black queen
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveReady(emptyList(), Move.parse("a1a8"))).first
 
-            assertEquals(AnalyticsTree(), state.tree)
+            assertEquals(AnalysisTree(), state.tree)
         }
 
         @Test
-        fun `receiving an illegal computer move stops waiting for it`() {
+        fun `receiving an invalid computer move hides the loading`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveReady(emptyList(), Move.parse("a1a8"))).first
 
-            assertFalse(state.computerMovePending)
+            assertFalse(state.isComputerMovePending)
         }
 
         @Test
-        fun `receiving a computer move stops waiting for it`() {
+        fun `receiving a computer move hides the loading`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveReady(emptyList(), Move.parse("a1a4"))).first
 
-            assertFalse(state.computerMovePending)
+            assertFalse(state.isComputerMovePending)
         }
 
         @Test
-        fun `receiving no computer move found stops waiting for it`() {
+        fun `finding no computer move hides the loading`() {
             val state = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.ComputerMoveNotFound(emptyList())).first
 
-            assertFalse(state.computerMovePending)
+            assertFalse(state.isComputerMovePending)
+        }
+
+    }
+
+    class RequestingAMoveEvaluation {
+
+        @Test
+        fun `requesting a move evaluation shows loading`() {
+            val state = AnalysisState()
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
+
+            assertTrue(state.isMoveEvaluationPending)
         }
 
         @Test
-        fun `receiving a computer move for an abandoned node keeps the newer request waiting`() {
-            val state = AnalysisState()
+        fun `requesting a move evaluation analyses every move node in the tree`() {
+            val played = AnalysisState()
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a1"))).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("a4"))).first // white a1a4
-                .reduce(AnalysisIntent.RequestComputerMove).first
-                .reduce(AnalysisIntent.SelectNode(emptyList())).first
-                .reduce(AnalysisIntent.RequestComputerMove).first
+
+            val effects = played.reduce(AnalysisIntent.RequestMovesEvaluation).second
+
+            assertEquals(listOf(AnalysisEffect.StartMovesEvaluation(1, played.tree)), effects)
+        }
+
+        @Test
+        fun `a move evaluation may be started again while an earlier one is running`() {
+            val effects = AnalysisState()
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
+                .reduce(AnalysisIntent.RequestMovesEvaluation).second
+
+            assertEquals(listOf(AnalysisEffect.StartMovesEvaluation(2, AnalysisTree())), effects)
+        }
+    }
+
+    class CancellingAPendingMoveEvaluation {
+
+        @Test
+        fun `resetting cancels the move evaluation`() {
+            val effects = AnalysisState()
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
+                .reduce(AnalysisIntent.Reset).second
+
+            assertTrue(effects.contains(AnalysisEffect.CancelMoveEvaluation))
+        }
+    }
+
+    class ReceivingAMoveEvaluation {
+
+        @Test
+        fun `receiving evaluations shows one beside every move`() {
+            val move = Move.parse("a1a4")
+            val answer = MoveEvaluation.WHITE_BETTER
+
+            val state = evaluationRequestedAfter(move)
+                .reduce(AnalysisIntent.MovesEvaluationReady(1, mapOf(listOf(move) to answer))).first
+
+            assertEquals(
+                """
+                Start
+                └── $move$answer
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+        }
+
+        @Test
+        fun `receiving evaluations hides the loading`() {
+            val move = Move.parse("a1a4")
+
+            val state = evaluationRequestedAfter(move)
                 .reduce(
-                    AnalysisIntent.ComputerMoveReady(
-                        listOf(Move.parse("a1a4")), Move.parse("b8b5")
+                    AnalysisIntent.MovesEvaluationReady(
+                        1,
+                        mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER)
                     )
                 ).first
 
-            assertTrue(state.computerMovePending)
+            assertFalse(state.isMoveEvaluationPending)
         }
+
+        @Test
+        fun `an older request may not overwrite the newer results`() {
+            val move = Move.parse("a1a4")
+            val olderAnswer = MoveEvaluation.WHITE_BETTER
+            val newerAnswer = MoveEvaluation.BLACK_BETTER
+
+            val state = evaluationRequestedAfter(move)
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
+                .reduce(AnalysisIntent.MovesEvaluationReady(2, mapOf(listOf(move) to newerAnswer)))
+                .first
+                .reduce(AnalysisIntent.MovesEvaluationReady(1, mapOf(listOf(move) to olderAnswer)))
+                .first
+
+            assertEquals(
+                """
+                Start
+                └── $move$newerAnswer
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+        }
+
+        @Test
+        fun `evaluations still arrive after the visible position changed`() {
+            val move = Move.parse("a1a4")
+            val answer = MoveEvaluation.WHITE_BETTER
+
+            val state = evaluationRequestedAfter(move)
+                .reduce(AnalysisIntent.SelectNode(emptyList())).first
+                .reduce(AnalysisIntent.MovesEvaluationReady(1, mapOf(listOf(move) to answer))).first
+
+            assertEquals(
+                """
+                Start
+                └── $move$answer
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+        }
+
+        @Test
+        fun `only the moves in the snapshot are evaluated`() {
+            val opening = Move.parse("a1a4")
+            val reply = Move.parse("b8b5")
+            val answer = MoveEvaluation.WHITE_BETTER
+
+            val state = evaluationRequestedAfter(opening)
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("b8"))).first
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("b5"))).first // black b8b5
+                .reduce(AnalysisIntent.MovesEvaluationReady(1, mapOf(listOf(opening) to answer)))
+                .first
+
+            assertEquals(
+                """
+                Start
+                └── $opening$answer
+                    └── $reply
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+        }
+
+        @Test
+        fun `evaluations arriving after reset cannot alter the reset state`() {
+            val move = Move.parse("a1a4")
+
+            val state = evaluationRequestedAfter(move)
+                .reduce(AnalysisIntent.Reset).first
+                .reduce(
+                    AnalysisIntent.MovesEvaluationReady(
+                        1,
+                        mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER)
+                    )
+                ).first
+
+            assertEquals(AnalysisTree(), state.tree)
+        }
+
+        @Test
+        fun `replaying a move keeps the evaluation already attached to it`() {
+            val move = Move.parse("a1a4")
+            val answer = MoveEvaluation.WHITE_BETTER
+
+            val state = evaluationRequestedAfter(move)
+                .reduce(AnalysisIntent.MovesEvaluationReady(1, mapOf(listOf(move) to answer))).first
+                .reduce(AnalysisIntent.SelectNode(emptyList())).first
+                .reduce(AnalysisIntent.OnSquareClick(move.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(move.to)).first // white a1a4 again
+
+            assertEquals(
+                """
+                Start
+                └── $move$answer
+                """.trimIndent(),
+                state.tree.moveTreeDiagram()
+            )
+        }
+
+        private fun evaluationRequestedAfter(move: Move): AnalysisState =
+            AnalysisState()
+                .reduce(AnalysisIntent.OnSquareClick(move.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(move.to)).first
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
     }
 }

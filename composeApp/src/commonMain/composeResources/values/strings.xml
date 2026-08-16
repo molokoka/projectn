@@ -6,7 +6,8 @@
     <string name="reset">reset</string>
     <string name="flip_board">flip board</string>
     <string name="computer_move">computer move</string>
-    <string name="thinking">thinking...</string>
+    <string name="analysis">analysis</string>
+    <string name="loading">loading...</string>
     <string name="current_moves">current moves: (%1$s)</string>
     <string name="moves_tree">moves tree</string>
 </resources>

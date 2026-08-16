@@ -28,7 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.AnalyticsTree
+import molokoka.project.n.analysis.AnalysisTree
 import molokoka.project.n.domain.sideToMove
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
@@ -39,14 +39,18 @@ import projectn.composeapp.generated.resources.start
 private const val DEPTH_MARKER = "."
 
 @Composable
-fun AnalyticsView(
-    tree: AnalyticsTree,
+fun AnalysisView(
+    tree: AnalysisTree,
     moves: List<Move>,
     onNodeSelected: (List<Move>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val analyticsUiConfig = chessBoardUiConfig().analytics
+    val analysisUiConfig = chessBoardUiConfig().analysis
     val paths = tree.paths()
+
+    val currentMoves = moves.indices.joinToString(" ") { moveCount ->
+        tree.moveWithEvaluation(moves.take(moveCount + 1))
+    }
 
     val listState = rememberLazyListState()
     val pathScroll = rememberScrollState()
@@ -64,12 +68,12 @@ fun AnalyticsView(
         SectionTitle(stringResource(Res.string.current_moves, moves.size))
 
         BasicText(
-            text = moves.joinToString(" "),
+            text = currentMoves,
             style = moveTextStyle(),
             softWrap = false,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(analyticsUiConfig.headerColor)
+                .background(analysisUiConfig.headerColor)
                 .horizontalScroll(pathScroll)
                 .padding(6.dp)
         )
@@ -90,7 +94,7 @@ fun AnalyticsView(
             item {
                 MoveRow(
                     label = stringResource(Res.string.start),
-                    background = analyticsUiConfig.headerColor,
+                    background = analysisUiConfig.headerColor,
                     isSelected = moves.isEmpty(),
                     scrollableViewPan = scrollableViewPan,
                     onClick = { onNodeSelected(emptyList()) }
@@ -99,8 +103,8 @@ fun AnalyticsView(
 
             items(paths) { path ->
                 MoveRow(
-                    label = DEPTH_MARKER.repeat(path.size) + " " + path.last(),
-                    background = analyticsUiConfig.moveColor(sideToMove(path.size - 1)),
+                    label = DEPTH_MARKER.repeat(path.size) + " " + tree.moveWithEvaluation(path),
+                    background = analysisUiConfig.moveColor(sideToMove(path.size - 1)),
                     isSelected = path == moves,
                     scrollableViewPan = scrollableViewPan,
                     onClick = { onNodeSelected(path) }
@@ -108,6 +112,13 @@ fun AnalyticsView(
             }
         }
     }
+}
+
+private fun AnalysisTree.moveWithEvaluation(path: List<Move>): String {
+    val move = path.last()
+    val moveEvaluation = evaluationAt(path)
+
+    return if (moveEvaluation == null) "$move" else "$move$moveEvaluation"
 }
 
 private suspend fun LazyListState.animateScrollToCentre(row: Int) {
@@ -119,14 +130,14 @@ private suspend fun LazyListState.animateScrollToCentre(row: Int) {
 
 @Composable
 private fun SectionTitle(text: String) {
-    val analyticsUiConfig = chessBoardUiConfig().analytics
+    val analysisUiConfig = chessBoardUiConfig().analysis
 
     BasicText(
         text = text,
         style = TextStyle(
             fontFamily = karmaticArcade(),
             fontSize = 12.sp,
-            color = analyticsUiConfig.mutedTextColor
+            color = analysisUiConfig.mutedTextColor
         ),
         modifier = Modifier.padding(top = 8.dp, bottom = 3.dp)
     )
@@ -140,10 +151,10 @@ private fun MoveRow(
     scrollableViewPan: ScrollableViewPan,
     onClick: () -> Unit
 ) {
-    val analyticsUiConfig = chessBoardUiConfig().analytics
+    val analysisUiConfig = chessBoardUiConfig().analysis
     val selectedBorder = Modifier.border(
-        analyticsUiConfig.selectedRowBorder,
-        analyticsUiConfig.selectedRowColor
+        analysisUiConfig.selectedRowBorder,
+        analysisUiConfig.selectedRowColor
     )
 
     Row(

@@ -1,7 +1,7 @@
 package molokoka.project.n.analysis
 
-import molokoka.project.n.domain.AnalyticsTree
 import molokoka.project.n.domain.Coordinates
+import molokoka.project.n.analysis.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
@@ -10,14 +10,18 @@ import molokoka.project.n.ui.BoardOrientation
 
 data class AnalysisState(
     val orientation: BoardOrientation = BoardOrientation.WHITE,
-    val tree: AnalyticsTree = AnalyticsTree(),
+    val tree: AnalysisTree = AnalysisTree(),
     val moves: List<Move> = emptyList(),
     val selected: Coordinates? = null,
-    val computerMovePending: Boolean = false
+    val isComputerMovePending: Boolean = false,
+    val pendingEvaluationGeneration: Int = 0,
 ) {
     val position: Position get() = tree.positionAt(moves)
 
     val sideToMove: Side get() = sideToMove(moves.size)
+
+    val isMoveEvaluationPending: Boolean
+        get() = pendingEvaluationGeneration > tree.evaluationGeneration
 }
 
 sealed interface AnalysisIntent {
@@ -35,6 +39,13 @@ sealed interface AnalysisIntent {
     data class ComputerMoveReady(val path: List<Move>, val move: Move) : AnalysisIntent
 
     data class ComputerMoveNotFound(val path: List<Move>) : AnalysisIntent
+
+    data object RequestMovesEvaluation : AnalysisIntent
+
+    data class MovesEvaluationReady(
+        val generation: Int,
+        val evaluations: Map<List<Move>, MoveEvaluation>
+    ) : AnalysisIntent
 }
 
 sealed interface AnalysisEffect {
@@ -46,9 +57,17 @@ sealed interface AnalysisEffect {
         val side: Side,
         val path: List<Move>
     ) : AnalysisEffect
+
+    data object CancelMoveEvaluation : AnalysisEffect
+
+    data class StartMovesEvaluation(
+        val generation: Int,
+        val tree: AnalysisTree
+    ) : AnalysisEffect
 }
 
-typealias AnalysisUpdate = Pair<AnalysisState, AnalysisEffect?>
+typealias AnalysisUpdate = Pair<AnalysisState, List<AnalysisEffect>>
+private fun emptyEffects(): List<AnalysisEffect> = emptyList()
 
 fun AnalysisState.reduce(intent: AnalysisIntent): AnalysisUpdate = when (intent) {
     AnalysisIntent.Reset -> {
@@ -64,8 +83,8 @@ fun AnalysisState.reduce(intent: AnalysisIntent): AnalysisUpdate = when (intent)
     }
 
     AnalysisIntent.RequestComputerMove -> {
-        copy(computerMovePending = true) to
-            AnalysisEffect.StartComputerMove(position, sideToMove, moves)
+        copy(isComputerMovePending = true) to
+            listOf(AnalysisEffect.StartComputerMove(position, sideToMove, moves))
     }
 
     is AnalysisIntent.ComputerMoveReady -> {
@@ -76,18 +95,29 @@ fun AnalysisState.reduce(intent: AnalysisIntent): AnalysisUpdate = when (intent)
         computerMoveNotFound(intent.path)
     }
 
+    AnalysisIntent.RequestMovesEvaluation -> {
+        startMovesEvaluation()
+    }
+
+    is AnalysisIntent.MovesEvaluationReady -> {
+        movesEvaluationReady(intent.generation, intent.evaluations)
+    }
+
     AnalysisIntent.FlipBoard -> {
         flipBoard()
     }
 }
 
 private fun initialState(): AnalysisUpdate =
-    AnalysisState() to AnalysisEffect.CancelComputerMove
+    AnalysisState() to listOf(
+        AnalysisEffect.CancelComputerMove,
+        AnalysisEffect.CancelMoveEvaluation
+    )
 
 private fun AnalysisState.onSquareClick(coordinates: Coordinates): AnalysisUpdate =
     when (selected) {
-        null -> select(coordinates) to null
-        coordinates -> copy(selected = null) to null
+        null -> select(coordinates) to emptyEffects()
+        coordinates -> copy(selected = null) to emptyEffects()
         else -> playOrReselect(Move(selected, coordinates))
     }
 
@@ -106,30 +136,30 @@ private fun AnalysisState.playOrReselect(move: Move): AnalysisUpdate =
                     tree = played,
                     moves = moves + move,
                     selected = null,
-                    computerMovePending = false
-                ) to AnalysisEffect.CancelComputerMove
+                    isComputerMovePending = false
+                ) to listOf(AnalysisEffect.CancelComputerMove)
             },
             onFailure = {
                 copy(selected = null)
-                    .select(move.to) to null
+                    .select(move.to) to emptyEffects()
             }
         )
 
 private fun AnalysisState.selectNode(path: List<Move>): AnalysisUpdate =
     when {
-        !tree.contains(path) -> this to null
-        path == moves -> this to null
+        !tree.contains(path) -> this to emptyEffects()
+        path == moves -> this to emptyEffects()
         else -> {
             copy(
                 moves = path,
                 selected = null,
-                computerMovePending = false
-            ) to AnalysisEffect.CancelComputerMove
+                isComputerMovePending = false
+            ) to listOf(AnalysisEffect.CancelComputerMove)
         }
     }
 
 private fun AnalysisState.playComputerMove(path: List<Move>, move: Move): AnalysisUpdate {
-    if (path != moves) return this to null
+    if (path != moves) return this to emptyEffects()
 
     return runCatching { tree.play(path, move) }
         .fold(
@@ -138,20 +168,39 @@ private fun AnalysisState.playComputerMove(path: List<Move>, move: Move): Analys
                     tree = played,
                     moves = path + move,
                     selected = null,
-                    computerMovePending = false
-                ) to null
+                    isComputerMovePending = false
+                ) to emptyEffects()
             },
             onFailure = {
-                copy(computerMovePending = false) to null
+                copy(isComputerMovePending = false) to emptyEffects()
             }
         )
 }
 
 private fun AnalysisState.computerMoveNotFound(path: List<Move>): AnalysisUpdate {
-    if (path != moves) return this to null
+    if (path != moves) return this to emptyEffects()
 
-    return copy(computerMovePending = false) to null
+    return copy(isComputerMovePending = false) to emptyEffects()
 }
+
+private fun AnalysisState.startMovesEvaluation(): AnalysisUpdate {
+    val generation = pendingEvaluationGeneration + 1
+
+    return copy(pendingEvaluationGeneration = generation) to
+        listOf(AnalysisEffect.StartMovesEvaluation(generation, tree))
+}
+
+private fun AnalysisState.movesEvaluationReady(
+    receivedEvaluationGeneration: Int,
+    evaluations: Map<List<Move>, MoveEvaluation>
+): AnalysisUpdate =
+    if (receivedEvaluationGeneration < tree.evaluationGeneration ||
+        receivedEvaluationGeneration > pendingEvaluationGeneration
+    ) {
+        this to emptyEffects()
+    } else {
+        copy(tree = tree.withEvaluations(receivedEvaluationGeneration, evaluations)) to emptyEffects()
+    }
 
 private fun AnalysisState.flipBoard(): AnalysisUpdate =
     copy(
@@ -159,4 +208,4 @@ private fun AnalysisState.flipBoard(): AnalysisUpdate =
             BoardOrientation.WHITE -> BoardOrientation.BLACK
             BoardOrientation.BLACK -> BoardOrientation.WHITE
         }
-    ) to null
+    ) to emptyEffects()

@@ -11,7 +11,7 @@ import kotlin.math.roundToInt
 
 /**
  *
- * A quick solution rather than a general one. It exists because analytics rows must drag together and the rows
+ * A quick solution rather than a general one. It exists because analysis rows must drag together and the rows
  * cannot share a `ScrollState`: each scrollable node writes its own `maxValue` while
  * measuring, so the shortest row would win and clamp the offset to zero for all of them.
  *

@@ -22,22 +22,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import molokoka.project.n.domain.BOARD_SIZE
 import molokoka.project.n.ui.ChessBoard
-import molokoka.project.n.ui.AnalyticsView
+import molokoka.project.n.ui.AnalysisView
 import molokoka.project.n.ui.chessBoardUiConfig
 import molokoka.project.n.ui.karmaticArcade
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import molokoka.project.n.analysis.AnalysisIntent.OnSquareClick
 import molokoka.project.n.analysis.AnalysisIntent.FlipBoard
+import molokoka.project.n.analysis.AnalysisIntent.RequestMovesEvaluation
 import molokoka.project.n.analysis.AnalysisIntent.RequestComputerMove
 import molokoka.project.n.analysis.AnalysisIntent.Reset
 import molokoka.project.n.analysis.AnalysisIntent.SelectNode
 import projectn.composeapp.generated.resources.Res
+import projectn.composeapp.generated.resources.analysis
 import projectn.composeapp.generated.resources.computer_move
 import projectn.composeapp.generated.resources.exit
 import projectn.composeapp.generated.resources.flip_board
+import projectn.composeapp.generated.resources.loading
 import projectn.composeapp.generated.resources.reset
-import projectn.composeapp.generated.resources.thinking
 
 @Composable
 fun AnalysisScreen(
@@ -59,7 +61,7 @@ fun AnalysisScreen(
                 .horizontalScroll(rememberScrollState())
         )
 
-        AnalyticsView(
+        AnalysisView(
             tree = state.tree,
             moves = state.moves,
             onNodeSelected = { viewModel.onIntent(SelectNode(it)) },
@@ -70,8 +72,10 @@ fun AnalysisScreen(
         )
 
         BottomBar(
-            computerMovePending = state.computerMovePending,
+            isComputerMovePending = state.isComputerMovePending,
+            isMoveEvaluationPending = state.isMoveEvaluationPending,
             onComputerMove = { viewModel.onIntent(RequestComputerMove) },
+            onAnalysis = { viewModel.onIntent(RequestMovesEvaluation) },
             onFlipBoard = { viewModel.onIntent(FlipBoard) },
             onReset = { viewModel.onIntent(Reset) },
             onBackToInit = onBackToInit
@@ -81,14 +85,14 @@ fun AnalysisScreen(
 
 @Composable
 private fun BottomBar(
-    computerMovePending: Boolean,
+    isComputerMovePending: Boolean,
+    isMoveEvaluationPending: Boolean,
     onComputerMove: () -> Unit,
+    onAnalysis: () -> Unit,
     onFlipBoard: () -> Unit,
     onReset: () -> Unit,
     onBackToInit: () -> Unit
 ) {
-    val uiConfig = chessBoardUiConfig()
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -100,18 +104,25 @@ private fun BottomBar(
             fontSize = 16.sp,
             color = Color.Blue
         )
+        val loading = stringResource(Res.string.loading)
 
         BasicText(
-            text = if (computerMovePending) {
-                stringResource(Res.string.thinking)
-            } else {
-                stringResource(Res.string.computer_move)
-            },
-            style = labelStyle.copy(
-                color = if (computerMovePending) uiConfig.analytics.mutedTextColor else Color.Blue
-            ),
+            text = stringResource(Res.string.computer_move) +
+                if (isComputerMovePending) " $loading" else "",
+            style = labelStyle,
             modifier = Modifier
-                .clickable(enabled = !computerMovePending) { onComputerMove() }
+                .clickable { onComputerMove() }
+                .padding(8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BasicText(
+            text = stringResource(Res.string.analysis) +
+                if (isMoveEvaluationPending) " $loading" else "",
+            style = labelStyle,
+            modifier = Modifier
+                .clickable { onAnalysis() }
                 .padding(8.dp)
         )
 
