@@ -94,6 +94,65 @@ spaces compile for both the JVM and Kotlin/Native targets, so they are safe in
 `commonTest`; they would only break in an Android instrumented test, which this
 project does not have.
 
+**Verification is phase 0 by default.** Run the suite once and confirm it is
+green. Deliberately breaking a guard to prove a test goes red is phase 1, and
+only on request - it costs four builds to check one branch. Do not pass
+`--rerun-tasks` for routine checks; it defeats the build cache.
+
+### Writing tests
+
+**Name the requirement, not the implementation.** Take the wording from
+`task_2.md`: "shows loading", "visible position", "take precedence", "cannot
+alter the reset state". `` `changing the visible position hides the computer move
+loading` `` says what a user gets; `` `selecting another node stops waiting for
+the computer` `` describes a boolean field. Where the spec and the code disagree
+on a noun, the subject follows the code (`move evaluation`) and the behaviour
+follows the spec, so the test stays findable from both.
+
+**Each test carries its own given.** Name every value the assertion depends on
+as a local `val` and interpolate it into the expected output:
+
+```kotlin
+val olderAnswer = MoveEvaluation.WHITE_BETTER
+val newerAnswer = MoveEvaluation.BLACK_BETTER
+...
+assertEquals(
+    """
+    Start
+    └── b2b4$olderAnswer
+    """.trimIndent(),
+    viewModel.state.value.tree.moveTreeDiagram()
+)
+```
+
+`└── b2b4+` forces the reader to trace a bare symbol back through a helper to
+find out whose answer it was. Prefer duplicated setup in each test over a shared
+builder that hides which value belongs to which request.
+
+**Assert something only the behaviour under test can change.** A test that still
+passes with that behaviour deleted is not a test. Two that looked fine here and
+were not: asserting an empty tree after Reset could not detect a leaked
+evaluation, because evaluations attach to nothing on an empty tree; and asserting
+"no move was played" after navigating away could not detect broken cancellation,
+because the `path != moves` guard discards the move anyway.
+
+**Do not test the fakes.** `` `plays no move before the delay elapses` `` only
+proved that a fake's `delay()` had not elapsed. Anything whose truth depends on a
+constant inside a test double is measuring the double.
+
+**Split by layer.** `AnalysisStateTest` covers `reduce` as a pure function - no
+dispatcher, no clock. `AnalysisViewModelTest` covers what only exists in time:
+job lifecycle, cancellation, overlapping requests, out-of-order arrival. If a
+property is expressible as a sequence of `reduce` calls, it belongs in the state
+test. The exception is job isolation - that one feature's coroutine does not
+cancel another's is invisible to the reducer, which emits no effect for it.
+
+**Test a defensive guard at the layer that owns it**, and only if removing the
+guard would break a stated requirement should the other mechanism fail. Reset
+both cancels the pending work and refuses stale results; cancellation is testable
+in the view model, invalidation only in the reducer, because cancellation always
+intervenes first. An untested guard is indistinguishable from dead code.
+
 ## Readable Code
 
 `domain/pieces/Shared.kt` is the reference for how code here should
