@@ -1,8 +1,8 @@
 package molokoka.project.n.move_evaluation
 
 import kotlinx.coroutines.delay
-import molokoka.project.n.analysis.MoveNode
-import molokoka.project.n.analysis.paths
+import molokoka.project.n.domain.MoveNode
+import molokoka.project.n.domain.paths
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import kotlin.random.Random

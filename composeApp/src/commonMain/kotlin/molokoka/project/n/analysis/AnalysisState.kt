@@ -1,5 +1,6 @@
 package molokoka.project.n.analysis
 
+import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move

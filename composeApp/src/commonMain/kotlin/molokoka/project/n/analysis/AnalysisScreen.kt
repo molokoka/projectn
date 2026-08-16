@@ -32,8 +32,10 @@ import molokoka.project.n.analysis.AnalysisIntent.RequestMovesEvaluation
 import molokoka.project.n.analysis.AnalysisIntent.Reset
 import molokoka.project.n.analysis.AnalysisIntent.SelectNode
 import molokoka.project.n.computer_move.ComputerMoveSource
+import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Move.Companion.parse
+import molokoka.project.n.domain.MoveNode
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.move_evaluation.MoveEvaluation

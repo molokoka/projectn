@@ -1,9 +1,6 @@
-package molokoka.project.n.analysis
+package molokoka.project.n.domain
 
 import molokoka.project.n.move_evaluation.MoveEvaluation
-import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.Position
-import molokoka.project.n.domain.play
 
 data class MoveNode(
     val move: Move,

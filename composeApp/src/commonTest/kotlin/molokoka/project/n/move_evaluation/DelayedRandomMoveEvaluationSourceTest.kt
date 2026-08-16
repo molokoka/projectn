@@ -2,12 +2,10 @@ package molokoka.project.n.move_evaluation
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import molokoka.project.n.analysis.AnalysisTree
-import molokoka.project.n.analysis.MoveNode
-import molokoka.project.n.analysis.paths
+import molokoka.project.n.domain.AnalysisTree
+import molokoka.project.n.domain.MoveNode
+import molokoka.project.n.domain.paths
 import molokoka.project.n.domain.Move
-import molokoka.project.n.move_evaluation.DelayedRandomMoveEvaluationSource
-import molokoka.project.n.move_evaluation.MoveEvaluationSource
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

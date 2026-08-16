@@ -16,6 +16,7 @@ import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.computer_move.ComputerMoveSource
+import molokoka.project.n.domain.AnalysisTree
 
 class AnalysisViewModel(
     private val computerMoveSource: ComputerMoveSource,

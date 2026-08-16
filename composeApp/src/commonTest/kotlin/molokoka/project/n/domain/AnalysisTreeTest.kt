@@ -1,8 +1,6 @@
-package molokoka.project.n.analysis
+package molokoka.project.n.domain
 
 import molokoka.project.n.move_evaluation.MoveEvaluation
-import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.Position
 import molokoka.project.n.util.fromDiagram
 import molokoka.project.n.util.moveTreeDiagram
 import molokoka.project.n.util.positionDiagram

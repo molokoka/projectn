@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.sideToMove
 import molokoka.project.n.ui.ScrollableViewPan

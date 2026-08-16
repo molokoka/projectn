@@ -1,9 +1,9 @@
 package molokoka.project.n.util
 
-import molokoka.project.n.analysis.AnalysisTree
+import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
-import molokoka.project.n.analysis.MoveNode
+import molokoka.project.n.domain.MoveNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
