@@ -61,6 +61,9 @@ kotlin {
             implementation(libs.navigation3.runtime)
             implementation(libs.navigation3.ui)
         }
+        androidMain.dependencies {
+            implementation(libs.compose.uiTooling)
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutinesTest)

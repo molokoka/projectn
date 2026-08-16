@@ -1,4 +1,4 @@
-package molokoka.project.n.ui
+package molokoka.project.n.analysis
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -24,19 +31,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import molokoka.project.n.domain.Move
-import molokoka.project.n.analysis.AnalysisTree
 import molokoka.project.n.domain.sideToMove
+import molokoka.project.n.ui.ScrollableViewPan
+import molokoka.project.n.ui.panned
+import molokoka.project.n.ui.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.current_moves
 import projectn.composeapp.generated.resources.moves_tree
 import projectn.composeapp.generated.resources.start
 
-private const val DEPTH_MARKER = "."
+private const val DepthMarker = "."
 
 @Composable
 fun AnalysisView(
@@ -45,7 +51,8 @@ fun AnalysisView(
     onNodeSelected: (List<Move>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val analysisUiConfig = chessBoardUiConfig().analysis
+    val colors = AppTheme.colors
+    val dimens = AppTheme.dimens
     val paths = tree.paths()
 
     val currentMoves = moves.indices.joinToString(" ") { moveCount ->
@@ -64,18 +71,21 @@ fun AnalysisView(
         pathScroll.animateScrollTo(pathScroll.maxValue)
     }
 
-    Column(modifier = modifier) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing),
+        modifier = modifier
+    ) {
         SectionTitle(stringResource(Res.string.current_moves, moves.size))
 
         BasicText(
             text = currentMoves,
-            style = moveTextStyle(),
+            style = AppTheme.typography.move,
             softWrap = false,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(analysisUiConfig.headerColor)
+                .background(colors.headerBackground)
                 .horizontalScroll(pathScroll)
-                .padding(6.dp)
+                .padding(dimens.currentMovesPadding)
         )
 
         SectionTitle(stringResource(Res.string.moves_tree))
@@ -94,7 +104,7 @@ fun AnalysisView(
             item {
                 MoveRow(
                     label = stringResource(Res.string.start),
-                    background = analysisUiConfig.headerColor,
+                    background = colors.headerBackground,
                     isSelected = moves.isEmpty(),
                     scrollableViewPan = scrollableViewPan,
                     onClick = { onNodeSelected(emptyList()) }
@@ -103,8 +113,8 @@ fun AnalysisView(
 
             items(paths) { path ->
                 MoveRow(
-                    label = DEPTH_MARKER.repeat(path.size) + " " + tree.moveWithEvaluation(path),
-                    background = analysisUiConfig.moveColor(sideToMove(path.size - 1)),
+                    label = DepthMarker.repeat(path.size) + " " + tree.moveWithEvaluation(path),
+                    background = colors.moveRow(sideToMove(path.size - 1)),
                     isSelected = path == moves,
                     scrollableViewPan = scrollableViewPan,
                     onClick = { onNodeSelected(path) }
@@ -130,16 +140,9 @@ private suspend fun LazyListState.animateScrollToCentre(row: Int) {
 
 @Composable
 private fun SectionTitle(text: String) {
-    val analysisUiConfig = chessBoardUiConfig().analysis
-
     BasicText(
         text = text,
-        style = TextStyle(
-            fontFamily = karmaticArcade(),
-            fontSize = 12.sp,
-            color = analysisUiConfig.mutedTextColor
-        ),
-        modifier = Modifier.padding(top = 8.dp, bottom = 3.dp)
+        style = AppTheme.typography.sectionTitle
     )
 }
 
@@ -151,10 +154,11 @@ private fun MoveRow(
     scrollableViewPan: ScrollableViewPan,
     onClick: () -> Unit
 ) {
-    val analysisUiConfig = chessBoardUiConfig().analysis
+    val colors = AppTheme.colors
+    val dimens = AppTheme.dimens
     val selectedBorder = Modifier.border(
-        analysisUiConfig.selectedRowBorder,
-        analysisUiConfig.selectedRowColor
+        dimens.selectedMoveRowBorder,
+        colors.selectedMoveRow
     )
 
     Row(
@@ -165,20 +169,82 @@ private fun MoveRow(
             .then(if (isSelected) selectedBorder else Modifier)
             .clickable { onClick() }
             .clipToBounds()
-            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .padding(
+                horizontal = dimens.moveRowHorizontalPadding,
+                vertical = dimens.moveRowVerticalPadding
+            )
     ) {
         BasicText(
             text = label,
-            style = moveTextStyle(),
+            style = AppTheme.typography.move,
             softWrap = false,
             modifier = Modifier.panned(scrollableViewPan)
         )
     }
 }
 
+private val ViewWidth = 360.dp
+private val ViewHeight = 320.dp
+
 @Composable
-private fun moveTextStyle() = TextStyle(
-    fontFamily = byteBounce(),
-    fontSize = 20.sp,
-    color = Color.Black
-)
+private fun AnalysisViewPreview(tree: AnalysisTree, moves: List<Move>) {
+    AppTheme {
+        Box(
+            modifier = Modifier
+                .width(ViewWidth)
+                .height(ViewHeight)
+        ) {
+            AnalysisView(
+                tree = tree,
+                moves = moves,
+                onNodeSelected = {},
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AnalysisViewEmptyPreview() {
+    AnalysisViewPreview(
+        tree = AnalysisTree(),
+        moves = emptyList()
+    )
+}
+
+@Preview
+@Composable
+fun AnalysisViewLinePreview() {
+    AnalysisViewPreview(
+        tree = previewLineTree(plies = 4),
+        moves = PreviewLine.take(4)
+    )
+}
+
+@Preview
+@Composable
+fun AnalysisViewStartSelectedPreview() {
+    AnalysisViewPreview(
+        tree = previewLineTree(plies = 4),
+        moves = emptyList()
+    )
+}
+
+@Preview
+@Composable
+fun AnalysisViewEvaluatedPreview() {
+    AnalysisViewPreview(
+        tree = previewEvaluatedTree(plies = 8),
+        moves = PreviewLine.take(8)
+    )
+}
+
+@Preview
+@Composable
+fun AnalysisViewBranchingPreview() {
+    AnalysisViewPreview(
+        tree = previewLineTree(plies = 3).play(PreviewLine.take(1), PreviewVariation),
+        moves = PreviewLine.take(1) + PreviewVariation
+    )
+}

@@ -1,4 +1,4 @@
-package molokoka.project.n.computer
+package molokoka.project.n.computer_move
 
 import kotlinx.coroutines.test.runTest
 import molokoka.project.n.domain.Move

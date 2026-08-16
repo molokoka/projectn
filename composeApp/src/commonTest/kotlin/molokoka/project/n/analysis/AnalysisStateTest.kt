@@ -1,6 +1,6 @@
 package molokoka.project.n.analysis
 
-import molokoka.project.n.analysis.move_evaluation.MoveEvaluation
+import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position

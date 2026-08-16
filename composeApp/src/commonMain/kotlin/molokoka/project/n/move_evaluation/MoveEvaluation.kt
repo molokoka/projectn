@@ -1,4 +1,4 @@
-package molokoka.project.n.analysis.move_evaluation
+package molokoka.project.n.move_evaluation
 
 // `+`, `-` and `=` name a side by chess convention (Chess Informant; PGN NAGs 14-19):
 // the sign is always White-relative, never relative to whoever just moved.

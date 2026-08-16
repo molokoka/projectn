@@ -1,4 +1,4 @@
-package molokoka.project.n.analysis.move_evaluation
+package molokoka.project.n.move_evaluation
 
 import molokoka.project.n.analysis.MoveNode
 import molokoka.project.n.domain.Move

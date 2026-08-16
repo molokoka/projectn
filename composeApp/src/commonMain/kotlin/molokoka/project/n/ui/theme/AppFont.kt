@@ -1,4 +1,4 @@
-package molokoka.project.n.ui
+package molokoka.project.n.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontFamily

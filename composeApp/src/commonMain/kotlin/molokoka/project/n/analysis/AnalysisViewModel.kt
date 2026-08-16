@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import molokoka.project.n.analysis.move_evaluation.MoveEvaluationSource
+import molokoka.project.n.move_evaluation.MoveEvaluationSource
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
-import molokoka.project.n.computer.ComputerMoveSource
+import molokoka.project.n.computer_move.ComputerMoveSource
 
 class AnalysisViewModel(
     private val computerMoveSource: ComputerMoveSource,

@@ -1,4 +1,4 @@
-package molokoka.project.n.computer
+package molokoka.project.n.computer_move
 
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position

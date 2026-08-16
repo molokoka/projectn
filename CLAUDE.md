@@ -217,7 +217,7 @@ performance difference. These functions run on a click, over at most six squares
   `requireValid<Piece>Move(move)` validates. `Shared.kt` holds what they have in
   common - the geometry predicates, the ray builders, and `reachableAlong`.
   Three exhaustive `when`s dispatch on `PieceType` - `domain/ReachableSquares.kt`
-  (generation), `Chess.kt` (validation), and `ui/PieceGlyph.kt` (display) - so a
+  (generation), `Chess.kt` (validation), and `ui/PieceImage.kt` (display) - so a
   new entry in the enum breaks the build in exactly the places that need editing
 - All dependency versions belong in `gradle/libs.versions.toml`, never inline in
   a build script
@@ -229,6 +229,18 @@ performance difference. These functions run on a click, over at most six squares
   Reload runs the app on its own provisioned JetBrains Runtime, which is older
   than the JDK an IDE may build with. That mismatch fails at launch with
   `UnsupportedClassVersionError`, not at compile time.
+- **Piece artwork in `composeResources/drawable` must be XML vector drawables,
+  not SVG.** Compose Multiplatform generates a `Res.drawable` accessor for an
+  `.svg` and renders it on desktop and iOS, but Android throws
+  `IllegalStateException: Android platform doesn't support SVG format` the
+  moment `painterResource` loads it. Nothing catches this before runtime -
+  `assembleDebug` succeeds, because the failure is in the resource decoder, not
+  the build. Vector XML renders on all three targets. It has no `<circle>`
+  element, so round shapes are two arc subpaths in `pathData`.
+- **Launch the Android app, do not just build it.** `:androidApp:assembleDebug`
+  passing says nothing about whether the app runs; the SVG crash above shipped a
+  green build. `./gradlew :androidApp:installDebug`, start it, then
+  `adb logcat -d -b crash`.
 - iOS targets are arm64 (device) and simulator arm64 only. iosX64 (Intel
   simulator) was removed: Compose Multiplatform publishes no iosX64 artifacts,
   so it could never build the UI. `EXCLUDED_ARCHS[sdk=iphonesimulator*]` in the

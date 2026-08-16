@@ -1,12 +1,10 @@
 package molokoka.project.n
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -21,8 +19,7 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import molokoka.project.n.analysis.AnalysisScreen
 import molokoka.project.n.di.appModule
-import molokoka.project.n.setup.Setup
-import molokoka.project.n.ui.ChessBoardUiConfigProvider
+import molokoka.project.n.ui.theme.AppTheme
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 
@@ -30,14 +27,11 @@ import org.koin.dsl.koinConfiguration
 @Preview
 fun App() {
     KoinApplication(configuration = koinConfiguration { modules(appModule) }) {
-        ChessBoardUiConfigProvider {
+        AppTheme {
             AppContent()
         }
     }
 }
-
-@Serializable
-data object SetupRoute : NavKey
 
 @Serializable
 data object AnalysisRoute : NavKey
@@ -46,7 +40,6 @@ val navSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
         include(SavedStateConfiguration.DEFAULT.serializersModule)
         polymorphic(NavKey::class) {
-            subclass(SetupRoute::class)
             subclass(AnalysisRoute::class)
         }
     }
@@ -54,11 +47,11 @@ val navSavedStateConfiguration = SavedStateConfiguration {
 
 @Composable
 fun AppContent() {
-    val backStack = rememberNavBackStack(navSavedStateConfiguration, SetupRoute)
+    val backStack = rememberNavBackStack(navSavedStateConfiguration, AnalysisRoute)
 
     NavDisplay(
         modifier = Modifier
-            .background(Color.White)
+            .background(AppTheme.colors.background)
             .safeContentPadding()
             .fillMaxSize(),
         backStack = backStack,
@@ -68,11 +61,8 @@ fun AppContent() {
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
-            entry<SetupRoute> {
-                Setup(onStart = { backStack.add(AnalysisRoute) })
-            }
             entry<AnalysisRoute> {
-                AnalysisScreen(onBackToInit = { backStack.removeLastOrNull() })
+                AnalysisScreen()
             }
         }
     )

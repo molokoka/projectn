@@ -1,4 +1,4 @@
-package molokoka.project.n.analysis.move_evaluation
+package molokoka.project.n.move_evaluation
 
 import kotlinx.coroutines.delay
 import molokoka.project.n.analysis.MoveNode
