@@ -17,6 +17,9 @@ import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.computer_move.ComputerMoveSource
 import molokoka.project.n.domain.AnalysisTree
+import molokoka.project.n.log.log
+
+private const val TAG = "AnalysisViewModel"
 
 class AnalysisViewModel(
     private val computerMoveSource: ComputerMoveSource,
@@ -30,9 +33,23 @@ class AnalysisViewModel(
     private val moveEvaluationScope =
         viewModelScope + SupervisorJob(viewModelScope.coroutineContext.job)
 
+    private val instance = "#${hashCode().toString(16)}"
+
+    init {
+        log(TAG, "$instance created")
+    }
+
+    override fun onCleared() {
+        log(TAG, "$instance cleared")
+    }
+
     fun onIntent(intent: AnalysisIntent) {
         val (newState, effects) = _state.value.reduce(intent)
         _state.value = newState
+
+        log(TAG, "$instance intent=$intent")
+        log(TAG, "$instance state ${newState.summary()}")
+
         effects.forEach { effect -> runEffect(effect) }
     }
 
@@ -73,4 +90,13 @@ class AnalysisViewModel(
     private fun cancelMoveEvaluation() {
         moveEvaluationScope.coroutineContext.cancelChildren()
     }
+}
+
+private fun AnalysisState.summary(): String {
+    val path = moves.joinToString(" ").ifEmpty { "Start" }
+    val square = selected?.toString() ?: "-"
+    val evaluation = "${tree.evaluationGeneration}/$pendingEvaluationGeneration"
+
+    return "moves=$path nodes=${tree.paths().size} selected=$square " +
+        "computerMove=$isComputerMovePending evaluation=$evaluation"
 }

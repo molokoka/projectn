@@ -22,7 +22,9 @@ kotlin {
             enable = true
         }
 
-        withHostTest {}
+        withHostTest {
+            isReturnDefaultValues = true
+        }
     }
 
     listOf(
