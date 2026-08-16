@@ -188,7 +188,7 @@ private val ViewWidth = 360.dp
 private val ViewHeight = 320.dp
 
 @Composable
-private fun AnalysisViewPreview(tree: AnalysisTree, moves: List<Move>) {
+private fun AnalysisViewPreview(analysis: AnalysisState = AnalysisState()) {
     AppTheme {
         Box(
             modifier = Modifier
@@ -196,8 +196,8 @@ private fun AnalysisViewPreview(tree: AnalysisTree, moves: List<Move>) {
                 .height(ViewHeight)
         ) {
             AnalysisView(
-                tree = tree,
-                moves = moves,
+                tree = analysis.tree,
+                moves = analysis.moves,
                 onNodeSelected = {},
                 modifier = Modifier.fillMaxSize()
             )
@@ -208,44 +208,29 @@ private fun AnalysisViewPreview(tree: AnalysisTree, moves: List<Move>) {
 @Preview
 @Composable
 fun AnalysisViewEmptyPreview() {
-    AnalysisViewPreview(
-        tree = AnalysisTree(),
-        moves = emptyList()
-    )
+    AnalysisViewPreview()
 }
 
 @Preview
 @Composable
 fun AnalysisViewLinePreview() {
-    AnalysisViewPreview(
-        tree = previewLineTree(plies = 4),
-        moves = PreviewLine.take(4)
-    )
+    AnalysisViewPreview(analysis = PreviewOpeningLineWithLastMoveSelected)
 }
 
 @Preview
 @Composable
 fun AnalysisViewStartSelectedPreview() {
-    AnalysisViewPreview(
-        tree = previewLineTree(plies = 4),
-        moves = emptyList()
-    )
+    AnalysisViewPreview(analysis = PreviewOpeningLineWithStartSelected)
 }
 
 @Preview
 @Composable
 fun AnalysisViewEvaluatedPreview() {
-    AnalysisViewPreview(
-        tree = previewEvaluatedTree(plies = 8),
-        moves = PreviewLine.take(8)
-    )
+    AnalysisViewPreview(analysis = PreviewEvaluatedLineWithLastMoveSelected)
 }
 
 @Preview
 @Composable
 fun AnalysisViewBranchingPreview() {
-    AnalysisViewPreview(
-        tree = previewLineTree(plies = 3).play(PreviewLine.take(1), PreviewVariation),
-        moves = PreviewLine.take(1) + PreviewVariation
-    )
+    AnalysisViewPreview(analysis = PreviewBranchedLineWithAlternativeSelected)
 }

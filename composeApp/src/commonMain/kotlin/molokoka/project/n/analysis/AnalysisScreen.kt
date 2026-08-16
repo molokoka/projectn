@@ -22,21 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import molokoka.project.n.analysis.AnalysisIntent.FlipBoard
-import molokoka.project.n.analysis.AnalysisIntent.MovesEvaluationReady
 import molokoka.project.n.analysis.AnalysisIntent.OnSquareClick
 import molokoka.project.n.analysis.AnalysisIntent.RequestComputerMove
 import molokoka.project.n.analysis.AnalysisIntent.RequestMovesEvaluation
 import molokoka.project.n.analysis.AnalysisIntent.Reset
 import molokoka.project.n.analysis.AnalysisIntent.SelectNode
 import molokoka.project.n.computer_move.DelayedRandomComputerMoveSource
-import molokoka.project.n.domain.AnalysisTree
-import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.Move.Companion.parse
 import molokoka.project.n.move_evaluation.DelayedRandomMoveEvaluationSource
-import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.ui.ChessBoard
 import molokoka.project.n.ui.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
@@ -134,12 +128,12 @@ private fun ActionBar(
     ) {
         Action(
             text = stringResource(Res.string.computer_move) +
-                if (isComputerMovePending) " $loading" else "",
+                    if (isComputerMovePending) " $loading" else "",
             onClick = onComputerMove
         )
         Action(
             text = stringResource(Res.string.analysis) +
-                if (isMoveEvaluationPending) " $loading" else "",
+                    if (isMoveEvaluationPending) " $loading" else "",
             onClick = onAnalysis
         )
         Action(
@@ -167,59 +161,26 @@ private fun Action(
     )
 }
 
-// previews + preview data
+// previews
 
 private val PhoneWidth = 400.dp
 private val PhoneHeight = 820.dp
 private val ThinWidth = 300.dp
 private val ShortHeight = 380.dp
 
-internal val PreviewLine = listOf("b2a2", "b8b5", "h2g2", "a7a4", "g1f1", "d8d5", "c1c5", "h8h5")
-    .map(Move::parse)
-
-internal val PreviewVariation = parse("d8d5")
-
-// todo simplify with non-algorythmic data building
-
-internal fun previewLineTree(plies: Int): AnalysisTree =
-    (0 until plies).fold(AnalysisTree()) { tree, ply ->
-        tree.play(PreviewLine.take(ply), PreviewLine[ply])
-    }
-
-internal fun previewEvaluatedTree(plies: Int): AnalysisTree =
-    previewLineTree(plies).withEvaluations(
-        generation = 1,
-        evaluations = previewEvaluations(plies)
-    )
-
-internal fun previewPlayedLine(plies: Int): List<AnalysisIntent> =
-    (0 until plies).map { ply ->
-        AnalysisIntent.ComputerMoveReady(PreviewLine.take(ply), PreviewLine[ply])
-    }
-
-internal fun previewEvaluatedLine(plies: Int): List<AnalysisIntent> =
-    listOf(
-        RequestMovesEvaluation,
-        MovesEvaluationReady(
-            generation = 1,
-            evaluations = previewEvaluations(plies)
-        )
-    )
-
-private fun previewEvaluations(plies: Int): Map<List<Move>, MoveEvaluation> =
-    (1..plies).associate { depth ->
-        PreviewLine.take(depth) to MoveEvaluation.entries[depth % MoveEvaluation.entries.size]
-    }
-
 @Composable
 private fun AnalysisScreenPreview(
     width: Dp = PhoneWidth,
     height: Dp = PhoneHeight,
+    analysis: AnalysisState = AnalysisState(),
     intents: List<AnalysisIntent> = emptyList()
 ) {
     val viewModel = remember {
-        AnalysisViewModel(DelayedRandomComputerMoveSource(), DelayedRandomMoveEvaluationSource(), SavedStateHandle())
-            .also { previewed -> intents.forEach(previewed::onIntent) }
+        AnalysisViewModel(
+            DelayedRandomComputerMoveSource(),
+            DelayedRandomMoveEvaluationSource(),
+            previewHandle(analysis)
+        ).also { previewed -> intents.forEach(previewed::onIntent) }
     }
 
     AppTheme {
@@ -243,7 +204,7 @@ fun AnalysisScreenInitialPreview() {
 @Composable
 fun AnalysisScreenEvaluatedLinePreview() {
     AnalysisScreenPreview(
-        intents = previewPlayedLine(plies = 8) + previewEvaluatedLine(plies = 8)
+        analysis = PreviewEvaluatedLineWithLastMoveSelected
     )
 }
 
@@ -251,7 +212,8 @@ fun AnalysisScreenEvaluatedLinePreview() {
 @Composable
 fun AnalysisScreenComputerMovePendingPreview() {
     AnalysisScreenPreview(
-        intents = previewPlayedLine(plies = 3) + RequestComputerMove
+        analysis = PreviewOpeningLineWithLastMoveSelected,
+        intents = listOf(RequestComputerMove)
     )
 }
 
@@ -259,7 +221,8 @@ fun AnalysisScreenComputerMovePendingPreview() {
 @Composable
 fun AnalysisScreenEvaluationPendingPreview() {
     AnalysisScreenPreview(
-        intents = previewPlayedLine(plies = 3) + RequestMovesEvaluation
+        analysis = PreviewOpeningLineWithLastMoveSelected,
+        intents = listOf(RequestMovesEvaluation)
     )
 }
 
@@ -267,7 +230,8 @@ fun AnalysisScreenEvaluationPendingPreview() {
 @Composable
 fun AnalysisScreenFlippedPreview() {
     AnalysisScreenPreview(
-        intents = previewPlayedLine(plies = 3) + FlipBoard
+        analysis = PreviewOpeningLineWithLastMoveSelected,
+        intents = listOf(FlipBoard)
     )
 }
 
@@ -276,7 +240,7 @@ fun AnalysisScreenFlippedPreview() {
 fun AnalysisScreenThinPreview() {
     AnalysisScreenPreview(
         width = ThinWidth,
-        intents = previewPlayedLine(plies = 8) + previewEvaluatedLine(plies = 8)
+        analysis = PreviewEvaluatedLineWithLastMoveSelected
     )
 }
 
@@ -285,6 +249,6 @@ fun AnalysisScreenThinPreview() {
 fun AnalysisScreenShortPreview() {
     AnalysisScreenPreview(
         height = ShortHeight,
-        intents = previewPlayedLine(plies = 3)
+        analysis = PreviewOpeningLineWithLastMoveSelected
     )
 }
