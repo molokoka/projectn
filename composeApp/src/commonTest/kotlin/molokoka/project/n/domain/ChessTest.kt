@@ -1,7 +1,7 @@
 package molokoka.project.n.domain
 
-import molokoka.project.n.domain.util.fromDiagram
-import molokoka.project.n.domain.util.positionDiagram
+import molokoka.project.n.util.fromDiagram
+import molokoka.project.n.util.positionDiagram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

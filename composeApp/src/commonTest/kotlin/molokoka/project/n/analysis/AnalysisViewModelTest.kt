@@ -18,7 +18,7 @@ import molokoka.project.n.analysis.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
-import molokoka.project.n.analysis.util.moveTreeDiagram
+import molokoka.project.n.util.moveTreeDiagram
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

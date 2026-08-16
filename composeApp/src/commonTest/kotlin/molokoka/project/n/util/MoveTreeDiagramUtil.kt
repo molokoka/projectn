@@ -1,4 +1,4 @@
-package molokoka.project.n.analysis.util
+package molokoka.project.n.util
 
 import molokoka.project.n.analysis.AnalysisTree
 import molokoka.project.n.analysis.move_evaluation.MoveEvaluation

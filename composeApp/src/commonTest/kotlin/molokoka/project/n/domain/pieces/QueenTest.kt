@@ -4,9 +4,9 @@ import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
-import molokoka.project.n.domain.pieces.util.playableSquares
-import molokoka.project.n.domain.pieces.util.reachableMovesDiagram
-import molokoka.project.n.domain.pieces.util.reachableSquaresFromDiagram
+import molokoka.project.n.util.playableSquares
+import molokoka.project.n.util.reachableMovesDiagram
+import molokoka.project.n.util.reachableSquaresFromDiagram
 import molokoka.project.n.domain.play
 import kotlin.test.Test
 import kotlin.test.assertEquals

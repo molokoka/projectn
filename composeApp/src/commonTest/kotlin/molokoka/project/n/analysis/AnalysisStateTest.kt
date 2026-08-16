@@ -6,8 +6,8 @@ import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.play
-import molokoka.project.n.analysis.util.moveTreeDiagram
-import molokoka.project.n.domain.util.positionDiagram
+import molokoka.project.n.util.moveTreeDiagram
+import molokoka.project.n.util.positionDiagram
 import molokoka.project.n.ui.BoardOrientation
 import kotlin.test.Test
 import kotlin.test.assertEquals

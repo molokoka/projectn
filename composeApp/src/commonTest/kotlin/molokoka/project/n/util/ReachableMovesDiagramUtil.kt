@@ -1,4 +1,4 @@
-package molokoka.project.n.domain.pieces.util
+package molokoka.project.n.util
 
 import molokoka.project.n.domain.BOARD_SIZE
 import molokoka.project.n.domain.Coordinates

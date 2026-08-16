@@ -5,7 +5,7 @@ import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.play
-import molokoka.project.n.domain.util.fromDiagram
+import molokoka.project.n.util.fromDiagram
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContains

@@ -3,9 +3,9 @@ package molokoka.project.n.analysis
 import molokoka.project.n.analysis.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
-import molokoka.project.n.domain.util.fromDiagram
-import molokoka.project.n.analysis.util.moveTreeDiagram
-import molokoka.project.n.domain.util.positionDiagram
+import molokoka.project.n.util.fromDiagram
+import molokoka.project.n.util.moveTreeDiagram
+import molokoka.project.n.util.positionDiagram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

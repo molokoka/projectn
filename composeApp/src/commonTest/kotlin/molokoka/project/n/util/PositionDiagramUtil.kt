@@ -1,4 +1,4 @@
-package molokoka.project.n.domain.util
+package molokoka.project.n.util
 
 import molokoka.project.n.domain.BOARD_SIZE
 import molokoka.project.n.domain.Coordinates
@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 /**
  * A position board representation
  *
- * - every square in [Position.pieces] as that piece's own symbol
+ * - every square in [pieces] as that piece's own symbol
  * - `.` on an empty square
  */
 fun Position.positionDiagram(): String {
