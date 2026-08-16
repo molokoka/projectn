@@ -1,14 +1,16 @@
 package molokoka.project.n.analysis
 
+import kotlinx.serialization.Serializable
 import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Coordinates
-import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.sideToMove
+import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.ui.BoardOrientation
 
+@Serializable
 data class AnalysisState(
     val orientation: BoardOrientation = BoardOrientation.WHITE,
     val tree: AnalysisTree = AnalysisTree(),

@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.awaitCancellation
 import molokoka.project.n.analysis.AnalysisIntent.FlipBoard
 import molokoka.project.n.analysis.AnalysisIntent.MovesEvaluationReady
 import molokoka.project.n.analysis.AnalysisIntent.OnSquareClick
@@ -31,15 +31,12 @@ import molokoka.project.n.analysis.AnalysisIntent.RequestComputerMove
 import molokoka.project.n.analysis.AnalysisIntent.RequestMovesEvaluation
 import molokoka.project.n.analysis.AnalysisIntent.Reset
 import molokoka.project.n.analysis.AnalysisIntent.SelectNode
-import molokoka.project.n.computer_move.ComputerMoveSource
+import molokoka.project.n.computer_move.DelayedRandomComputerMoveSource
 import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Move.Companion.parse
-import molokoka.project.n.domain.MoveNode
-import molokoka.project.n.domain.Position
-import molokoka.project.n.domain.Side
+import molokoka.project.n.move_evaluation.DelayedRandomMoveEvaluationSource
 import molokoka.project.n.move_evaluation.MoveEvaluation
-import molokoka.project.n.move_evaluation.MoveEvaluationSource
 import molokoka.project.n.ui.ChessBoard
 import molokoka.project.n.ui.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
@@ -182,6 +179,8 @@ internal val PreviewLine = listOf("b2a2", "b8b5", "h2g2", "a7a4", "g1f1", "d8d5"
 
 internal val PreviewVariation = parse("d8d5")
 
+// todo simplify with non-algorythmic data building
+
 internal fun previewLineTree(plies: Int): AnalysisTree =
     (0 until plies).fold(AnalysisTree()) { tree, ply ->
         tree.play(PreviewLine.take(ply), PreviewLine[ply])
@@ -212,19 +211,6 @@ private fun previewEvaluations(plies: Int): Map<List<Move>, MoveEvaluation> =
         PreviewLine.take(depth) to MoveEvaluation.entries[depth % MoveEvaluation.entries.size]
     }
 
-internal object NeverAnswersComputerMove : ComputerMoveSource {
-
-    override suspend fun nextMove(position: Position, side: Side): Move = awaitCancellation()
-}
-
-internal object NeverAnswersMoveEvaluation : MoveEvaluationSource {
-
-    override suspend fun evaluate(
-        initialPosition: Position,
-        nodes: List<MoveNode>
-    ): Map<List<Move>, MoveEvaluation> = awaitCancellation()
-}
-
 @Composable
 private fun AnalysisScreenPreview(
     width: Dp = PhoneWidth,
@@ -232,7 +218,7 @@ private fun AnalysisScreenPreview(
     intents: List<AnalysisIntent> = emptyList()
 ) {
     val viewModel = remember {
-        AnalysisViewModel(NeverAnswersComputerMove, NeverAnswersMoveEvaluation)
+        AnalysisViewModel(DelayedRandomComputerMoveSource(), DelayedRandomMoveEvaluationSource(), SavedStateHandle())
             .also { previewed -> intents.forEach(previewed::onIntent) }
     }
 

@@ -1,13 +1,16 @@
 package molokoka.project.n.domain
 
+import kotlinx.serialization.Serializable
 import molokoka.project.n.move_evaluation.MoveEvaluation
 
+@Serializable
 data class MoveNode(
     val move: Move,
     val moveEvaluation: MoveEvaluation? = null,
     val nodes: List<MoveNode> = emptyList(),
 )
 
+@Serializable
 data class AnalysisTree(
     val initialPosition: Position = Position.INITIAL,
     val nodes: List<MoveNode> = emptyList(),
@@ -69,7 +72,7 @@ data class AnalysisTree(
             if (any { it.move == move }) {
                 this
             } else {
-                // verify that move is playable
+                // todo verify that move is playable
                 requireNotNull(initialPosition.play(path + move))
 
                 this + MoveNode(move)

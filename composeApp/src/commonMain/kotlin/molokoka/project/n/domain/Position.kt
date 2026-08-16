@@ -1,7 +1,14 @@
 package molokoka.project.n.domain
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import molokoka.project.n.domain.pieces.Piece
 
+@Serializable(with = PositionSerializer::class)
 data class Position(val pieces: Map<Coordinates, Piece>) {
 
     override fun toString(): String =
@@ -25,4 +32,14 @@ data class Position(val pieces: Map<Coordinates, Piece>) {
             return Position(pieces.toMap())
         }
     }
+}
+
+object PositionSerializer : KSerializer<Position> {
+
+    override val descriptor = PrimitiveSerialDescriptor("Position", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Position) =
+        encoder.encodeString(value.toString())
+
+    override fun deserialize(decoder: Decoder): Position = Position.parse(decoder.decodeString())
 }

@@ -1,5 +1,6 @@
 package molokoka.project.n.analysis
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -23,7 +24,8 @@ private const val TAG = "AnalysisViewModel"
 
 class AnalysisViewModel(
     private val computerMoveSource: ComputerMoveSource,
-    private val moveEvaluationSource: MoveEvaluationSource
+    private val moveEvaluationSource: MoveEvaluationSource,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnalysisState())
@@ -37,6 +39,12 @@ class AnalysisViewModel(
 
     init {
         log(TAG, "$instance created")
+
+        savedStateHandle.restoreAnalysisState()?.let { restored ->
+            _state.value = restored
+
+            log(TAG, "$instance restored ${restored.toLog()}")
+        }
     }
 
     override fun onCleared() {
@@ -48,9 +56,25 @@ class AnalysisViewModel(
         _state.value = newState
 
         log(TAG, "$instance intent=$intent")
-        log(TAG, "$instance state ${newState.summary()}")
+        log(TAG, "$instance state ${newState.toLog()}")
+
+        newState.saveTo(savedStateHandle)
+
+        log(TAG, "$instance saved ${savedStateHandle.toLog()}")
 
         effects.forEach { effect -> runEffect(effect) }
+    }
+
+    private fun SavedStateHandle.toLog(): String =
+        keys().sorted().joinToString(" | ") { key -> "$key=${get<Any>(key)}" }
+
+    private fun AnalysisState.toLog(): String {
+        val path = moves.joinToString(" ").ifEmpty { "Start" }
+        val square = selected?.toString() ?: "-"
+        val evaluation = "${tree.evaluationGeneration}/$pendingEvaluationGeneration"
+
+        return "moves=$path nodes=${tree.paths().size} selected=$square " +
+                "computerMove=$isComputerMovePending evaluation=$evaluation"
     }
 
     private fun runEffect(effect: AnalysisEffect) = when (effect) {
@@ -90,13 +114,4 @@ class AnalysisViewModel(
     private fun cancelMoveEvaluation() {
         moveEvaluationScope.coroutineContext.cancelChildren()
     }
-}
-
-private fun AnalysisState.summary(): String {
-    val path = moves.joinToString(" ").ifEmpty { "Start" }
-    val square = selected?.toString() ?: "-"
-    val evaluation = "${tree.evaluationGeneration}/$pendingEvaluationGeneration"
-
-    return "moves=$path nodes=${tree.paths().size} selected=$square " +
-        "computerMove=$isComputerMovePending evaluation=$evaluation"
 }

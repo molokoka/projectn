@@ -2,6 +2,7 @@
 
 package molokoka.project.n.analysis
 
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -159,7 +160,8 @@ class AnalysisViewModelTest {
         val playedMove = Move.parse("c1c4")
         val viewModel = AnalysisViewModel(
             QueuedComputerMoveSource(listOf(discardedMove, playedMove)),
-            FakeMoveEvaluationSource()
+            FakeMoveEvaluationSource(),
+            SavedStateHandle()
         )
 
         viewModel.onIntent(AnalysisIntent.RequestComputerMove)
@@ -359,14 +361,54 @@ class AnalysisViewModelTest {
         assertFalse(viewModel.state.value.isMoveEvaluationPending)
     }
 
+    @Test
+    fun `a view model rebuilt on the same saved state comes up on the played moves`() = runTest {
+        val opening = Move.parse("b2b4")
+        val handle = SavedStateHandle()
+
+        AnalysisViewModel(
+            FakeComputerMoveSource(null),
+            FakeMoveEvaluationSource(),
+            handle
+        ).apply {
+            onIntent(AnalysisIntent.OnSquareClick(Coordinates.parse("b2")))
+            onIntent(AnalysisIntent.OnSquareClick(Coordinates.parse("b4")))
+        }
+
+        val rebuilt = AnalysisViewModel(
+            FakeComputerMoveSource(null),
+            FakeMoveEvaluationSource(),
+            handle
+        )
+
+        assertEquals(
+            """
+            Start
+            └── $opening
+            """.trimIndent(),
+            rebuilt.state.value.tree.moveTreeDiagram()
+        )
+        assertEquals(listOf(opening), rebuilt.state.value.moves)
+        assertFalse(rebuilt.state.value.isComputerMovePending)
+        assertFalse(rebuilt.state.value.isMoveEvaluationPending)
+    }
+
     private fun viewModelPlaying(computerMove: Move?): AnalysisViewModel =
-        AnalysisViewModel(FakeComputerMoveSource(computerMove), FakeMoveEvaluationSource())
+        AnalysisViewModel(
+            FakeComputerMoveSource(computerMove),
+            FakeMoveEvaluationSource(),
+            SavedStateHandle()
+        )
 
     private fun viewModelWithMovePlayed(
         moveEvaluationSource: MoveEvaluationSource = FakeMoveEvaluationSource(),
         computerMove: Move? = null
     ): AnalysisViewModel =
-        AnalysisViewModel(FakeComputerMoveSource(computerMove), moveEvaluationSource).apply {
+        AnalysisViewModel(
+            FakeComputerMoveSource(computerMove),
+            moveEvaluationSource,
+            SavedStateHandle()
+        ).apply {
             onIntent(AnalysisIntent.OnSquareClick(Coordinates.parse("b2")))
             onIntent(AnalysisIntent.OnSquareClick(Coordinates.parse("b4")))
         }
