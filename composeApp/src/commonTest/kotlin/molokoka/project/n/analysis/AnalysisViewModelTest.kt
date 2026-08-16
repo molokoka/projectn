@@ -33,40 +33,17 @@ import kotlin.test.assertTrue
 private const val DELAY = 1_000L
 private const val LONG_DELAY = 3_000L
 
-private class FakeComputerMoveSource(private val move: Move?) : ComputerMoveSource {
-
-    override suspend fun nextMove(position: Position, side: Side): Move? {
-        delay(DELAY)
-
-        return move
-    }
-}
-
-private class QueuedComputerMoveSource(private val moves: List<Move>) : ComputerMoveSource {
+private class QueuedComputerMoveSource(private val moves: List<Move?>) : ComputerMoveSource {
 
     private var answered = 0
 
     override suspend fun nextMove(position: Position, side: Side): Move? {
-        val move = moves.getOrNull(answered)
+        val move = moves[answered]
         answered++
 
         delay(DELAY)
 
         return move
-    }
-}
-
-private class FakeMoveEvaluationSource(
-    private val moveEvaluation: MoveEvaluation = MoveEvaluation.WHITE_BETTER
-) : MoveEvaluationSource {
-
-    override suspend fun evaluate(
-        initialPosition: Position,
-        nodes: List<MoveNode>
-    ): Map<List<Move>, MoveEvaluation> {
-        delay(DELAY)
-
-        return nodes.paths().associateWith { moveEvaluation }
     }
 }
 
@@ -160,7 +137,7 @@ class AnalysisViewModelTest {
         val playedMove = Move.parse("c1c4")
         val viewModel = AnalysisViewModel(
             QueuedComputerMoveSource(listOf(discardedMove, playedMove)),
-            FakeMoveEvaluationSource(),
+            QueuedMoveEvaluationSource(emptyList()),
             SavedStateHandle()
         )
 
@@ -214,7 +191,7 @@ class AnalysisViewModelTest {
     @Test
     fun `applies the evaluations after the delay`() = runTest {
         val answer = MoveEvaluation.WHITE_BETTER
-        val viewModel = viewModelWithMovePlayed(FakeMoveEvaluationSource(answer))
+        val viewModel = viewModelWithMovePlayed(QueuedMoveEvaluationSource(listOf(DELAY to answer)))
 
         viewModel.onIntent(AnalysisIntent.RequestMovesEvaluation)
         advanceUntilIdle()
@@ -313,7 +290,7 @@ class AnalysisViewModelTest {
     @Test
     fun `selecting another position leaves the move evaluation running`() = runTest {
         val answer = MoveEvaluation.WHITE_BETTER
-        val viewModel = viewModelWithMovePlayed(FakeMoveEvaluationSource(answer))
+        val viewModel = viewModelWithMovePlayed(QueuedMoveEvaluationSource(listOf(DELAY to answer)))
 
         viewModel.onIntent(AnalysisIntent.RequestMovesEvaluation)
         viewModel.onIntent(AnalysisIntent.SelectNode(emptyList()))
@@ -344,7 +321,10 @@ class AnalysisViewModelTest {
     fun `a move played during a move evaluation is not in its snapshot`() = runTest {
         val answer = MoveEvaluation.WHITE_BETTER
         val computerMove = Move.parse("a7a5")
-        val viewModel = viewModelWithMovePlayed(FakeMoveEvaluationSource(answer), computerMove)
+        val viewModel = viewModelWithMovePlayed(
+            QueuedMoveEvaluationSource(listOf(DELAY to answer)),
+            computerMove
+        )
 
         viewModel.onIntent(AnalysisIntent.RequestMovesEvaluation)
         viewModel.onIntent(AnalysisIntent.RequestComputerMove)
@@ -367,8 +347,8 @@ class AnalysisViewModelTest {
         val handle = SavedStateHandle()
 
         AnalysisViewModel(
-            FakeComputerMoveSource(null),
-            FakeMoveEvaluationSource(),
+            QueuedComputerMoveSource(emptyList()),
+            QueuedMoveEvaluationSource(emptyList()),
             handle
         ).apply {
             onIntent(AnalysisIntent.OnSquareClick(Coordinates.parse("b2")))
@@ -376,8 +356,8 @@ class AnalysisViewModelTest {
         }
 
         val rebuilt = AnalysisViewModel(
-            FakeComputerMoveSource(null),
-            FakeMoveEvaluationSource(),
+            QueuedComputerMoveSource(emptyList()),
+            QueuedMoveEvaluationSource(emptyList()),
             handle
         )
 
@@ -395,17 +375,18 @@ class AnalysisViewModelTest {
 
     private fun viewModelPlaying(computerMove: Move?): AnalysisViewModel =
         AnalysisViewModel(
-            FakeComputerMoveSource(computerMove),
-            FakeMoveEvaluationSource(),
+            QueuedComputerMoveSource(listOf(computerMove)),
+            QueuedMoveEvaluationSource(emptyList()),
             SavedStateHandle()
         )
 
     private fun viewModelWithMovePlayed(
-        moveEvaluationSource: MoveEvaluationSource = FakeMoveEvaluationSource(),
+        moveEvaluationSource: MoveEvaluationSource =
+            QueuedMoveEvaluationSource(listOf(DELAY to MoveEvaluation.WHITE_BETTER)),
         computerMove: Move? = null
     ): AnalysisViewModel =
         AnalysisViewModel(
-            FakeComputerMoveSource(computerMove),
+            QueuedComputerMoveSource(listOf(computerMove)),
             moveEvaluationSource,
             SavedStateHandle()
         ).apply {
