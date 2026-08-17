@@ -100,7 +100,7 @@ class AnalysisViewModel(
 
     private fun startMovesEvaluation(generation: Int, tree: AnalysisTree) {
         moveEvaluationScope.launch {
-            val evaluations = moveEvaluationSource.evaluate(tree.initialPosition, tree.nodes)
+            val evaluations = moveEvaluationSource.evaluate(tree.nodes)
 
             onIntent(AnalysisIntent.MovesEvaluationReady(generation, evaluations))
         }

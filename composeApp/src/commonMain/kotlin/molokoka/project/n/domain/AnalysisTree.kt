@@ -6,6 +6,7 @@ import molokoka.project.n.move_evaluation.MoveEvaluation
 @Serializable
 data class MoveNode(
     val move: Move,
+    val position: Position,
     val moveEvaluation: MoveEvaluation? = null,
     val nodes: List<MoveNode> = emptyList(),
 )
@@ -21,13 +22,13 @@ data class AnalysisTree(
     fun positionAt(path: List<Move>): Position {
         requireNode(path)
 
-        return initialPosition.play(path)
+        return nodeAt(path)?.position ?: initialPosition
     }
 
-    fun play(path: List<Move>, move: Move): AnalysisTree {
+    fun add(path: List<Move>, move: Move, position: Position): AnalysisTree {
         requireNode(path)
 
-        return copy(nodes = nodes.play(path, 0, move))
+        return copy(nodes = nodes.add(path, 0, move, position))
     }
 
     fun paths(): List<List<Move>> = nodes.paths()
@@ -41,13 +42,14 @@ data class AnalysisTree(
             evaluationGeneration = generation
         )
 
-    fun evaluationAt(path: List<Move>): MoveEvaluation? =
+    fun evaluationAt(path: List<Move>): MoveEvaluation? = nodeAt(path)?.moveEvaluation
+
+    private fun nodeAt(path: List<Move>): MoveNode? =
         if (path.isEmpty()) {
             null
         } else {
             nodes.nodeForPath(path.dropLast(1))
                 ?.firstOrNull { node -> node.move == path.last() }
-                ?.moveEvaluation
         }
 
     private fun List<MoveNode>.withEvaluations(
@@ -67,26 +69,28 @@ data class AnalysisTree(
         require(contains(path)) { "Tree has no node at '${path.joinToString(" ")}'" }
     }
 
-    private fun List<MoveNode>.play(path: List<Move>, depth: Int, move: Move): List<MoveNode> =
+    private fun List<MoveNode>.add(
+        path: List<Move>,
+        depth: Int,
+        move: Move,
+        position: Position
+    ): List<MoveNode> =
         if (depth == path.size) {
-            if (any { it.move == move }) {
+            if (any { node -> node.move == move }) {
                 this
             } else {
-                // todo verify that move is playable
-                requireNotNull(initialPosition.play(path + move))
-
-                this + MoveNode(move)
+                this + MoveNode(move, position)
             }
         } else {
             map { node ->
                 if (node.move == path[depth]) {
-                    node.copy(nodes = node.nodes.play(path, depth + 1, move))
+                    node.copy(nodes = node.nodes.add(path, depth + 1, move, position))
                 } else {
                     node
                 }
             }
         }
-    
+
     private fun List<MoveNode>.nodeForPath(path: List<Move>, depth: Int = 0): List<MoveNode>? =
         if (depth == path.size) {
             this

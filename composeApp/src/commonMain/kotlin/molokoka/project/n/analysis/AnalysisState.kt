@@ -6,6 +6,7 @@ import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
+import molokoka.project.n.domain.play
 import molokoka.project.n.domain.sideToMove
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.ui.BoardOrientation
@@ -14,7 +15,7 @@ import molokoka.project.n.ui.BoardOrientation
 data class AnalysisState(
     val orientation: BoardOrientation = BoardOrientation.WHITE,
     val tree: AnalysisTree = AnalysisTree(),
-    val moves: List<Move> = emptyList(),
+    val moves: List<Move> = emptyList(), // todo moves and path is used interchangibly
     val selected: Coordinates? = null,
     val isComputerMovePending: Boolean = false,
     val pendingEvaluationGeneration: Int = 0,
@@ -121,7 +122,7 @@ private fun AnalysisState.onSquareClick(coordinates: Coordinates): AnalysisUpdat
     when (selected) {
         null -> select(coordinates) to emptyEffects()
         coordinates -> copy(selected = null) to emptyEffects()
-        else -> playOrReselect(Move(selected, coordinates))
+        else -> playOrSelect(Move(selected, coordinates))
     }
 
 private fun AnalysisState.select(coordinates: Coordinates): AnalysisState =
@@ -131,12 +132,12 @@ private fun AnalysisState.select(coordinates: Coordinates): AnalysisState =
         this
     }
 
-private fun AnalysisState.playOrReselect(move: Move): AnalysisUpdate =
-    runCatching { tree.play(moves, move) }
+private fun AnalysisState.playOrSelect(move: Move): AnalysisUpdate =
+    runCatching { position.play(move, sideToMove) }
         .fold(
             onSuccess = { played ->
                 copy(
-                    tree = played,
+                    tree = tree.add(moves, move, played),
                     moves = moves + move,
                     selected = null,
                     isComputerMovePending = false
@@ -164,11 +165,11 @@ private fun AnalysisState.selectNode(path: List<Move>): AnalysisUpdate =
 private fun AnalysisState.playComputerMove(path: List<Move>, move: Move): AnalysisUpdate {
     if (path != moves) return this to emptyEffects()
 
-    return runCatching { tree.play(path, move) }
+    return runCatching { position.play(move, sideToMove) }
         .fold(
             onSuccess = { played ->
                 copy(
-                    tree = played,
+                    tree = tree.add(path, move, played),
                     moves = path + move,
                     selected = null,
                     isComputerMovePending = false

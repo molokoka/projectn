@@ -4,6 +4,7 @@ import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.MoveNode
+import molokoka.project.n.domain.Position
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -33,6 +34,8 @@ private fun List<MoveNode>.moveTreeRows(indent: String): List<String> =
             node.nodes.moveTreeRows(replyIndent)
     }
 
+private val mockPosition = Position.parse("Ra1")
+
 class MoveTreeDiagramUtilTest {
 
     @Test
@@ -51,7 +54,7 @@ class MoveTreeDiagramUtilTest {
             └── b2b4
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), Move.parse("b2b4"))
+                .add(emptyList(), Move.parse("b2b4"), mockPosition)
                 .moveTreeDiagram()
         )
     }
@@ -65,8 +68,8 @@ class MoveTreeDiagramUtilTest {
             └── d2d4
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), Move.parse("b2b4"))
-                .play(emptyList(), Move.parse("d2d4"))
+                .add(emptyList(), Move.parse("b2b4"), mockPosition)
+                .add(emptyList(), Move.parse("d2d4"), mockPosition)
                 .moveTreeDiagram()
         )
     }
@@ -83,11 +86,11 @@ class MoveTreeDiagramUtilTest {
                 └── e7e5
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), Move.parse("b2b4"))
-                .play(listOf(Move.parse("b2b4")), Move.parse("a7a5"))
-                .play(listOf(Move.parse("b2b4")), Move.parse("c7c5"))
-                .play(emptyList(), Move.parse("d2d4"))
-                .play(listOf(Move.parse("d2d4")), Move.parse("e7e5"))
+                .add(emptyList(), Move.parse("b2b4"), mockPosition)
+                .add(listOf(Move.parse("b2b4")), Move.parse("a7a5"), mockPosition)
+                .add(listOf(Move.parse("b2b4")), Move.parse("c7c5"), mockPosition)
+                .add(emptyList(), Move.parse("d2d4"), mockPosition)
+                .add(listOf(Move.parse("d2d4")), Move.parse("e7e5"), mockPosition)
                 .moveTreeDiagram()
         )
     }
@@ -101,8 +104,8 @@ class MoveTreeDiagramUtilTest {
                 └── a7a5
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), Move.parse("b2b4"))
-                .play(listOf(Move.parse("b2b4")), Move.parse("a7a5"))
+                .add(emptyList(), Move.parse("b2b4"), mockPosition)
+                .add(listOf(Move.parse("b2b4")), Move.parse("a7a5"), mockPosition)
                 .moveTreeDiagram()
         )
     }
@@ -117,9 +120,9 @@ class MoveTreeDiagramUtilTest {
             └── d2d4
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), Move.parse("b2b4"))
-                .play(listOf(Move.parse("b2b4")), Move.parse("a7a5"))
-                .play(emptyList(), Move.parse("d2d4"))
+                .add(emptyList(), Move.parse("b2b4"), mockPosition)
+                .add(listOf(Move.parse("b2b4")), Move.parse("a7a5"), mockPosition)
+                .add(emptyList(), Move.parse("d2d4"), mockPosition)
                 .moveTreeDiagram()
         )
     }
@@ -134,7 +137,7 @@ class MoveTreeDiagramUtilTest {
             └── b2b4+
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), move)
+                .add(emptyList(), move, mockPosition)
                 .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
                 .moveTreeDiagram()
         )
@@ -152,8 +155,8 @@ class MoveTreeDiagramUtilTest {
             └── d2d4
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), evaluated)
-                .play(emptyList(), unevaluated)
+                .add(emptyList(), evaluated, mockPosition)
+                .add(emptyList(), unevaluated, mockPosition)
                 .withEvaluations(1, mapOf(listOf(evaluated) to MoveEvaluation.EQUAL))
                 .moveTreeDiagram()
         )
@@ -171,8 +174,8 @@ class MoveTreeDiagramUtilTest {
                 └── a7a5-
             """.trimIndent(),
             AnalysisTree()
-                .play(emptyList(), opening)
-                .play(listOf(opening), reply)
+                .add(emptyList(), opening, mockPosition)
+                .add(listOf(opening), reply, mockPosition)
                 .withEvaluations(
                     1,
                     mapOf(

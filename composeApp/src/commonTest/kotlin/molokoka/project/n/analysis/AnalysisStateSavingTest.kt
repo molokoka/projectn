@@ -3,6 +3,7 @@ package molokoka.project.n.analysis
 import androidx.lifecycle.SavedStateHandle
 import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
+import molokoka.project.n.domain.Position
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.ui.BoardOrientation
 import molokoka.project.n.util.moveTreeDiagram
@@ -35,11 +36,11 @@ class AnalysisStateSavingTest {
 
         val state = AnalysisState(
             tree = AnalysisTree()
-                .play(emptyList(), opening)
-                .play(listOf(opening), reply)
-                .play(listOf(opening), alternativeReply)
-                .play(emptyList(), variation)
-                .play(listOf(variation), variationReply)
+                .add(emptyList(), opening, Position.parse("Rb4"))
+                .add(listOf(opening), reply, Position.parse("Rb4 ra5"))
+                .add(listOf(opening), alternativeReply, Position.parse("Rb4 rc5"))
+                .add(emptyList(), variation, Position.parse("Rd4"))
+                .add(listOf(variation), variationReply, Position.parse("Rd4 re5"))
         )
 
         assertEquals(
@@ -56,6 +57,97 @@ class AnalysisStateSavingTest {
     }
 
     @Test
+    fun `restores the position of every node in the tree`() {
+        val opening = Move.parse("b2b4")
+        val variation = Move.parse("d2d4")
+        val reply = Move.parse("a7a5")
+        val alternativeReply = Move.parse("c7c5")
+        val variationReply = Move.parse("e7e5")
+        val positionAfterOpening = "Rb4"
+        val positionAfterReply = "Rb4 ra5"
+        val positionAfterAlternativeReply = "Rb4 rc5"
+        val positionAfterVariation = "Rd4"
+        val positionAfterVariationReply = "Rd4 re5"
+
+        val state = AnalysisState(
+            tree = AnalysisTree()
+                .add(
+                    emptyList(),
+                    opening,
+                    Position.parse(positionAfterOpening)
+                )
+                .add(
+                    listOf(opening),
+                    reply,
+                    Position.parse(positionAfterReply)
+                )
+                .add(
+                    listOf(opening),
+                    alternativeReply,
+                    Position.parse(positionAfterAlternativeReply)
+                )
+                .add(
+                    emptyList(),
+                    variation,
+                    Position.parse(positionAfterVariation)
+                )
+                .add(
+                    listOf(variation),
+                    variationReply,
+                    Position.parse(positionAfterVariationReply)
+                )
+        )
+
+        val restored = state.savedAndRestored().tree
+
+        assertEquals(
+            positionAfterOpening,
+            restored.positionAt(listOf(opening)).toString()
+        )
+        assertEquals(
+            positionAfterReply,
+            restored.positionAt(listOf(opening, reply)).toString()
+        )
+        assertEquals(
+            positionAfterAlternativeReply,
+            restored.positionAt(listOf(opening, alternativeReply)).toString()
+        )
+        assertEquals(
+            positionAfterVariation,
+            restored.positionAt(listOf(variation)).toString()
+        )
+        assertEquals(
+            positionAfterVariationReply,
+            restored.positionAt(listOf(variation, variationReply)).toString()
+        )
+    }
+
+    @Test
+    fun `restores the initial position at the root`() {
+        val initialPosition = "Rb2 rb7"
+
+        val state = AnalysisState(tree = AnalysisTree(Position.parse(initialPosition)))
+
+        assertEquals(
+            initialPosition,
+            state.savedAndRestored().tree.positionAt(emptyList()).toString()
+        )
+    }
+
+    @Test
+    fun `restores the position shown at the selected node`() {
+        val move = Move.parse("b2b4")
+        val positionAfterMove = "Rb4"
+
+        val state = AnalysisState(
+            tree = AnalysisTree().add(emptyList(), move, Position.parse(positionAfterMove)),
+            moves = listOf(move)
+        )
+
+        assertEquals(positionAfterMove, state.savedAndRestored().position.toString())
+    }
+
+    @Test
     fun `restores an evaluation onto the move it belongs to`() {
         val opening = Move.parse("b2b4")
         val reply = Move.parse("a7a5")
@@ -64,8 +156,8 @@ class AnalysisStateSavingTest {
 
         val state = AnalysisState(
             tree = AnalysisTree()
-                .play(emptyList(), opening)
-                .play(listOf(opening), reply)
+                .add(emptyList(), opening, Position.parse("Rb4"))
+                .add(listOf(opening), reply, Position.parse("Rb4 ra5"))
                 .withEvaluations(
                     generation = 1,
                     evaluations = mapOf(
@@ -93,8 +185,8 @@ class AnalysisStateSavingTest {
 
         val state = AnalysisState(
             tree = AnalysisTree()
-                .play(emptyList(), evaluated)
-                .play(emptyList(), unevaluated)
+                .add(emptyList(), evaluated, Position.parse("Rb4"))
+                .add(emptyList(), unevaluated, Position.parse("Rd4"))
                 .withEvaluations(1, mapOf(listOf(evaluated) to evaluation))
         )
 
@@ -115,8 +207,8 @@ class AnalysisStateSavingTest {
 
         val state = AnalysisState(
             tree = AnalysisTree()
-                .play(emptyList(), opening)
-                .play(listOf(opening), reply),
+                .add(emptyList(), opening, Position.parse("Rb4"))
+                .add(listOf(opening), reply, Position.parse("Rb4 ra5")),
             moves = listOf(opening, reply)
         )
 
@@ -126,7 +218,7 @@ class AnalysisStateSavingTest {
     @Test
     fun `restores the start node as the selection when no move was selected`() {
         val state = AnalysisState(
-            tree = AnalysisTree().play(emptyList(), Move.parse("b2b4"))
+            tree = AnalysisTree().add(emptyList(), Move.parse("b2b4"), Position.parse("Rb4"))
         )
 
         assertEquals(emptyList(), state.savedAndRestored().moves)
@@ -142,7 +234,7 @@ class AnalysisStateSavingTest {
     @Test
     fun `restores a computer move that was pending as no longer pending`() {
         val state = AnalysisState(
-            tree = AnalysisTree().play(emptyList(), Move.parse("b2b4")),
+            tree = AnalysisTree().add(emptyList(), Move.parse("b2b4"), Position.parse("Rb4")),
             isComputerMovePending = true
         )
 
@@ -152,7 +244,7 @@ class AnalysisStateSavingTest {
     @Test
     fun `restores a move evaluation that was pending as no longer loading`() {
         val state = AnalysisState(
-            tree = AnalysisTree().play(emptyList(), Move.parse("b2b4")),
+            tree = AnalysisTree().add(emptyList(), Move.parse("b2b4"), Position.parse("Rb4")),
             pendingEvaluationGeneration = 1
         )
 
@@ -165,7 +257,7 @@ class AnalysisStateSavingTest {
 
         val state = AnalysisState(
             tree = AnalysisTree()
-                .play(emptyList(), opening)
+                .add(emptyList(), opening, Position.parse("Rb4"))
                 .withEvaluations(1, mapOf(listOf(opening) to MoveEvaluation.WHITE_BETTER)),
             pendingEvaluationGeneration = 1
         )

@@ -53,10 +53,7 @@ private class QueuedMoveEvaluationSource(
 
     private var answered = 0
 
-    override suspend fun evaluate(
-        initialPosition: Position,
-        nodes: List<MoveNode>
-    ): Map<List<Move>, MoveEvaluation> {
+    override suspend fun evaluate(nodes: List<MoveNode>): Map<List<Move>, MoveEvaluation> {
         val (answerDelay, evaluation) = answers[answered]
         answered++
 

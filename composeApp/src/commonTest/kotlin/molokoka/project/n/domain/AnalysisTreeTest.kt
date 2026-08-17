@@ -1,9 +1,7 @@
 package molokoka.project.n.domain
 
 import molokoka.project.n.move_evaluation.MoveEvaluation
-import molokoka.project.n.util.fromDiagram
 import molokoka.project.n.util.moveTreeDiagram
-import molokoka.project.n.util.positionDiagram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -11,71 +9,77 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+private val initialPosition = Position.parse("Ra1 ra8")
+private val mockPosition = Position.parse("Ra1")
+
 class AnalysisTreeTest {
 
     // positionAt
 
     @Test
     fun `shows the initial position at the root`() {
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
+        val initialPosition = "Ra1 ra8"
 
-        assertEquals("Ra1 ra8", tree.positionAt(emptyList()).toString())
+        val tree = AnalysisTree(Position.parse(initialPosition))
+
+        assertEquals(initialPosition, tree.positionAt(emptyList()).toString())
     }
 
     @Test
-    fun `replays a path onto the initial position`() {
-        val initialPosition = fromDiagram(
-            """
-            8 r . . . . . . .
-            7 . . . . . . . .
-            6 . . . . . . . .
-            5 . . . . . . . .
-            4 . . . . . . . .
-            3 . . . . . . . .
-            2 . . . . . . . .
-            1 R . . . . . . .
-              a b c d e f g h
-            """
-        )
+    fun `hands back the position a move was added with`() {
+        val move = Move.parse("a1a4")
+        val firstMovePosition = "Ra4 ra8"
 
         val tree = AnalysisTree(initialPosition)
-            .play(emptyList(), Move.parse("a1a4"))
-            .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
+            .add(emptyList(), move, Position.parse(firstMovePosition))
 
-        val position = tree.positionAt(listOf(Move.parse("a1a4"), Move.parse("a8a5")))
-
-        assertEquals(
-            """
-            8 . . . . . . . .
-            7 . . . . . . . .
-            6 . . . . . . . .
-            5 r . . . . . . .
-            4 R . . . . . . .
-            3 . . . . . . . .
-            2 . . . . . . . .
-            1 . . . . . . . .
-              a b c d e f g h
-            """.trimIndent(),
-            position.positionDiagram()
-        )
+        assertEquals(firstMovePosition, tree.positionAt(listOf(move)).toString())
     }
 
     @Test
-    fun `has no position at a path that was never played`() {
+    fun `hands back the position a reply was added with`() {
+        val opening = Move.parse("a1a4")
+        val reply = Move.parse("a8a5")
+        val secondMovePosition = "Ra4 ra5"
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, Position.parse(secondMovePosition))
+
+        assertEquals(secondMovePosition, tree.positionAt(listOf(opening, reply)).toString())
+    }
+
+    @Test
+    fun `keeps a separate position for each sibling`() {
+        val move = Move.parse("a1a4")
+        val sibling = Move.parse("a1a3")
+        val movePosition = "Ra4 ra8"
+        val siblingPosition = "Ra3 ra8"
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, Position.parse(movePosition))
+            .add(emptyList(), sibling, Position.parse(siblingPosition))
+
+        assertEquals(movePosition, tree.positionAt(listOf(move)).toString())
+        assertEquals(siblingPosition, tree.positionAt(listOf(sibling)).toString())
+    }
+
+    @Test
+    fun `has no position at a path that is not in the tree`() {
         assertFailsWith<IllegalArgumentException> {
-            AnalysisTree(Position.parse("Ra1 ra8"))
+            AnalysisTree(initialPosition)
                 .positionAt(listOf(Move.parse("a1a4")))
         }
     }
 
-    // play
+    // add
 
     @Test
     fun `adds a node at the root`() {
         val move = Move.parse("a1a4")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), move)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
 
         assertEquals(
             """
@@ -91,9 +95,9 @@ class AnalysisTreeTest {
         val opening = Move.parse("a1a4")
         val reply = Move.parse("a8a5")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
 
         assertEquals(
             """
@@ -106,13 +110,35 @@ class AnalysisTreeTest {
     }
 
     @Test
+    fun `adds a node three levels deep`() {
+        val opening = Move.parse("a1a4")
+        val reply = Move.parse("a8a5")
+        val deepMove = Move.parse("a4b4")
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+            .add(listOf(opening, reply), deepMove, mockPosition)
+
+        assertEquals(
+            """
+            Start
+            └── $opening
+                └── $reply
+                    └── $deepMove
+            """.trimIndent(),
+            tree.moveTreeDiagram()
+        )
+    }
+
+    @Test
     fun `adds a sibling node for a different move`() {
         val move = Move.parse("a1a4")
         val sibling = Move.parse("a1a3")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), move)
-            .play(emptyList(), sibling)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
+            .add(emptyList(), sibling, mockPosition)
 
         assertEquals(
             """
@@ -130,10 +156,10 @@ class AnalysisTreeTest {
         val reply = Move.parse("a8a5")
         val sibling = Move.parse("a8a6")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
-            .play(listOf(opening), sibling)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+            .add(listOf(opening), sibling, mockPosition)
 
         assertEquals(
             """
@@ -151,10 +177,10 @@ class AnalysisTreeTest {
         val opening = Move.parse("a1a4")
         val reply = Move.parse("a8a5")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
-            .play(emptyList(), opening)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+            .add(emptyList(), opening, mockPosition)
 
         assertEquals(
             """
@@ -166,57 +192,24 @@ class AnalysisTreeTest {
         )
     }
 
-    /**
-     * The rook standing on a4 (after two moves in) must be movable, even though a4 is
-     * empty in the initial position.
-     */
     @Test
-    fun `plays a move from a node two levels deep`() {
-        val opening = Move.parse("a1a4")
-        val reply = Move.parse("a8a5")
-        val deepMove = Move.parse("a4b4")
-        val path = listOf(opening, reply)
+    fun `keeps the position a reused node was first added with`() {
+        val move = Move.parse("a1a4")
+        val firstPosition = "Ra4 ra8"
+        val laterPosition = "Ra4 ra5"
 
-        val played = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
-            .play(path, deepMove)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, Position.parse(firstPosition))
+            .add(emptyList(), move, Position.parse(laterPosition))
 
-        assertEquals(
-            """
-            Start
-            └── $opening
-                └── $reply
-                    └── $deepMove
-            """.trimIndent(),
-            played.moveTreeDiagram()
-        )
-        assertEquals("Rb4 ra5", played.positionAt(path + deepMove).toString())
+        assertEquals(firstPosition, tree.positionAt(listOf(move)).toString())
     }
 
     @Test
-    fun `refuses to play at a path that was never played`() {
+    fun `refuses to add at a path that is not in the tree`() {
         assertFailsWith<IllegalArgumentException> {
-            AnalysisTree(Position.parse("Ra1 ra8"))
-                .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
-        }
-    }
-
-    @Test
-    fun `rejects moving a black piece when white is to move`() {
-        assertFailsWith<IllegalArgumentException> {
-            AnalysisTree(Position.parse("Ra1 ra8"))
-                .play(emptyList(), Move.parse("a8a5"))
-        }
-    }
-
-    @Test
-    fun `rejects moving a white piece when black is to move`() {
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), Move.parse("a1a4"))
-
-        assertFailsWith<IllegalArgumentException> {
-            tree.play(listOf(Move.parse("a1a4")), Move.parse("a4a6"))
+            AnalysisTree(initialPosition)
+                .add(listOf(Move.parse("a1a4")), Move.parse("a8a5"), mockPosition)
         }
     }
 
@@ -228,10 +221,10 @@ class AnalysisTreeTest {
         val reply = Move.parse("a8a5")
         val variation = Move.parse("a1a3")
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
-            .play(emptyList(), variation)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+            .add(emptyList(), variation, mockPosition)
 
         assertEquals(
             """
@@ -254,44 +247,51 @@ class AnalysisTreeTest {
 
     @Test
     fun `lists no paths for an empty tree`() {
-        assertEquals(emptyList(), AnalysisTree(Position.parse("Ra1 ra8")).paths())
+        assertEquals(emptyList(), AnalysisTree(initialPosition).paths())
     }
 
     // contains
 
     @Test
     fun `contains the root of an empty tree`() {
-        assertTrue(AnalysisTree(Position.parse("Ra1 ra8")).contains(emptyList()))
+        assertTrue(AnalysisTree(initialPosition).contains(emptyList()))
     }
 
     @Test
-    fun `contains a path that was played`() {
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), Move.parse("a1a4"))
+    fun `contains a path that was added`() {
+        val move = Move.parse("a1a4")
 
-        assertTrue(tree.contains(listOf(Move.parse("a1a4"))))
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
+
+        assertTrue(tree.contains(listOf(move)))
     }
 
     @Test
     fun `contains a path two levels deep`() {
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), Move.parse("a1a4"))
-            .play(listOf(Move.parse("a1a4")), Move.parse("a8a5"))
+        val opening = Move.parse("a1a4")
+        val reply = Move.parse("a8a5")
 
-        assertTrue(tree.contains(listOf(Move.parse("a1a4"), Move.parse("a8a5"))))
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+
+        assertTrue(tree.contains(listOf(opening, reply)))
     }
 
     @Test
-    fun `does not contain a path that was never played`() {
-        assertFalse(AnalysisTree(Position.parse("Ra1 ra8")).contains(listOf(Move.parse("a1a4"))))
+    fun `does not contain a path that was never added`() {
+        assertFalse(AnalysisTree(initialPosition).contains(listOf(Move.parse("a1a4"))))
     }
 
     @Test
-    fun `does not contain a path whose last move was never played`() {
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), Move.parse("a1a4"))
+    fun `does not contain a path whose last move was never added`() {
+        val opening = Move.parse("a1a4")
 
-        assertFalse(tree.contains(listOf(Move.parse("a1a4"), Move.parse("a8a5"))))
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+
+        assertFalse(tree.contains(listOf(opening, Move.parse("a8a5"))))
     }
 
     // withEvaluations
@@ -303,9 +303,9 @@ class AnalysisTreeTest {
         val openingAnswer = MoveEvaluation.WHITE_BETTER
         val replyAnswer = MoveEvaluation.BLACK_BETTER
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
             .withEvaluations(
                 1,
                 mapOf(
@@ -331,10 +331,10 @@ class AnalysisTreeTest {
         val added = Move.parse("a1a3")
         val addedAnswer = MoveEvaluation.EQUAL
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), evaluated)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), evaluated, mockPosition)
             .withEvaluations(1, mapOf(listOf(evaluated) to evaluatedAnswer))
-            .play(emptyList(), added)
+            .add(emptyList(), added, mockPosition)
             .withEvaluations(2, mapOf(listOf(added) to addedAnswer))
 
         assertEquals(
@@ -352,8 +352,8 @@ class AnalysisTreeTest {
         val move = Move.parse("a1a4")
         val generation = 7
 
-        val tree = AnalysisTree(Position.parse("Ra1 ra8"))
-            .play(emptyList(), move)
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
             .withEvaluations(generation, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertEquals(generation, tree.evaluationGeneration)
@@ -363,9 +363,10 @@ class AnalysisTreeTest {
 
     @Test
     fun `reads back the evaluation attached to a path`() {
-        val move = Move.parse("b2b4")
-        val tree = AnalysisTree()
-            .play(emptyList(), move)
+        val move = Move.parse("a1a4")
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
             .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertEquals(MoveEvaluation.WHITE_BETTER, tree.evaluationAt(listOf(move)))
@@ -373,11 +374,12 @@ class AnalysisTreeTest {
 
     @Test
     fun `reads back the evaluation of a reply`() {
-        val opening = Move.parse("b2b4")
-        val reply = Move.parse("a7a5")
-        val tree = AnalysisTree()
-            .play(emptyList(), opening)
-            .play(listOf(opening), reply)
+        val opening = Move.parse("a1a4")
+        val reply = Move.parse("a8a5")
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
             .withEvaluations(1, mapOf(listOf(opening, reply) to MoveEvaluation.BLACK_BETTER))
 
         assertEquals(MoveEvaluation.BLACK_BETTER, tree.evaluationAt(listOf(opening, reply)))
@@ -385,9 +387,10 @@ class AnalysisTreeTest {
 
     @Test
     fun `has no evaluation at the start node`() {
-        val move = Move.parse("b2b4")
-        val tree = AnalysisTree()
-            .play(emptyList(), move)
+        val move = Move.parse("a1a4")
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
             .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertNull(tree.evaluationAt(emptyList()))
@@ -395,8 +398,11 @@ class AnalysisTreeTest {
 
     @Test
     fun `has no evaluation before one is attached`() {
-        val move = Move.parse("b2b4")
+        val move = Move.parse("a1a4")
 
-        assertNull(AnalysisTree().play(emptyList(), move).evaluationAt(listOf(move)))
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), move, mockPosition)
+
+        assertNull(tree.evaluationAt(listOf(move)))
     }
 }

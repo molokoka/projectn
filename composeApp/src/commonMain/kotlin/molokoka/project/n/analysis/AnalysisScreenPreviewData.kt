@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Move.Companion.parse
+import molokoka.project.n.domain.Position
+import molokoka.project.n.domain.play
 import molokoka.project.n.move_evaluation.MoveEvaluation.BLACK_BETTER
 import molokoka.project.n.move_evaluation.MoveEvaluation.EQUAL
 import molokoka.project.n.move_evaluation.MoveEvaluation.WHITE_BETTER
@@ -33,20 +35,26 @@ private val afterBlackFourthMove = afterWhiteFourthMove + blackFourthMove
 
 private val afterBlackAlternativeFirstMove = afterWhiteFirstMove + blackAlternativeFirstMove
 
+private fun positionAfter(moves: List<Move>): Position = Position.INITIAL.play(moves)
+
 private val openingLineTree = AnalysisTree()
-    .play(beforeAnyMove, whiteFirstMove)
-    .play(afterWhiteFirstMove, blackFirstMove)
-    .play(afterBlackFirstMove, whiteSecondMove)
-    .play(afterWhiteSecondMove, blackSecondMove)
+    .add(beforeAnyMove, whiteFirstMove, positionAfter(afterWhiteFirstMove))
+    .add(afterWhiteFirstMove, blackFirstMove, positionAfter(afterBlackFirstMove))
+    .add(afterBlackFirstMove, whiteSecondMove, positionAfter(afterWhiteSecondMove))
+    .add(afterWhiteSecondMove, blackSecondMove, positionAfter(afterBlackSecondMove))
 
 private val branchedLineTree = openingLineTree
-    .play(afterWhiteFirstMove, blackAlternativeFirstMove)
+    .add(
+        afterWhiteFirstMove,
+        blackAlternativeFirstMove,
+        positionAfter(afterBlackAlternativeFirstMove)
+    )
 
 private val evaluatedLineTree = openingLineTree
-    .play(afterBlackSecondMove, whiteThirdMove)
-    .play(afterWhiteThirdMove, blackThirdMove)
-    .play(afterBlackThirdMove, whiteFourthMove)
-    .play(afterWhiteFourthMove, blackFourthMove)
+    .add(afterBlackSecondMove, whiteThirdMove, positionAfter(afterWhiteThirdMove))
+    .add(afterWhiteThirdMove, blackThirdMove, positionAfter(afterBlackThirdMove))
+    .add(afterBlackThirdMove, whiteFourthMove, positionAfter(afterWhiteFourthMove))
+    .add(afterWhiteFourthMove, blackFourthMove, positionAfter(afterBlackFourthMove))
     .withEvaluations(
         generation = PreviewEvaluationGeneration,
         evaluations = mapOf(
