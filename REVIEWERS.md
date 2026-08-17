@@ -12,16 +12,21 @@ accordingly: the chess model covers rook and queen movement only, and the
 substance sits in the ordering rules in
 [`AnalysisState.kt`](composeApp/src/commonMain/kotlin/molokoka/project/n/analysis/AnalysisState.kt).
 
+This guide also exists as a web page,
+[docs/analysis-board-guide.html](docs/analysis-board-guide.html) - same content,
+laid out for reading in a browser. Both are kept in step, so an edit to one
+belongs in the other.
+
 ## Platform scope: read this first
 
-This is a Kotlin Multiplatform project, but the three targets are not equally
-supported.
+This is a Kotlin Multiplatform project, and all three apps work. They are not
+equally in focus.
 
 | Platform | Status | What that means here |
 |---|---|---|
-| **Android** | **Supported, and the target** | The one platform the app is developed and verified on. Min SDK 24, compile SDK 37. State survives process death through a real `SavedStateHandle`; logging goes to `Log.d`. |
-| Desktop (JVM) | Experimental | Exists as the fast feedback loop for UI work, because Compose hot reload makes a layout change visible in about a second. Not a shipping target. |
-| iOS | Experimental | Builds and runs, but is not part of routine verification. arm64 device plus arm64 simulator only; iOS 26 deployment target; needs Xcode 26. |
+| **Android** | **Working, and the focus** | The platform the app is developed and verified on. Min SDK 24, compile SDK 37. State survives process death through a real `SavedStateHandle`; logging goes to `Log.d`. |
+| Desktop (JVM) | Working | Runs the shared code as a desktop app, and doubles as the fast feedback loop for UI work, because Compose hot reload makes a layout change visible in about a second. |
+| iOS | Working | Runs the shared code as an iOS app. arm64 device plus arm64 simulator only; iOS 26 deployment target; needs Xcode 26. |
 
 The shared Compose code is genuinely shared, and desktop and iOS run it as
 written. What differs is where the trade-offs were resolved: layout and
@@ -238,7 +243,7 @@ model is 438 lines.
 
 ## Tests
 
-265 tests, all in `commonTest`, all green via `./gradlew :composeApp:desktopTest`.
+264 tests, all in `commonTest`, all green via `./gradlew :composeApp:desktopTest`.
 Two conventions do most of the work.
 
 **Test names aim to state one acceptance criterion as a sentence.**
@@ -331,7 +336,7 @@ The tree, with each move's evaluation attached. Indentation is the branch, so
 convention -- `+` White is better, `-` Black is better, `=` equal -- never relative
 to whoever just moved.
 
-All three helpers carry their own tests -- 33 of the 265 -- on the grounds that an
+All three helpers carry their own tests -- 33 of the 264 -- on the grounds that an
 assertion is only as trustworthy as the renderer it reads through. A broken
 renderer that agreed with itself would pass every test that used it.
 
@@ -350,20 +355,20 @@ double is measuring the double.
 
 ## Running it
 
-Android, the supported target:
+Android, the focus platform:
 
 ```bash
 ./gradlew :androidApp:installDebug
 ```
 
-Desktop, the quickest look at a UI change (experimental):
+Desktop, the quickest look at a UI change:
 
 ```bash
 ./gradlew :desktopApp:run
 ./gradlew :desktopApp:hotRun --auto    # hot reload; --auto is required to watch files
 ```
 
-iOS, through Xcode (experimental):
+iOS, through Xcode:
 
 ```bash
 xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \

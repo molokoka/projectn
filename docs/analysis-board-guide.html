@@ -380,27 +380,27 @@
 
   <section>
     <h2>Platform scope, first</h2>
-    <p>This is a Kotlin Multiplatform project, but the three targets are not equally
-    supported.</p>
+    <p>This is a Kotlin Multiplatform project, and all three apps work. They are not equally
+    in focus.</p>
 
     <div class="squares">
       <div class="square target">
         <span class="square-name">Android</span>
-        <span class="square-status">Supported target</span>
-        <p>The one platform the app is developed and verified on. Min SDK 24, compile SDK 37.
+        <span class="square-status">Working, and the focus</span>
+        <p>The platform the app is developed and verified on. Min SDK 24, compile SDK 37.
         State survives process death through a real <code>SavedStateHandle</code>.</p>
       </div>
       <div class="square light">
         <span class="square-name">Desktop</span>
-        <span class="square-status">Experimental</span>
-        <p>Earns its keep as the fast feedback loop for UI work — Compose hot reload shows a
-        layout change in about a second. Not a shipping target.</p>
+        <span class="square-status">Working</span>
+        <p>Runs the shared code as a desktop app, and doubles as the fast feedback loop for UI
+        work — Compose hot reload shows a layout change in about a second.</p>
       </div>
       <div class="square dark">
         <span class="square-name">iOS</span>
-        <span class="square-status">Experimental</span>
-        <p>Builds and runs, but is not part of routine verification. arm64 device and arm64
-        simulator only; iOS 26 deployment target; needs Xcode 26.</p>
+        <span class="square-status">Working</span>
+        <p>Runs the shared code as an iOS app. arm64 device and arm64 simulator only; iOS 26
+        deployment target; needs Xcode 26.</p>
       </div>
     </div>
 
@@ -721,7 +721,7 @@ a result for generation g is applied only when
 
   <section>
     <h2>Tests</h2>
-    <p>265 tests, all in <code>commonTest</code>, all green via
+    <p>264 tests, all in <code>commonTest</code>, all green via
     <code>./gradlew :composeApp:desktopTest</code>. Two conventions do most of the work.</p>
 
     <h3>Test names aim to state one acceptance criterion as a sentence</h3>
@@ -810,7 +810,7 @@ a result for generation g is applied only when
       </div>
     </div>
 
-    <p>All three helpers carry their own tests — 33 of the 265 — on the grounds that an
+    <p>All three helpers carry their own tests — 33 of the 264 — on the grounds that an
     assertion is only as trustworthy as the renderer it reads through. A broken renderer that
     agreed with itself would pass every test that used it.</p>
 
@@ -831,10 +831,10 @@ a result for generation g is applied only when
   <section>
     <h2>Running it</h2>
     <p>Requires JDK 17.</p>
-<pre># Android, the supported target
+<pre># Android, the focus platform
 ./gradlew :androidApp:installDebug
 
-# Desktop, the quickest look at a UI change (experimental)
+# Desktop, the quickest look at a UI change
 ./gradlew :desktopApp:run
 ./gradlew :desktopApp:hotRun --auto     # --auto is required to watch files
 

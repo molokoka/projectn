@@ -6,16 +6,17 @@ computer move, and simulated asynchronous analysis.
 
 Reviewing this? Start with [REVIEWERS.md](REVIEWERS.md), which maps every task_2
 requirement to the code that implements it and the test that pins it, and
-explains the four ordering rules the exercise is really about.
+explains the four ordering rules the exercise is really about. The same guide as
+a web page is [docs/analysis-board-guide.html](docs/analysis-board-guide.html) -
+open it in a browser if you would rather read it laid out than in Markdown.
 
 ## Platform scope
 
-This is a Kotlin Multiplatform project, but **Android is the target platform and
-the only one that is developed and verified against.** The **desktop and iOS apps
-are experimental**: they build and run from the same shared code, but they are
-not shipping targets and are not part of routine verification. Desktop exists
-mainly as the fast feedback loop for UI work, because Compose hot reload shows a
-layout change in about a second.
+This is a Kotlin Multiplatform project, and all three apps work: Android,
+desktop and iOS run the same shared code. **Android is where the focus is** - it
+is the platform the app is developed against, and where a decision that can only
+go one way goes. Desktop doubles as the fast feedback loop for UI work, because
+Compose hot reload shows a layout change in about a second.
 
 ## Status
 
@@ -33,18 +34,18 @@ Parts 1 to 3 and the optional bonus are implemented.
 ## Requirements
 
 - JDK 17
-- Android compile SDK 37, min SDK 24 - the supported target
-- Xcode 26 or newer for the experimental iOS app (deployment target is iOS 26.0;
-  Apple Silicon only)
+- Android compile SDK 37, min SDK 24 - the focus platform
+- Xcode 26 or newer for the iOS app (deployment target is iOS 26.0; Apple
+  Silicon only)
 
 ## Quick Start
 
-### Android (supported)
+### Android (the focus platform)
 ```bash
 ./gradlew :androidApp:installDebug
 ```
 
-### Desktop (experimental)
+### Desktop
 ```bash
 ./gradlew :desktopApp:run
 ./gradlew :desktopApp:hotRun --auto
@@ -54,7 +55,7 @@ Parts 1 to 3 and the optional bonus are implemented.
 reload attached, but nothing watches your files, so edits only appear when
 `./gradlew :desktopApp:hotReloadMain` runs.
 
-### iOS (experimental)
+### iOS
 Build and run through Xcode, or link the framework directly:
 ```bash
 ./gradlew :composeApp:linkDebugFrameworkIosArm64            # device
@@ -81,10 +82,9 @@ deliberately leaves untested.
 
 - **`composeApp/`** - all shared code, as a Kotlin Multiplatform library
 - **`androidApp/`** - Android entry point (`MainActivity`, manifest, launcher
-  icons) - the supported target
-- **`desktopApp/`** - desktop entry point (`main.kt`, native packaging) -
-  experimental
-- **`iosApp/`** - iOS entry point (Xcode project) - experimental
+  icons) - the focus platform
+- **`desktopApp/`** - desktop entry point (`main.kt`, native packaging)
+- **`iosApp/`** - iOS entry point (Xcode project)
 
 Each platform's entry point lives in its own module, and `composeApp` holds only
 shared code plus the platform `actual`s it needs. The Android split is forced -
