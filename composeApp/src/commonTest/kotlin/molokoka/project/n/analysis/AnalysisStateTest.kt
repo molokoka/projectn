@@ -534,14 +534,23 @@ class AnalysisStateTest {
         }
 
         @Test
-        fun `playing a move hides the computer move loading and cancels it`() {
-            val update = AnalysisState()
+        fun `playing a move cancels the computer move`() {
+            val effect = AnalysisState()
                 .reduce(AnalysisIntent.RequestComputerMove).first
                 .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c1"))).first
-                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))) // white c1c4
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))).second // white c1c4
 
-            assertFalse(update.first.isComputerMovePending)
-            assertEquals(listOf(AnalysisEffect.CancelComputerMove), update.second)
+            assertEquals(listOf(AnalysisEffect.CancelComputerMove), effect)
+        }
+
+        @Test
+        fun `playing a move hides the computer move loading`() {
+            val state = AnalysisState()
+                .reduce(AnalysisIntent.RequestComputerMove).first
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c1"))).first
+                .reduce(AnalysisIntent.OnSquareClick(Coordinates.parse("c4"))).first // white c1c4
+
+            assertFalse(state.isComputerMovePending)
         }
 
         @Test
@@ -801,6 +810,47 @@ class AnalysisStateTest {
                 └── $move$answer
                 """.trimIndent(),
                 state.tree.moveTreeDiagram()
+            )
+        }
+
+        @Test
+        fun `a move evaluation never changes the selected node or the visible board position`() {
+            val opening = Move.parse("a1a4")
+            val reply = Move.parse("b8b5")
+            val answer = MoveEvaluation.WHITE_BETTER
+
+            val state = AnalysisState()
+                .reduce(AnalysisIntent.OnSquareClick(opening.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(opening.to)).first // white a1a4
+                .reduce(AnalysisIntent.OnSquareClick(reply.from)).first
+                .reduce(AnalysisIntent.OnSquareClick(reply.to)).first // black b8b5
+                .reduce(AnalysisIntent.SelectNode(listOf(opening))).first
+                .reduce(AnalysisIntent.RequestMovesEvaluation).first
+                .reduce(
+                    AnalysisIntent.MovesEvaluationReady(
+                        1,
+                        mapOf(
+                            listOf(opening) to answer,
+                            listOf(opening, reply) to answer
+                        )
+                    )
+                ).first
+
+            assertEquals(listOf(opening), state.moves)
+            // the board still stands at $opening: the black rook has not left b8
+            assertEquals(
+                """
+                8 . r . r . r . r
+                7 q . q . q . q .
+                6 . . . . . . . .
+                5 . . . . . . . .
+                4 R . . . . . . .
+                3 . . . . . . . .
+                2 . Q . Q . Q . Q
+                1 . . R . R . R .
+                  a b c d e f g h
+                """.trimIndent(),
+                state.position.positionDiagram()
             )
         }
 
