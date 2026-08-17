@@ -1,4 +1,4 @@
-package molokoka.project.n.analysis
+package molokoka.project.n.analysis.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,22 +8,20 @@ import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -31,9 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import molokoka.project.n.domain.AnalysisTree
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.sideToMove
 import molokoka.project.n.ui.ScrollableViewPan
 import molokoka.project.n.ui.panned
 import molokoka.project.n.ui.theme.AppTheme
@@ -41,34 +39,25 @@ import org.jetbrains.compose.resources.stringResource
 import projectn.composeapp.generated.resources.Res
 import projectn.composeapp.generated.resources.current_moves
 import projectn.composeapp.generated.resources.moves_tree
-import projectn.composeapp.generated.resources.start
-
-private const val DepthMarker = "."
 
 @Composable
 fun AnalysisView(
-    tree: AnalysisTree,
-    moves: List<Move>,
+    viewState: AnalysisViewState,
     onNodeSelected: (List<Move>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = AppTheme.colors
     val dimens = AppTheme.dimens
-    val paths = tree.paths()
-
-    val currentMoves = moves.indices.joinToString(" ") { moveCount ->
-        tree.moveWithEvaluation(moves.take(moveCount + 1))
-    }
 
     val listState = rememberLazyListState()
     val pathScroll = rememberScrollState()
-    val selectedRow = if (moves.isEmpty()) 0 else paths.indexOf(moves) + 1
+    val selectedRow = viewState.selectedRow
 
     LaunchedEffect(selectedRow) {
-        if (selectedRow >= 0) listState.animateScrollToCentre(selectedRow)
+        if (selectedRow != null) listState.animateScrollToCentre(selectedRow)
     }
 
-    LaunchedEffect(moves, pathScroll.maxValue) {
+    LaunchedEffect(viewState.currentMoves, pathScroll.maxValue) {
         pathScroll.animateScrollTo(pathScroll.maxValue)
     }
 
@@ -76,10 +65,10 @@ fun AnalysisView(
         verticalArrangement = Arrangement.spacedBy(dimens.sectionSpacing),
         modifier = modifier
     ) {
-        SectionTitle(stringResource(Res.string.current_moves, moves.size))
+        SectionTitle(stringResource(Res.string.current_moves, viewState.moveCount))
 
         BasicText(
-            text = currentMoves,
+            text = viewState.currentMoves,
             style = AppTheme.typography.move,
             softWrap = false,
             modifier = Modifier
@@ -102,34 +91,21 @@ fun AnalysisView(
                     state = rememberScrollableState(scrollableViewPan::drag)
                 )
         ) {
-            item {
+            items(viewState.rows) { row ->
                 MoveRow(
-                    label = stringResource(Res.string.start),
-                    background = colors.headerBackground,
-                    isSelected = moves.isEmpty(),
+                    label = row.label,
+                    background = if (row.side == null) {
+                        colors.headerBackground
+                    } else {
+                        colors.moveRow(row.side)
+                    },
+                    isSelected = row.isSelected,
                     scrollableViewPan = scrollableViewPan,
-                    onClick = { onNodeSelected(emptyList()) }
-                )
-            }
-
-            items(paths) { path ->
-                MoveRow(
-                    label = DepthMarker.repeat(path.size) + " " + tree.moveWithEvaluation(path),
-                    background = colors.moveRow(sideToMove(path.size - 1)),
-                    isSelected = path == moves,
-                    scrollableViewPan = scrollableViewPan,
-                    onClick = { onNodeSelected(path) }
+                    onClick = { onNodeSelected(row.path) }
                 )
             }
         }
     }
-}
-
-private fun AnalysisTree.moveWithEvaluation(path: List<Move>): String {
-    val move = path.last()
-    val moveEvaluation = evaluationAt(path)
-
-    return if (moveEvaluation == null) "$move" else "$move$moveEvaluation"
 }
 
 private suspend fun LazyListState.animateScrollToCentre(row: Int) {
@@ -188,7 +164,7 @@ private val ViewWidth = 360.dp
 private val ViewHeight = 320.dp
 
 @Composable
-private fun AnalysisViewPreview(analysis: AnalysisState = AnalysisState()) {
+private fun AnalysisViewPreview(viewState: AnalysisViewState = PreviewEmptyViewState) {
     AppTheme {
         Box(
             modifier = Modifier
@@ -196,8 +172,7 @@ private fun AnalysisViewPreview(analysis: AnalysisState = AnalysisState()) {
                 .height(ViewHeight)
         ) {
             AnalysisView(
-                tree = analysis.tree,
-                moves = analysis.moves,
+                viewState = viewState,
                 onNodeSelected = {},
                 modifier = Modifier.fillMaxSize()
             )
@@ -214,23 +189,23 @@ fun AnalysisViewEmptyPreview() {
 @Preview
 @Composable
 fun AnalysisViewLinePreview() {
-    AnalysisViewPreview(analysis = PreviewOpeningLineWithLastMoveSelected)
+    AnalysisViewPreview(viewState = PreviewLineViewState)
 }
 
 @Preview
 @Composable
 fun AnalysisViewStartSelectedPreview() {
-    AnalysisViewPreview(analysis = PreviewOpeningLineWithStartSelected)
+    AnalysisViewPreview(viewState = PreviewStartSelectedViewState)
 }
 
 @Preview
 @Composable
 fun AnalysisViewEvaluatedPreview() {
-    AnalysisViewPreview(analysis = PreviewEvaluatedLineWithLastMoveSelected)
+    AnalysisViewPreview(viewState = PreviewEvaluatedLineViewState)
 }
 
 @Preview
 @Composable
 fun AnalysisViewBranchingPreview() {
-    AnalysisViewPreview(analysis = PreviewBranchedLineWithAlternativeSelected)
+    AnalysisViewPreview(viewState = PreviewBranchedLineViewState)
 }

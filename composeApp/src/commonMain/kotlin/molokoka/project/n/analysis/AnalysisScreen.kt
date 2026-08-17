@@ -29,6 +29,8 @@ import molokoka.project.n.analysis.AnalysisIntent.RequestComputerMove
 import molokoka.project.n.analysis.AnalysisIntent.RequestMovesEvaluation
 import molokoka.project.n.analysis.AnalysisIntent.Reset
 import molokoka.project.n.analysis.AnalysisIntent.SelectNode
+import molokoka.project.n.analysis.view.AnalysisView
+import molokoka.project.n.analysis.view.rememberAnalysisViewState
 import molokoka.project.n.computer_move.DelayedRandomComputerMoveSource
 import molokoka.project.n.move_evaluation.DelayedRandomMoveEvaluationSource
 import molokoka.project.n.ui.ChessBoard
@@ -76,8 +78,7 @@ fun AnalysisScreen(viewModel: AnalysisViewModel = koinViewModel()) {
             )
 
             AnalysisView(
-                tree = state.tree,
-                moves = state.moves,
+                viewState = rememberAnalysisViewState(state.tree, state.moves),
                 onNodeSelected = { viewModel.onIntent(SelectNode(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
