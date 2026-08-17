@@ -90,21 +90,3 @@ Each platform's entry point lives in its own module, and `composeApp` holds only
 shared code plus the platform `actual`s it needs. The Android split is forced -
 AGP 9 no longer allows the Android application plugin inside a Kotlin
 Multiplatform module - and desktop follows the same shape for symmetry.
-
-## Open tasks
-
-### Verification
-- [ ] Confirm the analysis view model is cleared on exit: Start, flip the board,
-      Exit, then Start again - the board must come back white. This proves the
-      navigation entry decorator cleared the entry's view model store on pop,
-      which unit tests cannot reach.
-- [ ] Decide whether screens should stay top-left or return to horizontally
-      centred - `NavDisplay` defaults to `Alignment.TopStart`, and passing
-      `contentAlignment = Alignment.TopCenter` restores the previous centring
-
-### Refactoring
-- [ ] Unify board and analytics sizing and scrolling: both should sit in one
-      wrapper column that owns the width (`uiConfig.squareSize * BOARD_SIZE`) and
-      the padding, so neither states it again, and the board's horizontal pan
-      should be shared with the analytics panel rather than being its own scroll
-      state
