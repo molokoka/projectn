@@ -7,6 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop using
 Compose Multiplatform for UI.
 
+**Android is the target platform. iOS and desktop are experimental.** All three
+build from the same shared code and must keep compiling, but Android is the one
+the app is developed and verified against - when a decision only makes sense for
+one platform, it is Android. Desktop earns its keep as the fast feedback loop for
+UI work (hot reload), not as a shipping target. Say so wherever platform support
+comes up in docs, rather than implying a three-platform product.
+
 Local toolchain: JDK 17 and Xcode 26 for iOS.
 
 ## Project Architecture

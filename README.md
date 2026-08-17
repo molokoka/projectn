@@ -4,146 +4,96 @@ A chess analysis board built with Compose Multiplatform, implementing the
 exercise in [task_2.md](task_2.md): a move tree with variations, a delayed
 computer move, and simulated asynchronous analysis.
 
+Reviewing this? Start with [REVIEWERS.md](REVIEWERS.md), which maps every task_2
+requirement to the code that implements it and the test that pins it, and
+explains the four ordering rules the exercise is really about.
+
+## Platform scope
+
+This is a Kotlin Multiplatform project, but **Android is the target platform and
+the only one that is developed and verified against.** The **desktop and iOS apps
+are experimental**: they build and run from the same shared code, but they are
+not shipping targets and are not part of routine verification. Desktop exists
+mainly as the fast feedback loop for UI work, because Compose hot reload shows a
+layout change in about a second.
+
 ## Status
 
-- **Board rendering**: 8x8 board with file and rank labels, flippable
-- **Part 1 - move variations**: implemented
-- **Part 2 - delayed computer move**: implemented
-- **Part 3 - asynchronous analysis**: not implemented
+Parts 1 to 3 and the optional bonus are implemented.
 
-Tapping a piece of the side to move selects it; tapping a legal target plays the
-move and records it in the move tree. Playing from an earlier node creates a
-variation rather than overwriting the line.
-
-The computer move applies after a random 1-3 second delay, and a pending request
-is cancelled when the board is reset, when a move is played, or when a different
-node is selected. The move itself is generated: `DelayedRandomComputerMoveSource`
-takes the pieces of the side to move in a random order, passes over any piece with
-nowhere to go, and draws a destination from the squares that piece reaches. A
-position the side to move cannot play in comes back as `null`, which the view model
-turns into an `AnalysisIntent.ComputerMoveNotFound`.
-
-## Features
-
-- **Fixed 8x8 Board**: Standard chessboard dimensions
-- **Move tree**: variations, node selection, and board playback per node
-- **Cross-Platform**: apps for Android, iOS, and Desktop
+- **Part 1 - move variations**: play a move from any selected node; playing from
+  an earlier node creates a variation rather than overwriting the line
+- **Part 2 - delayed computer move**: applies after a random 1-3 second delay;
+  a pending request is cancelled by a reset, a played move, or a new selection
+- **Part 3 - asynchronous analysis**: requests may overlap, the newest results
+  win, and nothing in flight before a reset can come back afterwards
+- **Optional bonus**: board, tree, selection and evaluations survive activity
+  recreation and process death
 
 ## Requirements
 
 - JDK 17
-- Xcode 26 or newer for iOS (deployment target is iOS 26.0; Apple Silicon only)
-- Android compile SDK 37, min SDK 24
-
-## Architecture
-
-The analysis screen follows MVI. `AnalysisState` holds the whole screen state and
-owns the reducer:
-
-```kotlin
-fun AnalysisState.reduce(intent: AnalysisIntent): AnalysisUpdate
-```
-
-`AnalysisUpdate` pairs the next state with an optional `AnalysisEffect`. The
-reducer is pure - no coroutines, no clock - so every decision, including
-cancelling a pending computer move, is a value that can be asserted directly.
-`AnalysisViewModel` reduces the intent, publishes the state, and runs the effect;
-that is all it does. View models are provided by Koin.
-
-The computer move sits behind `ComputerMoveSource`, so the view model knows
-nothing about how a move is chosen or how long it takes - it maps the answer onto
-one of two intents and lets the reducer decide the rest.
-`DelayedRandomComputerMoveSource` takes its `Random` as a constructor argument, so
-a test can drive the same generation the app runs rather than a stand-in.
-
-### Fixed board size
-
-The board is fixed at 8x8.
-
-`BOARD_SIZE` is a single constant in `domain/BoardConfig.kt`, with `FILE_RANGE`
-and `RANK_RANGE` derived from it, so restoring dynamic sizing means widening one
-constant rather than unpicking a hardcoded 8.
+- Android compile SDK 37, min SDK 24 - the supported target
+- Xcode 26 or newer for the experimental iOS app (deployment target is iOS 26.0;
+  Apple Silicon only)
 
 ## Quick Start
 
-### Desktop
-```bash
-./gradlew :desktopApp:run
-```
-
-With hot reload, so edits to shared UI code appear without restarting:
-```bash
-./gradlew :desktopApp:hotRun --auto
-```
-
-`--auto` is required. Without it the app still starts with hot reload attached,
-but nothing watches your files, so edits only appear when
-`./gradlew :desktopApp:hotReloadMain` runs.
-
-### Android
+### Android (supported)
 ```bash
 ./gradlew :androidApp:installDebug
 ```
 
-### iOS
-iOS apps must be built and run through Xcode or the iOS Simulator directly.
-Build through Xcode or build specific iOS targets:
+### Desktop (experimental)
 ```bash
-# For device
-./gradlew :composeApp:linkDebugFrameworkIosArm64
+./gradlew :desktopApp:run
+./gradlew :desktopApp:hotRun --auto
+```
 
-# For simulator
-./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+`--auto` is required for hot reload. Without it the app still starts with hot
+reload attached, but nothing watches your files, so edits only appear when
+`./gradlew :desktopApp:hotReloadMain` runs.
+
+### iOS (experimental)
+Build and run through Xcode, or link the framework directly:
+```bash
+./gradlew :composeApp:linkDebugFrameworkIosArm64            # device
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64   # simulator
 ```
 
 ## Testing
 
-### Unit Tests
-Run unit tests for all platforms:
 ```bash
-# All tests
-./gradlew test
-
-# Desktop unit tests
 ./gradlew :composeApp:desktopTest
-
-# iOS tests
 ./gradlew :composeApp:iosSimulatorArm64Test
 ```
 
-### Test Locations
-- **Unit tests**: `composeApp/src/commonTest/kotlin/` - Kotlin multiplatform tests using kotlin.test
-
-`./gradlew test` does not cover the shared code - `composeApp` is a Kotlin
-Multiplatform library, so its JVM target is `desktopTest`.
-
-Coverage is the board primitives - coordinate parsing and validation, square
-colour, and draw order under both orientations - the rook and queen move rules,
-the move tree, the computer move, and the analysis screen. The analysis tests are
-split by unit under test: `AnalysisStateTest` drives the pure reducer with no
-coroutines, and `AnalysisViewModelTest` covers only what needs a dispatcher - the
-delay, the result round trip, and cancellation. The analysis and piece test classes
-group their cases into nested classes, one per behaviour, so a failure names the
-rule that broke.
+Tests live in `composeApp/src/commonTest/kotlin/`. Note that `./gradlew test`
+does not cover the shared code - `composeApp` is a Kotlin Multiplatform library,
+so its JVM target is named `desktopTest`.
 
 Board positions and move trees are asserted as diagrams rather than object
 graphs, so a failure prints a readable board or tree.
+[REVIEWERS.md](REVIEWERS.md) covers how the suite is split and what it
+deliberately leaves untested.
 
 ## Project Structure
 
-- **`composeApp/`** - Shared UI code for all platforms (Kotlin Multiplatform library)
-- **`androidApp/`** - Android application entry point (`MainActivity`, manifest, launcher icons)
-- **`iosApp/`** - iOS application entry point (Xcode project)
-- **`desktopApp/`** - Desktop application entry point (`main.kt`, native packaging)
+- **`composeApp/`** - all shared code, as a Kotlin Multiplatform library
+- **`androidApp/`** - Android entry point (`MainActivity`, manifest, launcher
+  icons) - the supported target
+- **`desktopApp/`** - desktop entry point (`main.kt`, native packaging) -
+  experimental
+- **`iosApp/`** - iOS entry point (Xcode project) - experimental
 
 Each platform's entry point lives in its own module, and `composeApp` holds only
-shared code plus the platform `actual`s the shared code needs. Android's split is
-forced - AGP 9 no longer allows the Android application plugin inside a Kotlin
+shared code plus the platform `actual`s it needs. The Android split is forced -
+AGP 9 no longer allows the Android application plugin inside a Kotlin
 Multiplatform module - and desktop follows the same shape for symmetry.
 
-## TODO List
+## Open tasks
 
-### Verification Tasks
+### Verification
 - [ ] Confirm the analysis view model is cleared on exit: Start, flip the board,
       Exit, then Start again - the board must come back white. This proves the
       navigation entry decorator cleared the entry's view model store on pop,
@@ -152,15 +102,7 @@ Multiplatform module - and desktop follows the same shape for symmetry.
       centred - `NavDisplay` defaults to `Alignment.TopStart`, and passing
       `contentAlignment = Alignment.TopCenter` restores the previous centring
 
-### Development Tasks
-- [x] Pieces and the starting position from [task_2.md](task_2.md)
-- [x] Rook and queen move rules, LAN move application
-- [x] Move tree with variations and node selection
-- [x] Delayed computer move, cancelling any pending request
-- [x] Generate a random valid move for the computer
-- [ ] Asynchronous analysis with out-of-order result handling
-
-### Refactoring Tasks
+### Refactoring
 - [ ] Unify board and analytics sizing and scrolling: both should sit in one
       wrapper column that owns the width (`uiConfig.squareSize * BOARD_SIZE`) and
       the padding, so neither states it again, and the board's horizontal pan
