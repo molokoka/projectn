@@ -111,7 +111,7 @@ class MoveTreeDiagramUtilTest {
     }
 
     @Test
-    fun `carries an unfinished branch down past a reply`() {
+    fun `draws an sibling branch down past a reply`() {
         assertEquals(
             """
             Start

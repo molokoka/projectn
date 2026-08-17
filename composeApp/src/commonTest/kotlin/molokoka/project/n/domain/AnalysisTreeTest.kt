@@ -26,7 +26,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `hands back the position a move was added with`() {
+    fun `returns the position for a move it was added with`() {
         val move = Move.parse("a1a4")
         val firstMovePosition = "Ra4 ra8"
 
@@ -37,7 +37,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `hands back the position a reply was added with`() {
+    fun `returns the position for a reply (second move) was added with`() {
         val opening = Move.parse("a1a4")
         val reply = Move.parse("a8a5")
         val secondMovePosition = "Ra4 ra5"
@@ -65,7 +65,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `has no position at a path that is not in the tree`() {
+    fun `throws exception when has no position at a path that is not in the tree`() {
         assertFailsWith<IllegalArgumentException> {
             AnalysisTree(initialPosition)
                 .positionAt(listOf(Move.parse("a1a4")))
@@ -206,7 +206,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `refuses to add at a path that is not in the tree`() {
+    fun `throws exception when adds to a path that is not in the tree`() {
         assertFailsWith<IllegalArgumentException> {
             AnalysisTree(initialPosition)
                 .add(listOf(Move.parse("a1a4")), Move.parse("a8a5"), mockPosition)
@@ -356,7 +356,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `keeps the evaluation of a move it is not given`() {
+    fun `keeps the evaluation of a move if next generation evaluation does not overwrite it`() {
         val evaluated = Move.parse("a1a4")
         val evaluatedAnswer = MoveEvaluation.WHITE_BETTER
         val added = Move.parse("a1a3")
@@ -393,7 +393,7 @@ class AnalysisTreeTest {
     // evaluationAt
 
     @Test
-    fun `reads back the evaluation attached to a path`() {
+    fun `returns the evaluation attached to a path`() {
         val move = Move.parse("a1a4")
 
         val tree = AnalysisTree(initialPosition)
@@ -404,7 +404,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `reads back the evaluation of a reply`() {
+    fun `returns the evaluation of a reply`() {
         val opening = Move.parse("a1a4")
         val reply = Move.parse("a8a5")
 
