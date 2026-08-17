@@ -657,10 +657,11 @@ a result for generation g is applied only when
       <h3>4. Analysis never changes the selected node or the visible board</h3>
       <p>Not enforced by a check — enforced by what <code>movesEvaluationReady</code> is able
       to do. It returns <code>copy(tree = ...)</code>. <code>moves</code> and
-      <code>selected</code> are not in reach. Structure is not proof against a later edit, so the test
-      “a move evaluation never changes the selected node or the visible board position” pins it: evaluations arrive for a whole
-      line while an earlier node is selected, and both the selected path and the board on screen
-      have to come through unchanged.</p>
+      <code>selected</code> are not in reach. Structure is not proof against a later edit, so the
+      test “a move evaluation never changes the selected node or the visible board position”
+      pins it: the user navigates to an earlier node while the request is in flight, and the
+      results that land afterwards must move neither the selected path nor the board on
+      screen.</p>
     </div>
 
     <p>Reset appears in rules 1, 3 and 4 at once: it returns a brand-new state, emits both

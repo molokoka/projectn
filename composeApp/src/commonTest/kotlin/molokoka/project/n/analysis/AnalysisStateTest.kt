@@ -824,8 +824,8 @@ class AnalysisStateTest {
                 .reduce(AnalysisIntent.OnSquareClick(opening.to)).first // white a1a4
                 .reduce(AnalysisIntent.OnSquareClick(reply.from)).first
                 .reduce(AnalysisIntent.OnSquareClick(reply.to)).first // black b8b5
-                .reduce(AnalysisIntent.SelectNode(listOf(opening))).first
                 .reduce(AnalysisIntent.RequestMovesEvaluation).first
+                .reduce(AnalysisIntent.SelectNode(listOf(opening))).first
                 .reduce(
                     AnalysisIntent.MovesEvaluationReady(
                         1,

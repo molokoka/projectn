@@ -187,8 +187,9 @@ enforced by a check -- enforced by what `movesEvaluationReady` is able to do. It
 returns `copy(tree = ...)`. `moves` and `selected` are not in reach. Structure is
 not proof against a later edit, so the test
 `` `a move evaluation never changes the selected node or the visible board position` ``
-pins it: evaluations arrive for a whole line while an earlier node is selected, and
-both the selected path and the board on screen have to come through unchanged.
+pins it: the user navigates to an earlier node while the request is in flight, and
+the results that land afterwards must move neither the selected path nor the board
+on screen.
 
 Reset appears in rules 1, 3 and 4 at once: it returns a brand-new state and emits
 both cancel effects, and because it resets `pendingEvaluationGeneration` to 0,
