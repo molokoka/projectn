@@ -7,15 +7,15 @@ import molokoka.project.n.domain.Move
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
 import molokoka.project.n.domain.play
-import molokoka.project.n.domain.sideToMove
 import molokoka.project.n.move_evaluation.MoveEvaluation
+import molokoka.project.n.domain.sideToMove
 import molokoka.project.n.ui.BoardOrientation
 
 @Serializable
 data class AnalysisState(
     val orientation: BoardOrientation = BoardOrientation.WHITE,
     val tree: AnalysisTree = AnalysisTree(),
-    val moves: List<Move> = emptyList(), // todo moves and path is used interchangibly
+    val moves: List<Move> = emptyList(),
     val selected: Coordinates? = null,
     val isComputerMovePending: Boolean = false,
     val pendingEvaluationGeneration: Int = 0,
@@ -66,7 +66,7 @@ sealed interface AnalysisEffect {
 
     data class StartMovesEvaluation(
         val generation: Int,
-        val tree: AnalysisTree
+        val snapshotTree: AnalysisTree
     ) : AnalysisEffect
 }
 
@@ -203,7 +203,7 @@ private fun AnalysisState.movesEvaluationReady(
     ) {
         this to emptyEffects()
     } else {
-        copy(tree = tree.withEvaluations(receivedEvaluationGeneration, evaluations)) to emptyEffects()
+        copy(tree = tree.applyEvaluations(receivedEvaluationGeneration, evaluations)) to emptyEffects()
     }
 
 private fun AnalysisState.flipBoard(): AnalysisUpdate =

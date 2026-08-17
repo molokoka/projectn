@@ -74,7 +74,7 @@ class AnalysisViewStateTest {
             val whiteMoveEvaluation = MoveEvaluation.WHITE_BETTER
             val tree = AnalysisTree()
                 .playing(emptyList(), whiteMove)
-                .withEvaluations(
+                .applyEvaluations(
                     generation = evaluationGeneration,
                     evaluations = mapOf(listOf(whiteMove) to whiteMoveEvaluation)
                 )
@@ -182,7 +182,7 @@ class AnalysisViewStateTest {
             val whiteMoveEvaluation = MoveEvaluation.BLACK_BETTER
             val tree = AnalysisTree()
                 .playing(emptyList(), whiteMove)
-                .withEvaluations(
+                .applyEvaluations(
                     generation = evaluationGeneration,
                     evaluations = mapOf(listOf(whiteMove) to whiteMoveEvaluation)
                 )

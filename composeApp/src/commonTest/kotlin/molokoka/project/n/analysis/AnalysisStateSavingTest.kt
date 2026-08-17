@@ -158,7 +158,7 @@ class AnalysisStateSavingTest {
             tree = AnalysisTree()
                 .add(emptyList(), opening, Position.parse("Rb4"))
                 .add(listOf(opening), reply, Position.parse("Rb4 ra5"))
-                .withEvaluations(
+                .applyEvaluations(
                     generation = 1,
                     evaluations = mapOf(
                         listOf(opening) to openingEvaluation,
@@ -187,7 +187,7 @@ class AnalysisStateSavingTest {
             tree = AnalysisTree()
                 .add(emptyList(), evaluated, Position.parse("Rb4"))
                 .add(emptyList(), unevaluated, Position.parse("Rd4"))
-                .withEvaluations(1, mapOf(listOf(evaluated) to evaluation))
+                .applyEvaluations(1, mapOf(listOf(evaluated) to evaluation))
         )
 
         assertEquals(
@@ -258,7 +258,7 @@ class AnalysisStateSavingTest {
         val state = AnalysisState(
             tree = AnalysisTree()
                 .add(emptyList(), opening, Position.parse("Rb4"))
-                .withEvaluations(1, mapOf(listOf(opening) to MoveEvaluation.WHITE_BETTER)),
+                .applyEvaluations(1, mapOf(listOf(opening) to MoveEvaluation.WHITE_BETTER)),
             pendingEvaluationGeneration = 1
         )
 

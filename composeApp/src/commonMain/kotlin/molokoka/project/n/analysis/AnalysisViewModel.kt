@@ -83,7 +83,7 @@ class AnalysisViewModel(
         is AnalysisEffect.StartComputerMove ->
             startComputerMove(effect.position, effect.side, effect.path)
         is AnalysisEffect.StartMovesEvaluation ->
-            startMovesEvaluation(effect.generation, effect.tree)
+            startMovesEvaluation(effect.generation, effect.snapshotTree)
     }
 
     private fun startComputerMove(position: Position, side: Side, path: List<Move>) {
@@ -98,9 +98,9 @@ class AnalysisViewModel(
         }
     }
 
-    private fun startMovesEvaluation(generation: Int, tree: AnalysisTree) {
+    private fun startMovesEvaluation(generation: Int, snapshotTree: AnalysisTree) {
         moveEvaluationScope.launch {
-            val evaluations = moveEvaluationSource.evaluate(tree.nodes)
+            val evaluations = moveEvaluationSource.evaluate(snapshotTree)
 
             onIntent(AnalysisIntent.MovesEvaluationReady(generation, evaluations))
         }

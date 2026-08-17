@@ -31,14 +31,14 @@ data class AnalysisTree(
         return copy(nodes = nodes.add(path, 0, move, position))
     }
 
-    fun paths(): List<List<Move>> = nodes.paths()
+    fun paths(): List<List<Move>> = nodes.paths(emptyList())
 
-    fun withEvaluations(
+    fun applyEvaluations(
         generation: Int,
         evaluations: Map<List<Move>, MoveEvaluation>
     ): AnalysisTree =
         copy(
-            nodes = nodes.withEvaluations(evaluations, emptyList()),
+            nodes = nodes.applyEvaluations(evaluations, emptyList()),
             evaluationGeneration = generation
         )
 
@@ -52,7 +52,14 @@ data class AnalysisTree(
                 ?.firstOrNull { node -> node.move == path.last() }
         }
 
-    private fun List<MoveNode>.withEvaluations(
+    private fun List<MoveNode>.paths(prefix: List<Move>): List<List<Move>> =
+        flatMap { node ->
+            val path = prefix + node.move
+
+            listOf(path) + node.nodes.paths(path)
+        }
+
+    private fun List<MoveNode>.applyEvaluations(
         evaluations: Map<List<Move>, MoveEvaluation>,
         prefix: List<Move>
     ): List<MoveNode> =
@@ -61,7 +68,7 @@ data class AnalysisTree(
 
             node.copy(
                 moveEvaluation = evaluations[path] ?: node.moveEvaluation,
-                nodes = node.nodes.withEvaluations(evaluations, path)
+                nodes = node.nodes.applyEvaluations(evaluations, path)
             )
         }
 
@@ -98,14 +105,3 @@ data class AnalysisTree(
             firstOrNull { it.move == path[depth] }?.nodes?.nodeForPath(path, depth + 1)
         }
 }
-
-//todo think about it
-fun List<MoveNode>.paths(prefix: List<Move> = emptyList()): List<List<Move>> =
-    flatMap { node ->
-        val path = prefix + node.move
-
-        listOf(path) + node.nodes.paths(path)
-    }
-
-
-

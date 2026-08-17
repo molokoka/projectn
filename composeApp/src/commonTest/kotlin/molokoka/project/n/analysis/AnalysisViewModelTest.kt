@@ -18,10 +18,8 @@ import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Coordinates
 import molokoka.project.n.move_evaluation.MoveEvaluation
 import molokoka.project.n.domain.Move
-import molokoka.project.n.domain.MoveNode
 import molokoka.project.n.domain.Position
 import molokoka.project.n.domain.Side
-import molokoka.project.n.domain.paths
 import molokoka.project.n.util.moveTreeDiagram
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -53,13 +51,13 @@ private class QueuedMoveEvaluationSource(
 
     private var answered = 0
 
-    override suspend fun evaluate(nodes: List<MoveNode>): Map<List<Move>, MoveEvaluation> {
+    override suspend fun evaluate(snapshotTree: AnalysisTree): Map<List<Move>, MoveEvaluation> {
         val (answerDelay, evaluation) = answers[answered]
         answered++
 
         delay(answerDelay)
 
-        return nodes.paths().associateWith { evaluation }
+        return snapshotTree.paths().associateWith { evaluation }
     }
 }
 

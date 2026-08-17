@@ -294,7 +294,7 @@ class AnalysisTreeTest {
         assertFalse(tree.contains(listOf(opening, Move.parse("a8a5"))))
     }
 
-    // withEvaluations
+    // applyEvaluations
 
     @Test
     fun `attaches an evaluation to every move it is given`() {
@@ -306,7 +306,7 @@ class AnalysisTreeTest {
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), opening, mockPosition)
             .add(listOf(opening), reply, mockPosition)
-            .withEvaluations(
+            .applyEvaluations(
                 1,
                 mapOf(
                     listOf(opening) to openingAnswer,
@@ -325,6 +325,37 @@ class AnalysisTreeTest {
     }
 
     @Test
+    fun `attaches an evaluation in every branch of the tree`() {
+        val opening = Move.parse("a1a4")
+        val reply = Move.parse("a8a5")
+        val variation = Move.parse("a1a3")
+        val answer = MoveEvaluation.EQUAL
+
+        val tree = AnalysisTree(initialPosition)
+            .add(emptyList(), opening, mockPosition)
+            .add(listOf(opening), reply, mockPosition)
+            .add(emptyList(), variation, mockPosition)
+            .applyEvaluations(
+                1,
+                mapOf(
+                    listOf(opening) to answer,
+                    listOf(opening, reply) to answer,
+                    listOf(variation) to answer
+                )
+            )
+
+        assertEquals(
+            """
+            Start
+            ├── $opening$answer
+            │   └── $reply$answer
+            └── $variation$answer
+            """.trimIndent(),
+            tree.moveTreeDiagram()
+        )
+    }
+
+    @Test
     fun `keeps the evaluation of a move it is not given`() {
         val evaluated = Move.parse("a1a4")
         val evaluatedAnswer = MoveEvaluation.WHITE_BETTER
@@ -333,9 +364,9 @@ class AnalysisTreeTest {
 
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), evaluated, mockPosition)
-            .withEvaluations(1, mapOf(listOf(evaluated) to evaluatedAnswer))
+            .applyEvaluations(1, mapOf(listOf(evaluated) to evaluatedAnswer))
             .add(emptyList(), added, mockPosition)
-            .withEvaluations(2, mapOf(listOf(added) to addedAnswer))
+            .applyEvaluations(2, mapOf(listOf(added) to addedAnswer))
 
         assertEquals(
             """
@@ -354,7 +385,7 @@ class AnalysisTreeTest {
 
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), move, mockPosition)
-            .withEvaluations(generation, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
+            .applyEvaluations(generation, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertEquals(generation, tree.evaluationGeneration)
     }
@@ -367,7 +398,7 @@ class AnalysisTreeTest {
 
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), move, mockPosition)
-            .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
+            .applyEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertEquals(MoveEvaluation.WHITE_BETTER, tree.evaluationAt(listOf(move)))
     }
@@ -380,7 +411,7 @@ class AnalysisTreeTest {
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), opening, mockPosition)
             .add(listOf(opening), reply, mockPosition)
-            .withEvaluations(1, mapOf(listOf(opening, reply) to MoveEvaluation.BLACK_BETTER))
+            .applyEvaluations(1, mapOf(listOf(opening, reply) to MoveEvaluation.BLACK_BETTER))
 
         assertEquals(MoveEvaluation.BLACK_BETTER, tree.evaluationAt(listOf(opening, reply)))
     }
@@ -391,7 +422,7 @@ class AnalysisTreeTest {
 
         val tree = AnalysisTree(initialPosition)
             .add(emptyList(), move, mockPosition)
-            .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
+            .applyEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
 
         assertNull(tree.evaluationAt(emptyList()))
     }

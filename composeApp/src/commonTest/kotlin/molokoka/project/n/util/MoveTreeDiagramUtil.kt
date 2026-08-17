@@ -138,7 +138,7 @@ class MoveTreeDiagramUtilTest {
             """.trimIndent(),
             AnalysisTree()
                 .add(emptyList(), move, mockPosition)
-                .withEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
+                .applyEvaluations(1, mapOf(listOf(move) to MoveEvaluation.WHITE_BETTER))
                 .moveTreeDiagram()
         )
     }
@@ -157,7 +157,7 @@ class MoveTreeDiagramUtilTest {
             AnalysisTree()
                 .add(emptyList(), evaluated, mockPosition)
                 .add(emptyList(), unevaluated, mockPosition)
-                .withEvaluations(1, mapOf(listOf(evaluated) to MoveEvaluation.EQUAL))
+                .applyEvaluations(1, mapOf(listOf(evaluated) to MoveEvaluation.EQUAL))
                 .moveTreeDiagram()
         )
     }
@@ -176,7 +176,7 @@ class MoveTreeDiagramUtilTest {
             AnalysisTree()
                 .add(emptyList(), opening, mockPosition)
                 .add(listOf(opening), reply, mockPosition)
-                .withEvaluations(
+                .applyEvaluations(
                     1,
                     mapOf(
                         listOf(opening) to MoveEvaluation.WHITE_BETTER,

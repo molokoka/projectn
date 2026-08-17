@@ -55,7 +55,7 @@ private val evaluatedLineTree = openingLineTree
     .add(afterWhiteThirdMove, blackThirdMove, positionAfter(afterBlackThirdMove))
     .add(afterBlackThirdMove, whiteFourthMove, positionAfter(afterWhiteFourthMove))
     .add(afterWhiteFourthMove, blackFourthMove, positionAfter(afterBlackFourthMove))
-    .withEvaluations(
+    .applyEvaluations(
         generation = PreviewEvaluationGeneration,
         evaluations = mapOf(
             afterWhiteFirstMove to BLACK_BETTER,

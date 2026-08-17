@@ -1,8 +1,7 @@
 package molokoka.project.n.move_evaluation
 
 import kotlinx.coroutines.delay
-import molokoka.project.n.domain.MoveNode
-import molokoka.project.n.domain.paths
+import molokoka.project.n.domain.AnalysisTree
 import molokoka.project.n.domain.Move
 import kotlin.random.Random
 import kotlin.random.nextLong
@@ -14,9 +13,9 @@ class DelayedRandomMoveEvaluationSource(
     private val random: Random = Random.Default
 ) : MoveEvaluationSource {
 
-    override suspend fun evaluate(nodes: List<MoveNode>): Map<List<Move>, MoveEvaluation> {
+    override suspend fun evaluate(snapshotTree: AnalysisTree): Map<List<Move>, MoveEvaluation> {
         delay(random.nextLong(DELAY_RANGE_MILLIS).milliseconds)
 
-        return nodes.paths().associateWith { MoveEvaluation.entries.random(random) }
+        return snapshotTree.paths().associateWith { MoveEvaluation.entries.random(random) }
     }
 }
