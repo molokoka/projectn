@@ -195,6 +195,46 @@ class ReachableMovesDiagramUtilTest {
         }
 
         @Test
+        fun `reads a reachable square from every corner of the board`() {
+            assertEquals(
+                setOf("a8", "h8", "a1", "h1").map(Coordinates::parse).toSet(),
+                reachableSquaresFromDiagram(
+                    """
+                8 . x x x x x x .
+                7 x x x x x x x x
+                6 x x x x x x x x
+                5 x x x x x x x x
+                4 x x x x x x x x
+                3 x x x x x x x x
+                2 x x x x x x x x
+                1 . x x x x x x .
+                  a b c d e f g h
+                    """
+                )
+            )
+        }
+
+        @Test
+        fun `reads only the dots and the captures out of a board drawing every mark`() {
+            assertEquals(
+                setOf("b4", "f4").map(Coordinates::parse).toSet(),
+                reachableSquaresFromDiagram(
+                    """
+                8 x x x x x x x x
+                7 x x x x x x x x
+                6 x x x x x x x x
+                5 x x x x x x x x
+                4 x . x R x o x #
+                3 x x x x x x x x
+                2 x x x x x x x x
+                1 x x x x x x x x
+                  a b c d e f g h
+                    """
+                )
+            )
+        }
+
+        @Test
         fun `ignores indentation and the file legend`() {
             assertEquals(
                 setOf(Coordinates.parse("d4")),
