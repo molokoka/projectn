@@ -31,6 +31,23 @@ data class AnalysisTree(
         return copy(nodes = nodes.add(path, 0, move, position))
     }
 
+    /**
+     * Every node in the tree, each as the move sequence that reaches it from [initialPosition].
+     *
+     * Depth-first: a node comes before its own continuations, siblings in the order they were
+     * added. The root carries no move, so an empty tree yields an empty list and no path is
+     * ever empty.
+     *
+     * ```
+     * Start                paths()
+     * ├── a1a4             [a1a4]
+     * │   └── a8a5         [a1a4, a8a5]
+     * └── a1a3             [a1a3]
+     * ```
+     *
+     * A reply is listed as the whole line reaching it, not as `a8a5` alone, so a path and the
+     * path to its continuation share every move but the last.
+     */
     fun paths(): List<List<Move>> = nodes.paths(emptyList())
 
     fun applyEvaluations(
