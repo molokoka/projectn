@@ -102,6 +102,6 @@ data class AnalysisTree(
         if (depth == path.size) {
             this
         } else {
-            firstOrNull { it.move == path[depth] }?.nodes?.nodeForPath(path, depth + 1)
+            firstOrNull { node -> node.move == path[depth] }?.nodes?.nodeForPath(path, depth + 1)
         }
 }
