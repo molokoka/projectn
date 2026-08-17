@@ -37,7 +37,7 @@ class AnalysisTreeTest {
     }
 
     @Test
-    fun `returns the position for a reply (second move) was added with`() {
+    fun `returns the position for a reply (second move) it was added with`() {
         val opening = Move.parse("a1a4")
         val reply = Move.parse("a8a5")
         val secondMovePosition = "Ra4 ra5"
