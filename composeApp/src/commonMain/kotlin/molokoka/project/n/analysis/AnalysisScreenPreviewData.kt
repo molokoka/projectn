@@ -21,8 +21,6 @@ private val blackThirdMove = parse("d8d5")
 private val whiteFourthMove = parse("c1c5")
 private val blackFourthMove = parse("h8h5")
 
-private val blackAlternativeFirstMove = parse("d8d5")
-
 private val beforeAnyMove = emptyList<Move>()
 private val afterWhiteFirstMove = listOf(whiteFirstMove)
 private val afterBlackFirstMove = afterWhiteFirstMove + blackFirstMove
@@ -33,8 +31,6 @@ private val afterBlackThirdMove = afterWhiteThirdMove + blackThirdMove
 private val afterWhiteFourthMove = afterBlackThirdMove + whiteFourthMove
 private val afterBlackFourthMove = afterWhiteFourthMove + blackFourthMove
 
-private val afterBlackAlternativeFirstMove = afterWhiteFirstMove + blackAlternativeFirstMove
-
 private fun positionAfter(moves: List<Move>): Position = Position.INITIAL.play(moves)
 
 private val openingLineTree = AnalysisTree()
@@ -42,13 +38,6 @@ private val openingLineTree = AnalysisTree()
     .add(afterWhiteFirstMove, blackFirstMove, positionAfter(afterBlackFirstMove))
     .add(afterBlackFirstMove, whiteSecondMove, positionAfter(afterWhiteSecondMove))
     .add(afterWhiteSecondMove, blackSecondMove, positionAfter(afterBlackSecondMove))
-
-private val branchedLineTree = openingLineTree
-    .add(
-        afterWhiteFirstMove,
-        blackAlternativeFirstMove,
-        positionAfter(afterBlackAlternativeFirstMove)
-    )
 
 private val evaluatedLineTree = openingLineTree
     .add(afterBlackSecondMove, whiteThirdMove, positionAfter(afterWhiteThirdMove))
@@ -72,16 +61,6 @@ private val evaluatedLineTree = openingLineTree
 internal val PreviewOpeningLineWithLastMoveSelected = AnalysisState(
     tree = openingLineTree,
     moves = afterBlackSecondMove
-)
-
-internal val PreviewOpeningLineWithStartSelected = AnalysisState(
-    tree = openingLineTree,
-    moves = beforeAnyMove
-)
-
-internal val PreviewBranchedLineWithAlternativeSelected = AnalysisState(
-    tree = branchedLineTree,
-    moves = afterBlackAlternativeFirstMove
 )
 
 internal val PreviewEvaluatedLineWithLastMoveSelected = AnalysisState(
